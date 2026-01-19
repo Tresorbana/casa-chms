@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CHMS Admin Dashboard - Casa Hotel</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#F9B233", // Casa Orange
+                        secondary: "#4CAF50", // Casa Green
+                        "background-light": "#F8FAFC",
+                        "background-dark": "#0F172A",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                    },
+                },
+            },
+        };
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 transition-colors duration-200">
+<aside class="fixed left-0 top-0 h-full w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 z-50 flex flex-col transition-colors duration-200">
+<div class="p-6">
+<div class="flex items-center gap-3">
+<img alt="Casa Hotel Logo" class="h-10 w-10 object-contain" src="logo.png"/>
+<div>
+<h1 class="font-bold text-xl tracking-tight text-slate-800 dark:text-white">Casa Hotel</h1>
+<p class="text-[10px] uppercase tracking-widest text-secondary font-bold">Management System</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 mt-4 px-4 space-y-1 overflow-y-auto scrollbar-hide">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all bg-primary/10 text-primary font-medium shadow-sm" href="dashboard_1.html">
+<span class="material-icons-outlined">dashboard</span>
+            Dashboard
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="bookings_1.html">
+<span class="material-icons-outlined">calendar_today</span>
+            Bookings
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="room_timeline.html">
+<span class="material-icons-outlined">hotel</span>
+            Room Status
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="events.html">
+<span class="material-icons-outlined">event</span>
+            Events
+        </a>
+<div class="pt-4 pb-2">
+<p class="px-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Operations</p>
+</div>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="pos_restaurant_1.html">
+<span class="material-icons-outlined">restaurant</span>
+            Restaurant POS
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="inventory.html">
+<span class="material-icons-outlined">inventory_2</span>
+            Inventory
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="checkout.html">
+<span class="material-icons-outlined">receipt_long</span>
+            Checkout
+        </a>
+<div class="pt-4 pb-2">
+<p class="px-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Admin</p>
+</div>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="reports_1.html">
+<span class="material-icons-outlined">assessment</span>
+            Reports
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="cms_content.html">
+<span class="material-icons-outlined">language</span>
+            Website CMS
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="cms_requests.html">
+<span class="material-icons-outlined">inbox</span>
+            Web Requests
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="settings_1.html">
+<span class="material-icons-outlined">settings</span>
+            Settings
+        </a>
+</nav>
+<div class="p-6 border-t border-slate-100 dark:border-slate-800">
+<div class="flex items-center gap-3 mb-4">
+<img alt="Admin user avatar" class="h-10 w-10 rounded-full object-contain bg-slate-100" src="logo.png"/>
+<div>
+<p class="text-sm font-semibold text-slate-700 dark:text-slate-200">Alex Rivera</p>
+<p class="text-xs text-slate-500">General Manager</p>
+</div>
+</div>
+<button class="w-full flex items-center justify-center gap-2 py-2 text-xs font-medium text-slate-500 hover:text-primary transition-colors" onclick="window.toggleTheme()">
+<span class="material-icons-outlined text-sm">dark_mode</span>
+            Switch Theme
+        </button>
+</div>
+</aside>
+<main class="ml-64 min-h-screen p-8">
+<div class="flex gap-2 mb-6 overflow-x-auto pb-2 border-b border-slate-100 dark:border-slate-800 p-6"><span class="text-xs font-semibold text-slate-400 uppercase tracking-wider self-center mr-2">Views:</span><a class="px-3 py-1.5 text-xs font-medium rounded-lg transition-all whitespace-nowrap bg-primary text-white shadow-sm" href="dashboard_1.html">View 1</a><a class="px-3 py-1.5 text-xs font-medium rounded-lg transition-all whitespace-nowrap bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700" href="dashboard_2.html">View 2</a><a class="px-3 py-1.5 text-xs font-medium rounded-lg transition-all whitespace-nowrap bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700" href="dashboard_3.html">View 3</a></div><header class="flex justify-between items-center mb-10">
+<div>
+<h2 class="text-3xl font-bold text-slate-800 dark:text-white">Dashboard Overview</h2>
+<p class="text-slate-500 mt-1">Welcome back, here's what's happening today.</p>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative">
+<span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="pl-10 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-primary focus:border-primary text-sm w-64" placeholder="Search rooms, guests..." type="text"/>
+</div>
+<button class="p-2 text-slate-500 hover:bg-white dark:hover:bg-slate-800 rounded-lg relative">
+<span class="material-icons-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-background-light dark:border-background-dark"></span>
+</button>
+</div>
+</header>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+<div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<div class="p-3 bg-secondary/10 text-secondary rounded-xl">
+<span class="material-icons-outlined">bed</span>
+</div>
+<span class="text-xs font-bold text-secondary bg-secondary/10 px-2 py-1 rounded">+2.4%</span>
+</div>
+<h3 class="text-slate-500 text-sm font-medium">Today's Occupancy</h3>
+<p class="text-3xl font-bold mt-1">78.5%</p>
+<div class="w-full bg-slate-100 dark:bg-slate-800 h-2 mt-4 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 78.5%"></div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<div class="p-3 bg-primary/10 text-primary rounded-xl">
+<span class="material-icons-outlined">payments</span>
+</div>
+<span class="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded">On Track</span>
+</div>
+<h3 class="text-slate-500 text-sm font-medium">Total Revenue Today</h3>
+<p class="text-3xl font-bold mt-1">$12,450.00</p>
+<p class="text-xs text-slate-400 mt-4 flex items-center gap-1">
+<span class="material-icons-outlined text-xs text-secondary">trending_up</span>
+                    15% higher than yesterday
+                </p>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<div class="p-3 bg-blue-500/10 text-blue-500 rounded-xl">
+<span class="material-icons-outlined">pending_actions</span>
+</div>
+<button class="text-xs font-bold text-blue-500 hover:underline">View All</button>
+</div>
+<h3 class="text-slate-500 text-sm font-medium">Pending Reservations</h3>
+<p class="text-3xl font-bold mt-1">24</p>
+<p class="text-xs text-slate-400 mt-4">Average response time: 14 mins</p>
+</div>
+</div>
+<section class="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+<div>
+<h3 class="text-xl font-bold text-slate-800 dark:text-white">Room Status Grid</h3>
+<p class="text-sm text-slate-500">Live floor-wise status of all hotel units</p>
+</div>
+<div class="flex flex-wrap gap-3">
+<div class="flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-400">
+<span class="w-3 h-3 rounded-full bg-secondary"></span> Available
+                    </div>
+<div class="flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-400">
+<span class="w-3 h-3 rounded-full bg-primary"></span> Occupied
+                    </div>
+<div class="flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-400">
+<span class="w-3 h-3 rounded-full bg-blue-400"></span> Cleaning
+                    </div>
+<div class="flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-400">
+<span class="w-3 h-3 rounded-full bg-slate-300 dark:bg-slate-700"></span> Maintenance
+                    </div>
+</div>
+</div>
+<div class="flex gap-4 border-b border-slate-100 dark:border-slate-800 mb-8 overflow-x-auto scrollbar-hide">
+<button class="pb-4 px-2 border-b-2 border-primary text-primary font-semibold whitespace-nowrap">Floor 1 (Lobby Level)</button>
+<button class="pb-4 px-2 border-b-2 border-transparent text-slate-400 hover:text-slate-600 whitespace-nowrap">Floor 2 (Executive)</button>
+<button class="pb-4 px-2 border-b-2 border-transparent text-slate-400 hover:text-slate-600 whitespace-nowrap">Floor 3 (Suites)</button>
+<button class="pb-4 px-2 border-b-2 border-transparent text-slate-400 hover:text-slate-600 whitespace-nowrap">Floor 4 (Penthouse)</button>
+</div>
+<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+<div class="group relative bg-secondary/5 border-2 border-secondary p-4 rounded-2xl hover:shadow-lg transition-all cursor-pointer">
+<div class="flex justify-between items-start mb-2">
+<span class="text-lg font-bold text-secondary">101</span>
+<span class="material-icons-outlined text-secondary text-sm">check_circle</span>
+</div>
+<p class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Standard</p>
+<p class="text-xs font-medium text-slate-700 dark:text-slate-200 mt-1">Available</p>
+</div>
+<div class="bg-primary/5 border-2 border-primary p-4 rounded-2xl cursor-pointer">
+<div class="flex justify-between items-start mb-2">
+<span class="text-lg font-bold text-primary">102</span>
+<span class="material-icons-outlined text-primary text-sm">person</span>
+</div>
+<p class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Deluxe</p>
+<p class="text-xs font-medium text-slate-700 dark:text-slate-200 mt-1">Mr. Johson</p>
+</div>
+<div class="bg-blue-400/5 border-2 border-blue-400 p-4 rounded-2xl cursor-pointer">
+<div class="flex justify-between items-start mb-2">
+<span class="text-lg font-bold text-blue-500">103</span>
+<span class="material-icons-outlined text-blue-500 text-sm">cleaning_services</span>
+</div>
+<p class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Standard</p>
+<p class="text-xs font-medium text-slate-700 dark:text-slate-200 mt-1">Housekeeping</p>
+</div>
+<div class="bg-primary/5 border-2 border-primary p-4 rounded-2xl cursor-pointer">
+<div class="flex justify-between items-start mb-2">
+<span class="text-lg font-bold text-primary">104</span>
+<span class="material-icons-outlined text-primary text-sm">person</span>
+</div>
+<p class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Twin</p>
+<p class="text-xs font-medium text-slate-700 dark:text-slate-200 mt-1">Ms. Sarah Lee</p>
+</div>
+<div class="bg-slate-100 dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700 p-4 rounded-2xl cursor-pointer">
+<div class="flex justify-between items-start mb-2">
+<span class="text-lg font-bold text-slate-400">105</span>
+<span class="material-icons-outlined text-slate-400 text-sm">build</span>
+</div>
+<p class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">King</p>
+<p class="text-xs font-medium text-slate-400 mt-1">Out of Order</p>
+</div>
+<div class="bg-secondary/5 border-2 border-secondary p-4 rounded-2xl cursor-pointer">
+<div class="flex justify-between items-start mb-2">
+<span class="text-lg font-bold text-secondary">106</span>
+<span class="material-icons-outlined text-secondary text-sm">check_circle</span>
+</div>
+<p class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Standard</p>
+<p class="text-xs font-medium text-slate-700 dark:text-slate-200 mt-1">Available</p>
+</div>
+<div class="bg-primary/5 border-2 border-primary p-4 rounded-2xl">
+<div class="flex justify-between items-start mb-2">
+<span class="text-lg font-bold text-primary">107</span>
+<span class="material-icons-outlined text-primary text-sm">person</span>
+</div>
+<p class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Suite</p>
+<p class="text-xs font-medium text-slate-700 dark:text-slate-200 mt-1">Reserved</p>
+</div>
+<div class="bg-secondary/5 border-2 border-secondary p-4 rounded-2xl">
+<div class="flex justify-between items-start mb-2">
+<span class="text-lg font-bold text-secondary">108</span>
+<span class="material-icons-outlined text-secondary text-sm">check_circle</span>
+</div>
+<p class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Standard</p>
+<p class="text-xs font-medium text-slate-700 dark:text-slate-200 mt-1">Available</p>
+</div>
+<div class="bg-secondary/5 border-2 border-secondary p-4 rounded-2xl">
+<div class="flex justify-between items-start mb-2">
+<span class="text-lg font-bold text-secondary">109</span>
+<span class="material-icons-outlined text-secondary text-sm">check_circle</span>
+</div>
+<p class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Standard</p>
+<p class="text-xs font-medium text-slate-700 dark:text-slate-200 mt-1">Available</p>
+</div>
+<div class="bg-blue-400/5 border-2 border-blue-400 p-4 rounded-2xl">
+<div class="flex justify-between items-start mb-2">
+<span class="text-lg font-bold text-blue-500">110</span>
+<span class="material-icons-outlined text-blue-500 text-sm">cleaning_services</span>
+</div>
+<p class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Deluxe</p>
+<p class="text-xs font-medium text-slate-700 dark:text-slate-200 mt-1">Housekeeping</p>
+</div>
+<div class="bg-primary/5 border-2 border-primary p-4 rounded-2xl">
+<div class="flex justify-between items-start mb-2">
+<span class="text-lg font-bold text-primary">111</span>
+<span class="material-icons-outlined text-primary text-sm">person</span>
+</div>
+<p class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Queen</p>
+<p class="text-xs font-medium text-slate-700 dark:text-slate-200 mt-1">Occupied</p>
+</div>
+<div class="bg-secondary/5 border-2 border-secondary p-4 rounded-2xl">
+<div class="flex justify-between items-start mb-2">
+<span class="text-lg font-bold text-secondary">112</span>
+<span class="material-icons-outlined text-secondary text-sm">check_circle</span>
+</div>
+<p class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Deluxe</p>
+<p class="text-xs font-medium text-slate-700 dark:text-slate-200 mt-1">Available</p>
+</div>
+</div>
+</section>
+<div class="mt-8 flex justify-between items-center text-slate-400 text-xs">
+<p>© 2024 Casa Hotel Management System. All rights reserved.</p>
+<div class="flex gap-6">
+<a class="hover:text-primary" href="#">System Status</a>
+<a class="hover:text-primary" href="#">Contact IT Support</a>
+</div>
+</div>
+</main>
+<script src="common.js"></script></body></html>

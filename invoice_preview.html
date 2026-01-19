@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Restaurant Pre-final Invoice - Casa Hotel</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#17cf54",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#112116",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Manrope', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            .print-shadow-none {
+                box-shadow: none !important;
+                border: 1px solid #e5e7eb !important;
+            }
+        }
+    </style>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/></head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen text-slate-900 dark:text-slate-100 font-display transition-colors duration-300"><aside class="fixed left-0 top-0 h-full w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 z-50">
+<div class="p-6">
+<div class="flex items-center gap-3">
+<img alt="Casa Hotel Logo" class="h-10 w-10 rounded-lg object-contain" src="logo.png"/>
+<div>
+<h1 class="font-bold text-xl tracking-tight text-slate-800 dark:text-white">Casa Hotel</h1>
+<p class="text-[10px] uppercase tracking-widest text-secondary font-bold">Management System</p>
+</div>
+</div>
+</div>
+<nav class="mt-4 px-4 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all" href="dashboard_1.html" id="link-dashboard">
+<span class="material-icons-outlined">dashboard</span>
+            Dashboard
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all" href="guest_registration_&amp;_booking_1.html" id="link-bookings">
+<span class="material-icons-outlined">calendar_today</span>
+            Bookings
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 bg-primary/10 text-primary rounded-xl font-medium" href="restaurant_&amp;_bar_pos_1.html" id="link-restaurant">
+<span class="material-icons-outlined">restaurant</span>
+            Restaurant &amp; Bar
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all" href="cms_content.html" id="link-website">
+<span class="material-icons-outlined">language</span>
+            Website CMS
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all" href="reports_1.html" id="link-reports">
+<span class="material-icons-outlined">assessment</span>
+            Reports
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all" href="system_settings_&amp;_security_log_1.html" id="link-settings">
+<span class="material-icons-outlined">settings</span>
+            Settings
+        </a>
+</nav>
+<div class="absolute bottom-8 left-0 w-full px-6">
+<div class="p-4 bg-slate-100 dark:bg-slate-800 rounded-2xl">
+<div class="flex items-center gap-3">
+<img alt="Admin user avatar" class="h-10 w-10 rounded-full object-contain" src="logo.png"/>
+<div>
+<p class="text-sm font-semibold">Alex Rivera</p>
+<p class="text-xs text-slate-500">General Manager</p>
+</div>
+</div>
+</div>
+<button class="mt-4 w-full flex items-center justify-center gap-2 py-2 text-xs font-medium text-slate-500 hover:text-primary transition-colors" onclick="document.documentElement.classList.toggle('dark')">
+<span class="material-icons-outlined text-sm">dark_mode</span>
+            Switch Theme
+        </button>
+</div>
+</aside><main class="ml-64 min-h-screen p-8">
+<!-- ToolBar Component -->
+<div class="no-print sticky top-0 z-50 w-full border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md">
+<div class="max-w-[960px] mx-auto flex justify-between gap-2 px-4 py-3 items-center">
+<div class="flex gap-2">
+<button class="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined">arrow_back</span>
+<span class="text-sm font-semibold">Back to POS</span>
+</button>
+</div>
+<div class="flex items-center gap-3">
+<span class="hidden md:inline-flex items-center gap-1 text-xs font-medium px-2.5 py-0.5 rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-500">
+<span class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span>
+                    Pending Signature
+                </span>
+<button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-primary text-background-dark dark:text-background-dark gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-4 hover:opacity-90 transition-opacity" onclick="window.print()">
+<span class="material-symbols-outlined">picture_as_pdf</span>
+<span class="truncate">Export to PDF</span>
+</button>
+</div>
+</div>
+</div>
+<div class="layout-container flex h-full grow flex-col items-center py-8 px-4">
+<div class="layout-content-container flex flex-col w-full max-w-[960px] bg-white dark:bg-slate-900 shadow-xl print-shadow-none rounded-xl overflow-hidden border border-slate-100 dark:border-slate-800">
+<!-- Header Section with Brand -->
+<div class="flex flex-col items-center justify-center pt-10 pb-6 px-8 border-b border-slate-50 dark:border-slate-800">
+<div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-primary text-4xl">restaurant</span>
+</div>
+<h1 class="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white uppercase">Casa Hotel</h1>
+<p class="text-sm text-slate-500 dark:text-slate-400">Luxury Restaurant &amp; Lounge</p>
+<p class="text-[10px] text-slate-400 mt-1 uppercase tracking-[0.2em]">Billing Department</p>
+</div>
+<!-- HeadlineText Component -->
+<div class="bg-slate-50 dark:bg-slate-800/50 py-4">
+<h2 class="text-slate-900 dark:text-white tracking-tight text-xl md:text-2xl font-bold leading-tight px-4 text-center">Pre-final Restaurant Invoice</h2>
+<p class="text-center text-xs text-slate-500 mt-1">Invoice #: CH-RES-99421 • Oct 24, 2023 08:45 PM</p>
+</div>
+<!-- DescriptionList Component (Guest Info) -->
+<div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="flex flex-col gap-1 border-t border-solid border-slate-200 dark:border-slate-700 pt-4">
+<p class="text-primary text-xs font-bold uppercase tracking-wider leading-normal">Guest Name</p>
+<p class="text-slate-900 dark:text-white text-lg font-semibold leading-normal">John Doe</p>
+</div>
+<div class="flex flex-col gap-1 border-t border-solid border-slate-200 dark:border-slate-700 pt-4">
+<p class="text-primary text-xs font-bold uppercase tracking-wider leading-normal">Room Number</p>
+<p class="text-slate-900 dark:text-white text-lg font-semibold leading-normal">Suite 402</p>
+</div>
+</div>
+<!-- Table Component (Bill Items) -->
+<div class="px-6 py-4">
+<div class="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50 dark:bg-slate-800">
+<th class="px-4 py-3 text-slate-900 dark:text-white text-xs font-bold uppercase tracking-wider">Item Name</th>
+<th class="px-4 py-3 text-slate-900 dark:text-white text-xs font-bold uppercase tracking-wider text-center">Qty</th>
+<th class="px-4 py-3 text-slate-900 dark:text-white text-xs font-bold uppercase tracking-wider text-right">Unit Price</th>
+<th class="px-4 py-3 text-slate-900 dark:text-white text-xs font-bold uppercase tracking-wider text-right">Total</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<tr>
+<td class="px-4 py-4 text-slate-800 dark:text-slate-200 text-sm font-medium">Draft Beer (Premium)</td>
+<td class="px-4 py-4 text-slate-500 dark:text-slate-400 text-sm text-center">2</td>
+<td class="px-4 py-4 text-slate-500 dark:text-slate-400 text-sm text-right">$5.00</td>
+<td class="px-4 py-4 text-slate-900 dark:text-white text-sm font-semibold text-right">$10.00</td>
+</tr>
+<tr>
+<td class="px-4 py-4 text-slate-800 dark:text-slate-200 text-sm font-medium">Grilled Tilapia w/ Lemon Butter</td>
+<td class="px-4 py-4 text-slate-500 dark:text-slate-400 text-sm text-center">1</td>
+<td class="px-4 py-4 text-slate-500 dark:text-slate-400 text-sm text-right">$25.00</td>
+<td class="px-4 py-4 text-slate-900 dark:text-white text-sm font-semibold text-right">$25.00</td>
+</tr>
+<tr>
+<td class="px-4 py-4 text-slate-800 dark:text-slate-200 text-sm font-medium">Sparkling Water 500ml</td>
+<td class="px-4 py-4 text-slate-500 dark:text-slate-400 text-sm text-center">1</td>
+<td class="px-4 py-4 text-slate-500 dark:text-slate-400 text-sm text-right">$4.50</td>
+<td class="px-4 py-4 text-slate-900 dark:text-white text-sm font-semibold text-right">$4.50</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Totals Section -->
+<div class="px-6 py-4 flex flex-col items-end gap-2 border-b border-slate-100 dark:border-slate-800">
+<div class="flex justify-between w-full max-w-[240px]">
+<span class="text-slate-500 dark:text-slate-400 text-sm">Subtotal</span>
+<span class="text-slate-900 dark:text-white text-sm font-medium">$39.50</span>
+</div>
+<div class="flex justify-between w-full max-w-[240px]">
+<span class="text-slate-500 dark:text-slate-400 text-sm">Service Charge (10%)</span>
+<span class="text-slate-900 dark:text-white text-sm font-medium">$3.95</span>
+</div>
+<div class="flex justify-between w-full max-w-[240px] pt-2 mt-2 border-t border-slate-100 dark:border-slate-800">
+<span class="text-slate-900 dark:text-white text-lg font-bold">Grand Total</span>
+<span class="text-primary text-xl font-extrabold">$43.45</span>
+</div>
+</div>
+<!-- Signature Area -->
+<div class="p-8 mt-4">
+<p class="text-center text-slate-500 dark:text-slate-400 text-xs mb-12 italic leading-relaxed">
+                    "I, the undersigned, agree that the total amount above will be charged to my room account and I am responsible for payment in full upon checkout."
+                </p>
+<div class="flex flex-col items-center justify-center">
+<div class="w-full max-w-[400px] border-b-2 border-slate-300 dark:border-slate-600 mb-2 h-16">
+<!-- Space for physical signature -->
+</div>
+<span class="text-primary text-xs font-bold uppercase tracking-[0.2em]">Guest Signature</span>
+<span class="text-slate-400 text-[10px] mt-1">Date: ____________________</span>
+</div>
+</div>
+<!-- Footer Logo/Pattern -->
+<div class="h-2 bg-primary w-full"></div>
+</div>
+<!-- Extra Info Footer -->
+<div class="mt-8 text-center text-slate-400 dark:text-slate-500 text-xs max-w-[960px] flex flex-col gap-2">
+<p>Generated by Casa Hotel Management System v4.2.0</p>
+<div class="flex justify-center gap-4">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">call</span>
+                    +1 (555) CASA-HOTEL
+                </span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">language</span>
+                    www.casahotel.example
+                </span>
+</div>
+</div>
+</div>
+</main><script src="common.js"></script></body></html>

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Restaurant Final Invoice - Casa Hotel</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#17cf54",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#112116",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            .print-only {
+                display: block !important;
+            }
+            body {
+                background-color: white !important;
+            }
+            .invoice-card {
+                box-shadow: none !important;
+                border: none !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+        }
+    </style>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/></head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#0e1b12] dark:text-white min-h-screen"><aside class="fixed left-0 top-0 h-full w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 z-50 flex flex-col transition-colors duration-200">
+<div class="p-6">
+<div class="flex items-center gap-3">
+<img alt="Casa Hotel Logo" class="h-10 w-10 object-contain" src="logo.png"/>
+<div>
+<h1 class="font-bold text-xl tracking-tight text-slate-800 dark:text-white">Casa Hotel</h1>
+<p class="text-[10px] uppercase tracking-widest text-secondary font-bold">Management System</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 mt-4 px-4 space-y-1 overflow-y-auto scrollbar-hide">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="dashboard_1.html">
+<span class="material-icons-outlined">dashboard</span>
+            Dashboard
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="bookings_1.html">
+<span class="material-icons-outlined">calendar_today</span>
+            Bookings
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="room_timeline.html">
+<span class="material-icons-outlined">hotel</span>
+            Room Status
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="events.html">
+<span class="material-icons-outlined">event</span>
+            Events
+        </a>
+<div class="pt-4 pb-2">
+<p class="px-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Operations</p>
+</div>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="pos_restaurant_1.html">
+<span class="material-icons-outlined">restaurant</span>
+            Restaurant POS
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="inventory.html">
+<span class="material-icons-outlined">inventory_2</span>
+            Inventory
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="checkout.html">
+<span class="material-icons-outlined">receipt_long</span>
+            Checkout
+        </a>
+<div class="pt-4 pb-2">
+<p class="px-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Admin</p>
+</div>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="reports_1.html">
+<span class="material-icons-outlined">assessment</span>
+            Reports
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="cms_content.html">
+<span class="material-icons-outlined">language</span>
+            Website CMS
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="cms_requests.html">
+<span class="material-icons-outlined">inbox</span>
+            Web Requests
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="settings_1.html">
+<span class="material-icons-outlined">settings</span>
+            Settings
+        </a>
+</nav>
+<div class="p-6 border-t border-slate-100 dark:border-slate-800">
+<div class="flex items-center gap-3 mb-4">
+<img alt="Admin user avatar" class="h-10 w-10 rounded-full object-contain bg-slate-100" src="logo.png"/>
+<div>
+<p class="text-sm font-semibold text-slate-700 dark:text-slate-200">Alex Rivera</p>
+<p class="text-xs text-slate-500">General Manager</p>
+</div>
+</div>
+<button class="w-full flex items-center justify-center gap-2 py-2 text-xs font-medium text-slate-500 hover:text-primary transition-colors" onclick="window.toggleTheme()">
+<span class="material-icons-outlined text-sm">dark_mode</span>
+            Switch Theme
+        </button>
+</div>
+</aside>
+<div class="layout-container flex h-full grow flex-col">
+<!-- Top Navigation Bar -->
+<main class="flex-1 flex flex-col items-center py-8 px-4 sm:px-10 lg:px-40 ml-64"><div class="flex justify-end gap-4 mb-4 p-4 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800"><button class="flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transition-all">
+<span class="truncate">Download PDF</span>
+</button><button class="flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-[#e7f3eb] dark:bg-[#1e3224] text-[#0e1b12] dark:text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-opacity-80 transition-all" onclick="window.print()">
+<span class="material-symbols-outlined mr-2 text-lg">print</span>
+<span class="truncate">Print</span>
+</button></div>
+<!-- Breadcrumbs -->
+<div class="w-full max-w-[960px] flex flex-wrap gap-2 py-4 no-print">
+<a class="text-[#4e9767] text-sm font-medium leading-normal hover:underline" href="#">Management</a>
+<span class="text-[#4e9767] text-sm font-medium leading-normal">/</span>
+<a class="text-[#4e9767] text-sm font-medium leading-normal hover:underline" href="#">Restaurant</a>
+<span class="text-[#4e9767] text-sm font-medium leading-normal">/</span>
+<span class="text-[#0e1b12] dark:text-white text-sm font-medium leading-normal">Final Invoice</span>
+</div>
+<!-- Page Heading -->
+<div class="w-full max-w-[960px] flex flex-wrap justify-between items-end gap-3 pb-8 no-print">
+<div class="flex min-w-72 flex-col gap-1">
+<h1 class="text-[#0e1b12] dark:text-white text-3xl font-black leading-tight tracking-[-0.033em]">Final Restaurant Invoice</h1>
+<p class="text-[#4e9767] text-sm font-normal leading-normal">Generate and settle bills for walk-in or table service.</p>
+</div>
+<div class="flex items-center gap-2">
+<span class="px-3 py-1 rounded-full bg-primary/20 text-primary text-xs font-bold uppercase tracking-wider">Status: Settled</span>
+</div>
+</div>
+<!-- Invoice Card (The Printable Area) -->
+<div class="invoice-card w-full max-w-[800px] bg-white dark:bg-[#1a2e20] shadow-xl rounded-xl overflow-hidden flex flex-col border border-[#e7f3eb] dark:border-[#1e3224]">
+<!-- Decorative Top Bar -->
+<div class="h-2 w-full bg-primary"></div>
+<div class="p-8 md:p-12">
+<!-- Invoice Header Section -->
+<div class="flex flex-col md:flex-row justify-between items-start gap-8 mb-12 border-b border-gray-100 dark:border-gray-800 pb-8">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-2">
+<div class="size-8 text-primary">
+<svg fill="currentColor" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M4 42.4379C4 42.4379 14.0962 36.0744 24 41.1692C35.0664 46.8624 44 42.2078 44 42.2078L44 7.01134C44 7.01134 35.068 11.6577 24.0031 5.96913C14.0971 0.876274 4 7.27094 4 7.27094L4 42.4379Z"></path>
+</svg>
+</div>
+<h2 class="text-xl font-bold tracking-tight">Casa Hotel Restaurant</h2>
+</div>
+<div class="text-sm text-[#4e9767] leading-relaxed">
+<p>123 Luxury Avenue, City Center</p>
+<p>Phone: +254 700 123 456</p>
+<p>Email: dining@casahotel.com</p>
+<p>KRA PIN: P051234567X</p>
+</div>
+</div>
+<div class="text-left md:text-right">
+<h3 class="text-3xl font-black text-[#0e1b12] dark:text-white mb-2">INVOICE</h3>
+<div class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+<span class="text-[#4e9767]">Invoice No:</span>
+<span class="font-bold">#INV-2023-0842</span>
+<span class="text-[#4e9767]">Date:</span>
+<span>Oct 24, 2023</span>
+<span class="text-[#4e9767]">Time:</span>
+<span>14:30 PM</span>
+<span class="text-[#4e9767]">Cashier:</span>
+<span>John Doe</span>
+</div>
+</div>
+</div>
+<!-- Customer Info & Payment Method -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+<div class="p-4 rounded-lg bg-background-light dark:bg-[#112116] border border-[#e7f3eb] dark:border-[#1e3224]">
+<p class="text-xs font-bold text-[#4e9767] uppercase tracking-widest mb-2">Billed To</p>
+<p class="text-lg font-bold">Walk-in Guest</p>
+<p class="text-sm text-[#4e9767]">Table #12 - Terrace View</p>
+<p class="text-sm text-[#4e9767]">Guest Count: 2 Adults</p>
+</div>
+<div class="p-4 rounded-lg bg-background-light dark:bg-[#112116] border border-[#e7f3eb] dark:border-[#1e3224]">
+<p class="text-xs font-bold text-[#4e9767] uppercase tracking-widest mb-2">Payment Details</p>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">contactless</span>
+<div>
+<p class="text-sm font-bold">Mobile Money (M-Pesa)</p>
+<p class="text-sm text-[#4e9767]">Ref: QXJ92841LS</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Itemized Charges Table -->
+<div class="mb-12 overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b-2 border-[#e7f3eb] dark:border-[#1e3224]">
+<th class="py-4 font-bold text-sm uppercase tracking-wider">Item Description</th>
+<th class="py-4 font-bold text-sm uppercase tracking-wider text-center">Qty</th>
+<th class="py-4 font-bold text-sm uppercase tracking-wider text-right">Unit Price</th>
+<th class="py-4 font-bold text-sm uppercase tracking-wider text-right">Total</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+<tr>
+<td class="py-5">
+<p class="font-bold text-[#0e1b12] dark:text-white">Grilled Tilapia (Large)</p>
+<p class="text-xs text-[#4e9767]">Served with Ugali and Kachumbari</p>
+</td>
+<td class="py-5 text-center">2</td>
+<td class="py-5 text-right">$18.00</td>
+<td class="py-5 text-right font-medium">$36.00</td>
+</tr>
+<tr>
+<td class="py-5">
+<p class="font-bold text-[#0e1b12] dark:text-white">Fresh Pineapple Juice</p>
+<p class="text-xs text-[#4e9767]">500ml Chilled</p>
+</td>
+<td class="py-5 text-center">2</td>
+<td class="py-5 text-right">$4.50</td>
+<td class="py-5 text-right font-medium">$9.00</td>
+</tr>
+<tr>
+<td class="py-5">
+<p class="font-bold text-[#0e1b12] dark:text-white">Chef's Special Salad</p>
+<p class="text-xs text-[#4e9767]">Organic greens with lemon vinaigrette</p>
+</td>
+<td class="py-5 text-center">1</td>
+<td class="py-5 text-right">$12.00</td>
+<td class="py-5 text-right font-medium">$12.00</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Calculations Summary -->
+<div class="flex flex-col items-end gap-2 border-t border-[#e7f3eb] dark:border-[#1e3224] pt-8">
+<div class="flex justify-between w-full max-w-xs py-1">
+<span class="text-[#4e9767] text-sm">Subtotal</span>
+<span class="text-sm font-medium">$57.00</span>
+</div>
+<div class="flex justify-between w-full max-w-xs py-1">
+<span class="text-[#4e9767] text-sm">VAT (16%)</span>
+<span class="text-sm font-medium">$9.12</span>
+</div>
+<div class="flex justify-between w-full max-w-xs py-1">
+<span class="text-[#4e9767] text-sm">Service Charge (2%)</span>
+<span class="text-sm font-medium">$1.14</span>
+</div>
+<div class="flex justify-between w-full max-w-xs pt-4 mt-2 border-t border-gray-100 dark:border-gray-800">
+<span class="text-lg font-bold text-[#0e1b12] dark:text-white uppercase tracking-tight">Grand Total</span>
+<span class="text-2xl font-black text-primary">$67.26</span>
+</div>
+</div>
+<!-- Footer Note -->
+<div class="mt-16 text-center border-t border-dashed border-gray-200 dark:border-gray-700 pt-8">
+<p class="text-sm font-medium italic text-[#4e9767]">"Thank you for dining at Casa Hotel. We hope to see you again soon!"</p>
+<div class="mt-4 flex justify-center gap-4 text-[10px] text-gray-400 uppercase tracking-widest">
+<span>Quality Service</span>
+<span>•</span>
+<span>Authentic Taste</span>
+<span>•</span>
+<span>Luxury Stay</span>
+</div>
+</div>
+</div>
+<!-- Print Specific Footer -->
+<div class="hidden print:block text-[10px] text-center text-gray-400 py-4 italic">
+                    This is a computer-generated receipt and does not require a physical signature.
+                </div>
+</div>
+<!-- Additional Help/Support Links (No-Print) -->
+<div class="w-full max-w-[800px] flex justify-center gap-6 mt-8 no-print">
+<button class="flex items-center gap-2 text-sm text-[#4e9767] hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-base">mail</span>
+                    Email Copy to Guest
+                </button>
+<button class="flex items-center gap-2 text-sm text-[#4e9767] hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-base">history</span>
+                    Void Invoice
+                </button>
+<button class="flex items-center gap-2 text-sm text-[#4e9767] hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-base">help</span>
+                    Support
+                </button>
+</div>
+</main>
+</div>
+<script src="common.js"></script></body></html>

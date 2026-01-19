@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Casa Hotel - Restaurant &amp; Bar POS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#f9b233", // Orange from logo
+              secondary: "#469143", // Green from logo
+              "background-light": "#f8fafc",
+              "background-dark": "#0f172a",
+              "card-light": "#ffffff",
+              "card-dark": "#1e293b",
+            },
+            fontFamily: {
+              display: ["Outfit", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.75rem",
+            },
+          },
+        },
+      };
+      function toggleDarkMode() {
+        document.documentElement.classList.toggle('dark');
+      }
+      function switchType(type) {
+        const residentInput = document.getElementById('resident-field');
+        const residentBtn = document.getElementById('btn-resident');
+        const walkinBtn = document.getElementById('btn-walkin');
+        if (type === 'resident') {
+          residentInput.classList.remove('hidden');
+          residentBtn.classList.add('bg-primary', 'text-white');
+          residentBtn.classList.remove('bg-gray-100', 'text-gray-600', 'dark:bg-slate-800', 'dark:text-slate-400');
+          walkinBtn.classList.remove('bg-primary', 'text-white');
+          walkinBtn.classList.add('bg-gray-100', 'text-gray-600', 'dark:bg-slate-800', 'dark:text-slate-400');
+        } else {
+          residentInput.classList.add('hidden');
+          walkinBtn.classList.add('bg-primary', 'text-white');
+          walkinBtn.classList.remove('bg-gray-100', 'text-gray-600', 'dark:bg-slate-800', 'dark:text-slate-400');
+          residentBtn.classList.remove('bg-primary', 'text-white');
+          residentBtn.classList.add('bg-gray-100', 'text-gray-600', 'dark:bg-slate-800', 'dark:text-slate-400');
+        }
+      }
+    </script>
+<style>
+        body { font-family: 'Outfit', sans-serif; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/></head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-200">
+<aside class="fixed left-0 top-0 h-full w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 z-50 flex flex-col transition-colors duration-200">
+<div class="p-6">
+<div class="flex items-center gap-3">
+<img alt="Casa Hotel Logo" class="h-10 w-10 object-contain" src="logo.png"/>
+<div>
+<h1 class="font-bold text-xl tracking-tight text-slate-800 dark:text-white">Casa Hotel</h1>
+<p class="text-[10px] uppercase tracking-widest text-secondary font-bold">Management System</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 mt-4 px-4 space-y-1 overflow-y-auto scrollbar-hide">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="dashboard_1.html">
+<span class="material-icons-outlined">dashboard</span>
+            Dashboard
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="bookings_1.html">
+<span class="material-icons-outlined">calendar_today</span>
+            Bookings
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="room_timeline.html">
+<span class="material-icons-outlined">hotel</span>
+            Room Status
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="events.html">
+<span class="material-icons-outlined">event</span>
+            Events
+        </a>
+<div class="pt-4 pb-2">
+<p class="px-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Operations</p>
+</div>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all bg-primary/10 text-primary font-medium shadow-sm" href="pos_restaurant_1.html">
+<span class="material-icons-outlined">restaurant</span>
+            Restaurant POS
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="inventory.html">
+<span class="material-icons-outlined">inventory_2</span>
+            Inventory
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="checkout.html">
+<span class="material-icons-outlined">receipt_long</span>
+            Checkout
+        </a>
+<div class="pt-4 pb-2">
+<p class="px-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Admin</p>
+</div>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="reports_1.html">
+<span class="material-icons-outlined">assessment</span>
+            Reports
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="cms_content.html">
+<span class="material-icons-outlined">language</span>
+            Website CMS
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="cms_requests.html">
+<span class="material-icons-outlined">inbox</span>
+            Web Requests
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="settings_1.html">
+<span class="material-icons-outlined">settings</span>
+            Settings
+        </a>
+</nav>
+<div class="p-6 border-t border-slate-100 dark:border-slate-800">
+<div class="flex items-center gap-3 mb-4">
+<img alt="Admin user avatar" class="h-10 w-10 rounded-full object-contain bg-slate-100" src="logo.png"/>
+<div>
+<p class="text-sm font-semibold text-slate-700 dark:text-slate-200">Alex Rivera</p>
+<p class="text-xs text-slate-500">General Manager</p>
+</div>
+</div>
+<button class="w-full flex items-center justify-center gap-2 py-2 text-xs font-medium text-slate-500 hover:text-primary transition-colors" onclick="window.toggleTheme()">
+<span class="material-icons-outlined text-sm">dark_mode</span>
+            Switch Theme
+        </button>
+</div>
+</aside>
+<main class="flex-1 flex overflow-hidden ml-64 min-h-screen"><div class="flex justify-end gap-4 mb-4 p-4 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800"><div class="text-right hidden sm:block">
+<p class="text-xs text-gray-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Current Shift</p>
+<p class="text-sm font-medium">Evening Bar - John Doe</p>
+</div></div>
+<div class="flex gap-2 mb-6 overflow-x-auto pb-2 border-b border-slate-100 dark:border-slate-800 p-6"><span class="text-xs font-semibold text-slate-400 uppercase tracking-wider self-center mr-2">Views:</span><a class="px-3 py-1.5 text-xs font-medium rounded-lg transition-all whitespace-nowrap bg-primary text-white shadow-sm" href="pos_restaurant_1.html">View 1</a><a class="px-3 py-1.5 text-xs font-medium rounded-lg transition-all whitespace-nowrap bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700" href="pos_restaurant_2.html">View 2</a><a class="px-3 py-1.5 text-xs font-medium rounded-lg transition-all whitespace-nowrap bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700" href="pos_restaurant_3.html">View 3</a><a class="px-3 py-1.5 text-xs font-medium rounded-lg transition-all whitespace-nowrap bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700" href="pos_restaurant_4.html">View 4</a></div><header class="flex justify-between items-center mb-10 px-8 pt-8">
+<div>
+<h2 class="text-3xl font-bold text-slate-800 dark:text-white">Pos Restaurant 1</h2>
+<p class="text-slate-500 mt-1">Manage your pos here.</p>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative">
+<span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="pl-10 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-primary focus:border-primary text-sm w-64 transition-all" placeholder="Search..." type="text"/>
+</div>
+<button class="p-2 text-slate-500 hover:bg-white dark:hover:bg-slate-800 rounded-lg relative transition-colors">
+<span class="material-icons-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-background-light dark:border-background-dark"></span>
+</button>
+</div>
+</header>
+<section class="flex-1 flex flex-col p-6 overflow-hidden">
+<div class="flex flex-col md:flex-row gap-4 mb-6">
+<div class="flex p-1 bg-gray-100 dark:bg-slate-800 rounded-xl w-fit">
+<button class="px-6 py-2 rounded-lg text-sm font-semibold transition-all bg-primary text-white shadow-sm" id="btn-resident" onclick="switchType('resident')">
+                        Resident
+                    </button>
+<button class="px-6 py-2 rounded-lg text-sm font-semibold transition-all text-gray-600 dark:text-slate-400" id="btn-walkin" onclick="switchType('walkin')">
+                        Walk-in
+                    </button>
+</div>
+<div class="relative flex-1 max-w-sm" id="resident-field">
+<span class="material-icons-round absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">meeting_room</span>
+<input class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-800 rounded-xl focus:ring-primary focus:border-primary dark:text-white" placeholder="Search Room Number (e.g. 402)..." type="text"/>
+</div>
+<div class="relative flex-1">
+<span class="material-icons-round absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+<input class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-800 rounded-xl focus:ring-primary focus:border-primary dark:text-white" placeholder="Search menu items..." type="text"/>
+</div>
+</div>
+<div class="flex gap-3 mb-6 overflow-x-auto pb-2 hide-scrollbar">
+<button class="px-5 py-2 rounded-full bg-secondary text-white text-sm font-semibold whitespace-nowrap">All Items</button>
+<button class="px-5 py-2 rounded-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-sm font-semibold whitespace-nowrap hover:border-primary transition-colors">Appetizers</button>
+<button class="px-5 py-2 rounded-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-sm font-semibold whitespace-nowrap hover:border-primary transition-colors">Main Course</button>
+<button class="px-5 py-2 rounded-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-sm font-semibold whitespace-nowrap hover:border-primary transition-colors">Wine &amp; Spirits</button>
+<button class="px-5 py-2 rounded-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-sm font-semibold whitespace-nowrap hover:border-primary transition-colors">Cocktails</button>
+<button class="px-5 py-2 rounded-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-sm font-semibold whitespace-nowrap hover:border-primary transition-colors">Desserts</button>
+</div>
+<div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 overflow-y-auto pr-2">
+<button class="group relative flex flex-col bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-2xl overflow-hidden hover:shadow-xl transition-all text-left">
+<img alt="Grilled Salmon" class="h-32 w-full object-cover h-10 object-contain" src="logo.png"/>
+<div class="p-3">
+<h3 class="font-semibold text-sm group-hover:text-primary transition-colors">Grilled Salmon Steak</h3>
+<p class="text-xs text-gray-500 dark:text-slate-400 mt-1">Mains</p>
+<div class="mt-2 flex items-center justify-between">
+<span class="text-primary font-bold">$24.50</span>
+<div class="bg-gray-100 dark:bg-slate-800 p-1.5 rounded-lg group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-icons-round text-sm">add</span>
+</div>
+</div>
+</div>
+</button>
+<button class="group relative flex flex-col bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-2xl overflow-hidden hover:shadow-xl transition-all text-left">
+<img alt="Espresso Martini" class="h-32 w-full object-cover h-10 object-contain" src="logo.png"/>
+<div class="p-3">
+<h3 class="font-semibold text-sm group-hover:text-primary transition-colors">Espresso Martini</h3>
+<p class="text-xs text-gray-500 dark:text-slate-400 mt-1">Cocktails</p>
+<div class="mt-2 flex items-center justify-between">
+<span class="text-primary font-bold">$12.00</span>
+<div class="bg-gray-100 dark:bg-slate-800 p-1.5 rounded-lg group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-icons-round text-sm">add</span>
+</div>
+</div>
+</div>
+</button>
+<button class="group relative flex flex-col bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-2xl overflow-hidden hover:shadow-xl transition-all text-left">
+<img alt="Beef Burger" class="h-32 w-full object-cover h-10 object-contain" src="logo.png"/>
+<div class="p-3">
+<h3 class="font-semibold text-sm group-hover:text-primary transition-colors">Classic Wagyu Burger</h3>
+<p class="text-xs text-gray-500 dark:text-slate-400 mt-1">Mains</p>
+<div class="mt-2 flex items-center justify-between">
+<span class="text-primary font-bold">$18.90</span>
+<div class="bg-gray-100 dark:bg-slate-800 p-1.5 rounded-lg group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-icons-round text-sm">add</span>
+</div>
+</div>
+</div>
+</button>
+<button class="group relative flex flex-col bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-2xl overflow-hidden hover:shadow-xl transition-all text-left">
+<img alt="Pizza" class="h-32 w-full object-cover h-10 object-contain" src="logo.png"/>
+<div class="p-3">
+<h3 class="font-semibold text-sm group-hover:text-primary transition-colors">Truffle Mushroom Pizza</h3>
+<p class="text-xs text-gray-500 dark:text-slate-400 mt-1">Mains</p>
+<div class="mt-2 flex items-center justify-between">
+<span class="text-primary font-bold">$21.00</span>
+<div class="bg-gray-100 dark:bg-slate-800 p-1.5 rounded-lg group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-icons-round text-sm">add</span>
+</div>
+</div>
+</div>
+</button>
+<button class="group relative flex flex-col bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-2xl overflow-hidden hover:shadow-xl transition-all text-left">
+<img alt="Cabernet Sauvignon" class="h-32 w-full object-cover h-10 object-contain" src="logo.png"/>
+<div class="p-3">
+<h3 class="font-semibold text-sm group-hover:text-primary transition-colors">Cabernet Sauvignon</h3>
+<p class="text-xs text-gray-500 dark:text-slate-400 mt-1">Wine</p>
+<div class="mt-2 flex items-center justify-between">
+<span class="text-primary font-bold">$45.00</span>
+<div class="bg-gray-100 dark:bg-slate-800 p-1.5 rounded-lg group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-icons-round text-sm">add</span>
+</div>
+</div>
+</div>
+</button>
+<button class="group relative flex flex-col bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-2xl overflow-hidden hover:shadow-xl transition-all text-left">
+<img alt="Chicken Wings" class="h-32 w-full object-cover h-10 object-contain" src="logo.png"/>
+<div class="p-3">
+<h3 class="font-semibold text-sm group-hover:text-primary transition-colors">Buffalo Wings</h3>
+<p class="text-xs text-gray-500 dark:text-slate-400 mt-1">Appetizers</p>
+<div class="mt-2 flex items-center justify-between">
+<span class="text-primary font-bold">$14.00</span>
+<div class="bg-gray-100 dark:bg-slate-800 p-1.5 rounded-lg group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-icons-round text-sm">add</span>
+</div>
+</div>
+</div>
+</button>
+</div>
+</section>
+</main>
+<div class="fixed bottom-6 left-6 flex gap-4 text-[10px] uppercase font-bold text-gray-400 tracking-widest pointer-events-none">
+<div class="flex items-center gap-1.5"><kbd class="px-1.5 py-0.5 rounded bg-gray-200 dark:bg-slate-800 text-gray-600 dark:text-slate-300">F2</kbd> PAY</div>
+<div class="flex items-center gap-1.5"><kbd class="px-1.5 py-0.5 rounded bg-gray-200 dark:bg-slate-800 text-gray-600 dark:text-slate-300">F4</kbd> PRINT</div>
+<div class="flex items-center gap-1.5"><kbd class="px-1.5 py-0.5 rounded bg-gray-200 dark:bg-slate-800 text-gray-600 dark:text-slate-300">ESC</kbd> CLEAR</div>
+</div>
+<script src="common.js"></script>
+<div class="fixed bottom-8 right-8 z-50">
+<button class="flex items-center justify-center w-14 h-14 bg-primary text-white rounded-full shadow-lg hover:bg-opacity-90 hover:scale-105 transition-all" onclick="openModal('New Entry', '&lt;p&gt;Add new entry form goes here.&lt;/p&gt;', () =&gt; {})">
+<span class="material-icons-outlined text-2xl">add</span>
+</button>
+</div>
+</body></html>
