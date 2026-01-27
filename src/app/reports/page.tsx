@@ -1,352 +1,220 @@
 'use client';
-import Link from 'next/link';
-import Image from 'next/image';
+import React from 'react';
+import useSWR from 'swr';
+import { fetcher } from '@/lib/fetcher';
+import TopBar from '@/components/TopBar';
 
-export default function Reports1() {
+export default function Reports() {
+  const { data, error, isLoading } = useSWR('/api/reports', fetcher);
+
+  if (isLoading) return <div className="p-8 text-center text-slate-500 font-bold uppercase tracking-widest text-[10px]">Loading Intelligence Data...</div>;
+  if (!data) return <div className="p-8 text-red-500 font-bold text-center">Failed to synchronize reporting metrics</div>;
+
+  const summary = data.summary || { totalRevenue: 0, avgOccupancy: 0, totalBookings: 0 };
+  const records = data.records || [];
+
   return (
-    <div className="flex-1 min-h-screen relative">
-      
+    <div className="flex-1 min-h-screen bg-slate-50 dark:bg-slate-950 p-4 lg:p-8 flex flex-col gap-8">
+      <style jsx global>{`
+        @media print {
+          .no-print { display: none !important; }
+          aside, nav { display: none !important; }
+          main { margin-left: 0 !important; padding: 0 !important; }
+        }
+      `}</style>
+      <TopBar
+        title="Business Intelligence"
+        description="Real-time occupancy analytics and revenue performance metrics for Casa Hotel."
+        actions={
+          <div className="flex gap-2">
+            <button className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2.5 rounded-xl text-slate-500 hover:text-primary transition-all shadow-sm">
+              <span className="material-icons-outlined text-[20px]">filter_list</span>
+            </button>
+            <button className="bg-primary hover:bg-opacity-90 text-white px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest flex items-center gap-2 transition-all shadow-lg shadow-primary/20" onClick={() => window.print()}>
+              <span className="material-icons-outlined text-[18px]">download</span>
+              Export Report
+            </button>
+          </div>
+        }
+      />
 
-<main className="lg:ml-64 p-4 lg:p-8 ml-64 min-h-screen">
-<div className="flex gap-2 mb-6 overflow-x-auto pb-2 border-b border-slate-100 dark:border-slate-800 p-6"><span className="text-xs font-semibold text-slate-400 uppercase tracking-wider self-center mr-2">Views:</span><a className="px-3 py-1.5 text-xs font-medium rounded-lg transition-all whitespace-nowrap bg-primary text-white shadow-sm" href="/reports">View 1</a><a className="px-3 py-1.5 text-xs font-medium rounded-lg transition-all whitespace-nowrap bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700" href="/reports/view-2">View 2</a><a className="px-3 py-1.5 text-xs font-medium rounded-lg transition-all whitespace-nowrap bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700" href="/reports/view-3">View 3</a><a className="px-3 py-1.5 text-xs font-medium rounded-lg transition-all whitespace-nowrap bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700" href="/reports/view-4">View 4</a></div><header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-<div>
-<h2 className="text-2xl font-bold dark:text-white">Business Intelligence Reports</h2>
-<p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Real-time occupancy and revenue analytics for Casa Hotel.</p>
-</div>
-<div className="flex items-center gap-3">
-<button className="p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors" onClick={() => { document.documentElement.classList.toggle('dark') }}>
-<span className="material-icons-outlined block dark:hidden">dark_mode</span>
-<span className="material-icons-outlined hidden dark:block text-primary">light_mode</span>
-</button>
-<button className="bg-primary text-white px-4 py-2 rounded-lg font-medium hover:bg-opacity-90 transition-all shadow-lg shadow-primary/20 flex items-center gap-2">
-<span className="material-icons-outlined text-sm">download</span>
-                    Export Data
-                </button>
-</div>
-</header>
-<section className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 mb-8 shadow-sm">
-<div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4">
-<div className="space-y-1">
-<label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Date Range</label>
-<div className="relative">
-<span className="material-icons-outlined absolute left-3 top-2.5 text-slate-400 text-sm">calendar_month</span>
-<input className="w-full pl-9 py-2 text-sm bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg focus:ring-primary focus:border-primary" type="text" value="Oct 01, 2023 - Oct 31, 2023"/>
-</div>
-</div>
-<div className="space-y-1">
-<label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Nationality</label>
-<select className="w-full py-2 text-sm bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg focus:ring-primary focus:border-primary">
-<option>All Nationalities</option>
-<option>Local (Domestic)</option>
-<option>International</option>
-</select>
-</div>
-<div className="space-y-1">
-<label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Room Type</label>
-<select className="w-full py-2 text-sm bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg focus:ring-primary focus:border-primary">
-<option>All Types</option>
-<option>Deluxe Suite</option>
-<option>Executive King</option>
-<option>Standard Twin</option>
-</select>
-</div>
-<div className="space-y-1">
-<label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Revenue Source</label>
-<select className="w-full py-2 text-sm bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg focus:ring-primary focus:border-primary">
-<option>All Sources</option>
-<option>Room Booking</option>
-<option>Restaurant</option>
-<option>Spa &amp; Services</option>
-</select>
-</div>
-<div className="flex items-end">
-<button className="w-full py-2 bg-slate-800 dark:bg-slate-700 text-white rounded-lg hover:bg-slate-700 dark:hover:bg-slate-600 transition-colors text-sm font-medium">
-                        Apply Filters
-                    </button>
-</div>
-</div>
-</section>
-<section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-<div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-<div className="flex items-center justify-between mb-2">
-<span className="text-slate-500 dark:text-slate-400 font-medium text-sm">Total Revenue</span>
-<span className="p-2 bg-primary/10 rounded-lg text-primary material-icons-outlined">payments</span>
-</div>
-<div className="text-2xl font-bold">$124,500</div>
-<div className="flex items-center mt-2 text-secondary text-xs font-semibold">
-<span className="material-icons-outlined text-xs">trending_up</span>
-<span className="ml-1">+12% from last month</span>
-</div>
-</div>
-<div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-<div className="flex items-center justify-between mb-2">
-<span className="text-slate-500 dark:text-slate-400 font-medium text-sm">Avg Occupancy</span>
-<span className="p-2 bg-secondary/10 rounded-lg text-secondary material-icons-outlined">bed</span>
-</div>
-<div className="text-2xl font-bold">78.4%</div>
-<div className="flex items-center mt-2 text-secondary text-xs font-semibold">
-<span className="material-icons-outlined text-xs">trending_up</span>
-<span className="ml-1">+5.2% from last month</span>
-</div>
-</div>
-<div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-<div className="flex items-center justify-between mb-2">
-<span className="text-slate-500 dark:text-slate-400 font-medium text-sm">Total Bookings</span>
-<span className="p-2 bg-blue-500/10 rounded-lg text-blue-500 material-icons-outlined">book_online</span>
-</div>
-<div className="text-2xl font-bold">1,240</div>
-<div className="flex items-center mt-2 text-red-500 text-xs font-semibold">
-<span className="material-icons-outlined text-xs">trending_down</span>
-<span className="ml-1">-2.1% from last month</span>
-</div>
-</div>
-<div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-<div className="flex items-center justify-between mb-2">
-<span className="text-slate-500 dark:text-slate-400 font-medium text-sm">Restaurant Sales</span>
-<span className="p-2 bg-orange-500/10 rounded-lg text-orange-500 material-icons-outlined">restaurant</span>
-</div>
-<div className="text-2xl font-bold">$32,840</div>
-<div className="flex items-center mt-2 text-secondary text-xs font-semibold">
-<span className="material-icons-outlined text-xs">trending_up</span>
-<span className="ml-1">+8.4% from last month</span>
-</div>
-</div>
-</section>
-<section className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-<div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-<div className="flex items-center justify-between mb-8">
-<h3 className="font-bold text-lg">Occupancy Trends</h3>
-<div className="flex gap-2">
-<span className="flex items-center gap-1 text-[10px] uppercase font-bold text-slate-400">
-<span className="w-2 h-2 rounded-full bg-primary"></span> Deluxe
-                        </span>
-<span className="flex items-center gap-1 text-[10px] uppercase font-bold text-slate-400">
-<span className="w-2 h-2 rounded-full bg-secondary"></span> Standard
-                        </span>
-</div>
-</div>
-<div className="h-64 flex items-end justify-between gap-2 px-2 relative">
-<div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
-<div className="border-t border-slate-100 dark:border-slate-800 w-full h-0"></div>
-<div className="border-t border-slate-100 dark:border-slate-800 w-full h-0"></div>
-<div className="border-t border-slate-100 dark:border-slate-800 w-full h-0"></div>
-<div className="border-t border-slate-100 dark:border-slate-800 w-full h-0"></div>
-</div>
-<div className="relative w-full h-full flex items-end justify-between">
-<div className="flex flex-col items-center gap-1 w-full">
-<div className="flex gap-1 items-end h-48">
-<div className="w-3 bg-primary rounded-t-sm chart-bar" style={{ height: "80%" }}></div>
-<div className="w-3 bg-secondary rounded-t-sm chart-bar" style={{ height: "60%" }}></div>
-</div>
-<span className="text-[10px] text-slate-400 mt-2">Mon</span>
-</div>
-<div className="flex flex-col items-center gap-1 w-full">
-<div className="flex gap-1 items-end h-48">
-<div className="w-3 bg-primary rounded-t-sm chart-bar" style={{ height: "40%" }}></div>
-<div className="w-3 bg-secondary rounded-t-sm chart-bar" style={{ height: "30%" }}></div>
-</div>
-<span className="text-[10px] text-slate-400 mt-2">Tue</span>
-</div>
-<div className="flex flex-col items-center gap-1 w-full">
-<div className="flex gap-1 items-end h-48">
-<div className="w-3 bg-primary rounded-t-sm chart-bar" style={{ height: "90%" }}></div>
-<div className="w-3 bg-secondary rounded-t-sm chart-bar" style={{ height: "75%" }}></div>
-</div>
-<span className="text-[10px] text-slate-400 mt-2">Wed</span>
-</div>
-<div className="flex flex-col items-center gap-1 w-full">
-<div className="flex gap-1 items-end h-48">
-<div className="w-3 bg-primary rounded-t-sm chart-bar" style={{ height: "65%" }}></div>
-<div className="w-3 bg-secondary rounded-t-sm chart-bar" style={{ height: "85%" }}></div>
-</div>
-<span className="text-[10px] text-slate-400 mt-2">Thu</span>
-</div>
-<div className="flex flex-col items-center gap-1 w-full">
-<div className="flex gap-1 items-end h-48">
-<div className="w-3 bg-primary rounded-t-sm chart-bar" style={{ height: "75%" }}></div>
-<div className="w-3 bg-secondary rounded-t-sm chart-bar" style={{ height: "55%" }}></div>
-</div>
-<span className="text-[10px] text-slate-400 mt-2">Fri</span>
-</div>
-<div className="flex flex-col items-center gap-1 w-full">
-<div className="flex gap-1 items-end h-48">
-<div className="w-3 bg-primary rounded-t-sm chart-bar" style={{ height: "100%" }}></div>
-<div className="w-3 bg-secondary rounded-t-sm chart-bar" style={{ height: "90%" }}></div>
-</div>
-<span className="text-[10px] text-slate-400 mt-2">Sat</span>
-</div>
-<div className="flex flex-col items-center gap-1 w-full">
-<div className="flex gap-1 items-end h-48">
-<div className="w-3 bg-primary rounded-t-sm chart-bar" style={{ height: "95%" }}></div>
-<div className="w-3 bg-secondary rounded-t-sm chart-bar" style={{ height: "80%" }}></div>
-</div>
-<span className="text-[10px] text-slate-400 mt-2">Sun</span>
-</div>
-</div>
-</div>
-</div>
-<div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-<div className="flex items-center justify-between mb-8">
-<h3 className="font-bold text-lg">Revenue Breakdown</h3>
-<button className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-<span className="material-icons-outlined">more_vert</span>
-</button>
-</div>
-<div className="flex items-center justify-around h-64">
-<div className="relative w-48 h-48">
-<svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-<path className="text-slate-100 dark:text-slate-800" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="4"></path>
-<path className="text-primary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="60, 100" strokeWidth="4"></path>
-<path className="text-secondary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="25, 100" stroke-dashoffset="-60" strokeWidth="4"></path>
-<path className="text-slate-400" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="15, 100" stroke-dashoffset="-85" strokeWidth="4"></path>
-</svg>
-<div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-<span className="text-xs text-slate-400 font-medium uppercase">Total</span>
-<span className="text-2xl font-bold">$124k</span>
-</div>
-</div>
-<div className="space-y-4">
-<div className="flex items-center gap-3">
-<div className="w-3 h-3 rounded-full bg-primary"></div>
-<div>
-<p className="text-xs font-semibold text-slate-400 uppercase">Room Revenue</p>
-<p className="font-bold text-sm">60% ($74.7k)</p>
-</div>
-</div>
-<div className="flex items-center gap-3">
-<div className="w-3 h-3 rounded-full bg-secondary"></div>
-<div>
-<p className="text-xs font-semibold text-slate-400 uppercase">Restaurant</p>
-<p className="font-bold text-sm">25% ($31.1k)</p>
-</div>
-</div>
-<div className="flex items-center gap-3">
-<div className="w-3 h-3 rounded-full bg-slate-400"></div>
-<div>
-<p className="text-xs font-semibold text-slate-400 uppercase">Other Services</p>
-<p className="font-bold text-sm">15% ($18.6k)</p>
-</div>
-</div>
-</div>
-</div>
-</div>
-</section>
-<section className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-<div className="p-6 border-b border-slate-200 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
-<h3 className="font-bold text-lg">Detailed Records</h3>
-<div className="flex items-center gap-3">
-<div className="relative">
-<span className="material-icons-outlined absolute left-3 top-2 text-slate-400 text-lg">search</span>
-<input className="pl-10 py-1.5 text-sm bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg focus:ring-primary focus:border-primary w-full md:w-64" placeholder="Search bookings..." type="text"/>
-</div>
-<div className="flex border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
-<button className="px-3 py-1.5 text-xs font-bold bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border-r border-slate-200 dark:border-slate-700 flex items-center gap-1">
-<span className="material-icons-outlined text-sm">description</span> CSV
-                        </button>
-<button className="px-3 py-1.5 text-xs font-bold bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-1">
-<span className="material-icons-outlined text-sm">picture_as_pdf</span> PDF
-                        </button>
-</div>
-</div>
-</div>
-<div className="overflow-x-auto">
-<table className="w-full text-left border-collapse">
-<thead>
-<tr className="bg-slate-50 dark:bg-slate-800/50">
-<th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Booking ID</th>
-<th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Guest Name</th>
-<th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Nationality</th>
-<th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Room Type</th>
-<th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Stay Dates</th>
-<th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Revenue</th>
-<th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Status</th>
-</tr>
-</thead>
-<tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-<tr className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-<td className="px-6 py-4 text-sm font-medium">#BK-8902</td>
-<td className="px-6 py-4 text-sm font-semibold">Jonathan Smith</td>
-<td className="px-6 py-4 text-sm">United Kingdom</td>
-<td className="px-6 py-4 text-sm">Deluxe Suite</td>
-<td className="px-6 py-4 text-sm">Oct 12 - Oct 15</td>
-<td className="px-6 py-4 text-sm font-bold">$1,250.00</td>
-<td className="px-6 py-4 text-sm">
-<span className="px-2.5 py-1 rounded-full bg-secondary/10 text-secondary text-[10px] font-bold uppercase">Completed</span>
-</td>
-</tr>
-<tr className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-<td className="px-6 py-4 text-sm font-medium">#BK-8903</td>
-<td className="px-6 py-4 text-sm font-semibold">Maria Garcia</td>
-<td className="px-6 py-4 text-sm">Spain</td>
-<td className="px-6 py-4 text-sm">Executive King</td>
-<td className="px-6 py-4 text-sm">Oct 14 - Oct 16</td>
-<td className="px-6 py-4 text-sm font-bold">$980.00</td>
-<td className="px-6 py-4 text-sm">
-<span className="px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase">In-House</span>
-</td>
-</tr>
-<tr className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-<td className="px-6 py-4 text-sm font-medium">#BK-8904</td>
-<td className="px-6 py-4 text-sm font-semibold">Yuki Tanaka</td>
-<td className="px-6 py-4 text-sm">Japan</td>
-<td className="px-6 py-4 text-sm">Standard Twin</td>
-<td className="px-6 py-4 text-sm">Oct 15 - Oct 18</td>
-<td className="px-6 py-4 text-sm font-bold">$720.00</td>
-<td className="px-6 py-4 text-sm">
-<span className="px-2.5 py-1 rounded-full bg-blue-100 text-blue-600 text-[10px] font-bold uppercase dark:bg-blue-900/40">Confirmed</span>
-</td>
-</tr>
-<tr className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-<td className="px-6 py-4 text-sm font-medium">#BK-8905</td>
-<td className="px-6 py-4 text-sm font-semibold">Carlos Mendez</td>
-<td className="px-6 py-4 text-sm">Mexico</td>
-<td className="px-6 py-4 text-sm">Deluxe Suite</td>
-<td className="px-6 py-4 text-sm">Oct 16 - Oct 20</td>
-<td className="px-6 py-4 text-sm font-bold">$1,850.00</td>
-<td className="px-6 py-4 text-sm">
-<span className="px-2.5 py-1 rounded-full bg-blue-100 text-blue-600 text-[10px] font-bold uppercase dark:bg-blue-900/40">Confirmed</span>
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div className="p-4 bg-slate-50 dark:bg-slate-800/30 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
-<p className="text-xs text-slate-500 font-medium">Showing 1 to 4 of 48 entries</p>
-<div className="flex gap-1">
-<button className="p-1.5 rounded bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 hover:bg-slate-50 disabled:opacity-50" disabled={true}>
-<span className="material-icons-outlined text-sm">chevron_left</span>
-</button>
-<button className="px-3 py-1 rounded bg-primary text-white text-xs font-bold">1</button>
-<button className="px-3 py-1 rounded bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold hover:bg-slate-50">2</button>
-<button className="px-3 py-1 rounded bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold hover:bg-slate-50">3</button>
-<button className="p-1.5 rounded bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 hover:bg-slate-50">
-<span className="material-icons-outlined text-sm">chevron_right</span>
-</button>
-</div>
-</div>
-</section>
-</main>
-<footer className="lg:hidden fixed bottom-0 left-0 w-full bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 p-2 z-30">
-<div className="flex justify-around">
-<a className="flex flex-col items-center p-2 text-primary" href="#">
-<span className="material-icons-outlined">analytics</span>
-<span className="text-[10px] font-bold">Reports</span>
-</a>
-<a className="flex flex-col items-center p-2 text-slate-400" href="#">
-<span className="material-icons-outlined">calendar_today</span>
-<span className="text-[10px] font-bold">Booking</span>
-</a>
-<a className="flex flex-col items-center p-2 text-slate-400" href="#">
-<span className="material-icons-outlined">restaurant</span>
-<span className="text-[10px] font-bold">Dine</span>
-</a>
-<a className="flex flex-col items-center p-2 text-slate-400" href="#">
-<span className="material-icons-outlined">account_circle</span>
-<span className="text-[10px] font-bold">Profile</span>
-</a>
-</div>
-</footer>
+      {/* Stats Overview */}
+      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[
+          { label: 'Total Revenue', value: `RWF ${summary.totalRevenue.toLocaleString()}`, trend: '+12.5%', icon: 'payments', color: 'primary' },
+          { label: 'Avg Occupancy', value: `${summary.avgOccupancy.toFixed(1)}%`, trend: '+5.2%', icon: 'bed', color: 'secondary' },
+          { label: 'Total Bookings', value: summary.totalBookings.toLocaleString(), trend: '-2.1%', icon: 'book_online', color: 'blue' },
+          { label: 'Restaurant Sales', value: 'RWF 3,284,000', trend: '+8.4%', icon: 'restaurant', color: 'orange' }
+        ].map((stat, i) => (
+          <div key={i} className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl transition-all group">
+            <div className="flex items-center justify-between mb-4">
+              <div className={`p-3 bg-${stat.color === 'primary' ? 'primary' : stat.color === 'secondary' ? 'secondary' : stat.color + '-500'}/10 rounded-2xl text-${stat.color === 'primary' ? 'primary' : stat.color === 'secondary' ? 'secondary' : stat.color + '-500'} group-hover:scale-110 transition-transform`}>
+                <span className="material-icons-outlined">{stat.icon}</span>
+              </div>
+              <span className={`text-[10px] font-black px-2 py-1 rounded-lg ${stat.trend.startsWith('+') ? 'bg-secondary/10 text-secondary' : 'bg-red-500/10 text-red-500'}`}>
+                {stat.trend}
+              </span>
+            </div>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{stat.label}</p>
+            <h3 className="text-2xl font-black text-slate-800 dark:text-white tracking-tighter">{stat.value}</h3>
+          </div>
+        ))}
+      </section>
 
+      {/* Visual Analytics */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-xl">
+          <div className="flex items-center justify-between mb-10">
+            <div>
+              <h3 className="font-black text-lg tracking-tight text-slate-800 dark:text-white">Occupancy Trends</h3>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Weekly occupancy distribution</p>
+            </div>
+            <div className="flex gap-4">
+              <span className="flex items-center gap-2 text-[10px] uppercase font-black text-slate-400">
+                <span className="w-2.5 h-2.5 rounded-full bg-primary shadow-sm"></span> Deluxe
+              </span>
+              <span className="flex items-center gap-2 text-[10px] uppercase font-black text-slate-400">
+                <span className="w-2.5 h-2.5 rounded-full bg-secondary shadow-sm"></span> Standard
+              </span>
+            </div>
+          </div>
+          <div className="h-64 flex items-end justify-between gap-4 px-2 relative">
+            <div className="absolute inset-0 flex flex-col justify-between pointer-events-none pb-8">
+              {[1, 2, 3, 4].map(i => <div key={i} className="border-t border-slate-100 dark:border-slate-800/50 w-full h-0"></div>)}
+            </div>
+            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => (
+              <div key={day} className="flex flex-col items-center gap-3 w-full group relative z-10">
+                <div className="flex gap-1.5 items-end h-48 w-full justify-center">
+                  <div className="w-3 bg-primary rounded-full hover:brightness-110 transition-all cursor-pointer shadow-lg shadow-primary/20" style={{ height: `${[80, 40, 90, 65, 75, 100, 95][i]}%` }}></div>
+                  <div className="w-3 bg-secondary rounded-full hover:brightness-110 transition-all cursor-pointer shadow-lg shadow-secondary/20" style={{ height: `${[60, 30, 75, 85, 55, 90, 80][i]}%` }}></div>
+                </div>
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{day}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-xl">
+          <div className="flex items-center justify-between mb-10">
+            <div>
+              <h3 className="font-black text-lg tracking-tight text-slate-800 dark:text-white">Revenue Mix</h3>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Revenue by department</p>
+            </div>
+            <button className="text-slate-400 hover:text-primary transition-colors">
+              <span className="material-icons-outlined">more_horiz</span>
+            </button>
+          </div>
+          <div className="flex flex-col md:flex-row items-center justify-around gap-10">
+            <div className="relative w-56 h-56 group">
+              <svg className="w-full h-full transform -rotate-90 filter drop-shadow-xl" viewBox="0 0 36 36">
+                <circle cx="18" cy="18" r="15.915" fill="none" className="text-slate-100 dark:text-slate-800" strokeWidth="4.5" />
+                <circle cx="18" cy="18" r="15.915" fill="none" className="text-primary" strokeWidth="4.5" strokeDasharray="60, 100" />
+                <circle cx="18" cy="18" r="15.915" fill="none" className="text-secondary" strokeWidth="4.5" strokeDasharray="25, 100" strokeDashoffset="-60" />
+                <circle cx="18" cy="18" r="15.915" fill="none" className="text-blue-500/50" strokeWidth="4.5" strokeDasharray="15, 100" strokeDashoffset="-85" />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Total</span>
+                <span className="text-3xl font-black text-slate-800 dark:text-white tracking-tighter italic">124M</span>
+              </div>
+            </div>
+            <div className="space-y-5 w-full md:w-auto">
+              {[
+                { label: 'Rooms', val: '60%', raw: '74.7M', color: 'primary' },
+                { label: 'Dining', val: '25%', raw: '31.1M', color: 'secondary' },
+                { label: 'Events', val: '15%', raw: '18.6M', color: 'blue-500' }
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-4 bg-slate-50 dark:bg-slate-800/30 p-3 rounded-2xl border border-transparent hover:border-slate-100 dark:hover:border-slate-800 transition-all cursor-default w-full md:min-w-[180px]">
+                  <div className={`w-2.5 h-10 rounded-full bg-${item.color === 'primary' ? 'primary' : item.color === 'secondary' ? 'secondary' : item.color}`}></div>
+                  <div>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{item.label}</p>
+                    <p className="font-black text-slate-800 dark:text-white text-sm">{item.val} <span className="text-[10px] opacity-40 ml-1">({item.raw})</span></p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Detailed Records Table */}
+      <section className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden flex-1 mb-8">
+        <div className="p-8 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-slate-50/50 dark:bg-slate-800/20">
+          <div>
+            <h3 className="font-black text-lg tracking-tight text-slate-800 dark:text-white uppercase italic">Transactional Data</h3>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Detailed room revenue logs</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="relative group">
+              <span className="material-icons-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg group-focus-within:text-primary transition-colors">search</span>
+              <input className="pl-12 pr-6 py-3 text-xs bg-white dark:bg-slate-800 border-none rounded-2xl focus:ring-1 focus:ring-primary w-full md:w-72 shadow-inner font-bold uppercase tracking-widest placeholder:text-slate-300" placeholder="Search records..." type="text" />
+            </div>
+            <button className="bg-white dark:bg-slate-800 p-3 rounded-2xl text-slate-400 hover:text-primary transition-all border border-slate-100 dark:border-slate-700 shadow-sm">
+              <span className="material-icons-outlined text-[20px]">sort</span>
+            </button>
+          </div>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="bg-slate-50/30 dark:bg-slate-800/10">
+                {['Ref ID', 'Guest', 'Nationality', 'Room Type', 'Period', 'Revenue', 'Status'].map(h => (
+                  <th key={h} className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              {records.map((record: any) => (
+                <tr key={record.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors group cursor-pointer">
+                  <td className="px-8 py-6">
+                    <span className="text-[10px] font-black font-mono text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">
+                      #{record.id.substring(record.id.length - 6).toUpperCase()}
+                    </span>
+                  </td>
+                  <td className="px-8 py-6">
+                    <p className="font-black text-slate-800 dark:text-white group-hover:text-primary transition-colors text-sm">{record.guestName}</p>
+                  </td>
+                  <td className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">{record.nationality}</td>
+                  <td className="px-8 py-6">
+                    <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-full text-[10px] font-black uppercase tracking-widest border border-slate-200/50 dark:border-slate-700/50">{record.roomType}</span>
+                  </td>
+                  <td className="px-8 py-6 text-xs font-bold text-slate-500 uppercase">{record.dates}</td>
+                  <td className="px-8 py-6">
+                    <span className="font-black text-slate-800 dark:text-white text-sm">RWF {record.revenue.toLocaleString()}</span>
+                  </td>
+                  <td className="px-8 py-6">
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${record.status === 'COMPLETED' ? 'bg-secondary/10 text-secondary' :
+                      record.status === 'CONFIRMED' ? 'bg-blue-500/10 text-blue-500' :
+                        'bg-primary/10 text-primary'
+                      }`}>
+                      <span className={`w-1.5 h-1.5 rounded-full mr-2 ${record.status === 'COMPLETED' ? 'bg-secondary' :
+                        record.status === 'CONFIRMED' ? 'bg-blue-500' :
+                          'bg-primary animate-pulse'
+                        }`}></span>
+                      {record.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="p-6 bg-slate-50/50 dark:bg-slate-800/20 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Showing {records.length} of {records.length} entries</p>
+          <div className="flex gap-2">
+            <button className="size-10 flex items-center justify-center rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-primary transition-all disabled:opacity-30 shadow-sm" disabled>
+              <span className="material-icons-outlined text-[18px]">chevron_left</span>
+            </button>
+            {[1, 2, 3].map(p => (
+              <button key={p} className={`size-10 rounded-xl text-[10px] font-black transition-all shadow-sm ${p === 1 ? 'bg-primary text-white shadow-primary/30' : 'bg-white dark:bg-slate-800 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'}`}>
+                {p}
+              </button>
+            ))}
+            <button className="size-10 flex items-center justify-center rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-primary transition-all shadow-sm">
+              <span className="material-icons-outlined text-[18px]">chevron_right</span>
+            </button>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

@@ -1,141 +1,124 @@
 'use client';
+import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 
 export default function InvoicePreview() {
   return (
-    <div className="flex-1 min-h-screen relative">
-      <main className="ml-64 min-h-screen p-8">
-{/* ToolBar Component */}
-<div className="no-print sticky top-0 z-50 w-full border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md">
-<div className="max-w-[960px] mx-auto flex justify-between gap-2 px-4 py-3 items-center">
-<div className="flex gap-2">
-<button className="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors flex items-center gap-2">
-<span className="material-symbols-outlined">arrow_back</span>
-<span className="text-sm font-semibold">Back to POS</span>
-</button>
-</div>
-<div className="flex items-center gap-3">
-<span className="hidden md:inline-flex items-center gap-1 text-xs font-medium px-2.5 py-0.5 rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-500">
-<span className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span>
-                    Pending Signature
-                </span>
-<button className="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-primary text-background-dark dark:text-background-dark gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-4 hover:opacity-90 transition-opacity" onClick={() => { window.print() }}>
-<span className="material-symbols-outlined">picture_as_pdf</span>
-<span className="truncate">Export to PDF</span>
-</button>
-</div>
-</div>
-</div>
-<div className="layout-container flex h-full grow flex-col items-center py-8 px-4">
-<div className="layout-content-container flex flex-col w-full max-w-[960px] bg-white dark:bg-slate-900 shadow-xl print-shadow-none rounded-xl overflow-hidden border border-slate-100 dark:border-slate-800">
-{/* Header Section with Brand */}
-<div className="flex flex-col items-center justify-center pt-10 pb-6 px-8 border-b border-slate-50 dark:border-slate-800">
-<div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-<span className="material-symbols-outlined text-primary text-4xl">restaurant</span>
-</div>
-<h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white uppercase">Casa Hotel</h1>
-<p className="text-sm text-slate-500 dark:text-slate-400">Luxury Restaurant &amp; Lounge</p>
-<p className="text-[10px] text-slate-400 mt-1 uppercase tracking-[0.2em]">Billing Department</p>
-</div>
-{/* HeadlineText Component */}
-<div className="bg-slate-50 dark:bg-slate-800/50 py-4">
-<h2 className="text-slate-900 dark:text-white tracking-tight text-xl md:text-2xl font-bold leading-tight px-4 text-center">Pre-final Restaurant Invoice</h2>
-<p className="text-center text-xs text-slate-500 mt-1">Invoice #: CH-RES-99421 • Oct 24, 2023 08:45 PM</p>
-</div>
-{/* DescriptionList Component (Guest Info) */}
-<div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-<div className="flex flex-col gap-1 border-t border-solid border-slate-200 dark:border-slate-700 pt-4">
-<p className="text-primary text-xs font-bold uppercase tracking-wider leading-normal">Guest Name</p>
-<p className="text-slate-900 dark:text-white text-lg font-semibold leading-normal">John Doe</p>
-</div>
-<div className="flex flex-col gap-1 border-t border-solid border-slate-200 dark:border-slate-700 pt-4">
-<p className="text-primary text-xs font-bold uppercase tracking-wider leading-normal">Room Number</p>
-<p className="text-slate-900 dark:text-white text-lg font-semibold leading-normal">Suite 402</p>
-</div>
-</div>
-{/* Table Component (Bill Items) */}
-<div className="px-6 py-4">
-<div className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700">
-<table className="w-full text-left border-collapse">
-<thead>
-<tr className="bg-slate-50 dark:bg-slate-800">
-<th className="px-4 py-3 text-slate-900 dark:text-white text-xs font-bold uppercase tracking-wider">Item Name</th>
-<th className="px-4 py-3 text-slate-900 dark:text-white text-xs font-bold uppercase tracking-wider text-center">Qty</th>
-<th className="px-4 py-3 text-slate-900 dark:text-white text-xs font-bold uppercase tracking-wider text-right">Unit Price</th>
-<th className="px-4 py-3 text-slate-900 dark:text-white text-xs font-bold uppercase tracking-wider text-right">Total</th>
-</tr>
-</thead>
-<tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-<tr>
-<td className="px-4 py-4 text-slate-800 dark:text-slate-200 text-sm font-medium">Draft Beer (Premium)</td>
-<td className="px-4 py-4 text-slate-500 dark:text-slate-400 text-sm text-center">2</td>
-<td className="px-4 py-4 text-slate-500 dark:text-slate-400 text-sm text-right">$5.00</td>
-<td className="px-4 py-4 text-slate-900 dark:text-white text-sm font-semibold text-right">$10.00</td>
-</tr>
-<tr>
-<td className="px-4 py-4 text-slate-800 dark:text-slate-200 text-sm font-medium">Grilled Tilapia w/ Lemon Butter</td>
-<td className="px-4 py-4 text-slate-500 dark:text-slate-400 text-sm text-center">1</td>
-<td className="px-4 py-4 text-slate-500 dark:text-slate-400 text-sm text-right">$25.00</td>
-<td className="px-4 py-4 text-slate-900 dark:text-white text-sm font-semibold text-right">$25.00</td>
-</tr>
-<tr>
-<td className="px-4 py-4 text-slate-800 dark:text-slate-200 text-sm font-medium">Sparkling Water 500ml</td>
-<td className="px-4 py-4 text-slate-500 dark:text-slate-400 text-sm text-center">1</td>
-<td className="px-4 py-4 text-slate-500 dark:text-slate-400 text-sm text-right">$4.50</td>
-<td className="px-4 py-4 text-slate-900 dark:text-white text-sm font-semibold text-right">$4.50</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-{/* Totals Section */}
-<div className="px-6 py-4 flex flex-col items-end gap-2 border-b border-slate-100 dark:border-slate-800">
-<div className="flex justify-between w-full max-w-[240px]">
-<span className="text-slate-500 dark:text-slate-400 text-sm">Subtotal</span>
-<span className="text-slate-900 dark:text-white text-sm font-medium">$39.50</span>
-</div>
-<div className="flex justify-between w-full max-w-[240px]">
-<span className="text-slate-500 dark:text-slate-400 text-sm">Service Charge (10%)</span>
-<span className="text-slate-900 dark:text-white text-sm font-medium">$3.95</span>
-</div>
-<div className="flex justify-between w-full max-w-[240px] pt-2 mt-2 border-t border-slate-100 dark:border-slate-800">
-<span className="text-slate-900 dark:text-white text-lg font-bold">Grand Total</span>
-<span className="text-primary text-xl font-extrabold">$43.45</span>
-</div>
-</div>
-{/* Signature Area */}
-<div className="p-8 mt-4">
-<p className="text-center text-slate-500 dark:text-slate-400 text-xs mb-12 italic leading-relaxed">
-                    "I, the undersigned, agree that the total amount above will be charged to my room account and I am responsible for payment in full upon checkout."
-                </p>
-<div className="flex flex-col items-center justify-center">
-<div className="w-full max-w-[400px] border-b-2 border-slate-300 dark:border-slate-600 mb-2 h-16">
-{/* Space for physical signature */}
-</div>
-<span className="text-primary text-xs font-bold uppercase tracking-[0.2em]">Guest Signature</span>
-<span className="text-slate-400 text-[10px] mt-1">Date: ____________________</span>
-</div>
-</div>
-{/* Footer Logo/Pattern */}
-<div className="h-2 bg-primary w-full"></div>
-</div>
-{/* Extra Info Footer */}
-<div className="mt-8 text-center text-slate-400 dark:text-slate-500 text-xs max-w-[960px] flex flex-col gap-2">
-<p>Generated by Casa Hotel Management System v4.2.0</p>
-<div className="flex justify-center gap-4">
-<span className="flex items-center gap-1">
-<span className="material-symbols-outlined text-[14px]">call</span>
-                    +1 (555) CASA-HOTEL
-                </span>
-<span className="flex items-center gap-1">
-<span className="material-symbols-outlined text-[14px]">language</span>
-                    www.casahotel.example
-                </span>
-</div>
-</div>
-</div>
-</main>
+    <div className="flex-1 min-h-screen bg-white dark:bg-slate-950 p-4 lg:p-8">
+      {/* ToolBar Component */}
+      <div className="no-print sticky top-0 z-50 w-full border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md mb-8">
+        <div className="w-full flex justify-between gap-2 px-4 py-3 items-center">
+          <div className="flex gap-2">
+            <Link href="/pos/restaurant" className="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors flex items-center gap-2">
+              <span className="material-symbols-outlined">arrow_back</span>
+              <span className="text-sm font-black uppercase tracking-widest">Back to POS</span>
+            </Link>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="hidden md:inline-flex items-center gap-1 text-[10px] font-black px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-500 uppercase tracking-widest">
+              <span className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span>
+              Pending Signature
+            </span>
+            <button className="flex cursor-pointer items-center justify-center rounded-xl h-10 bg-primary text-white gap-2 text-[10px] font-black uppercase tracking-widest px-6 hover:opacity-90 transition-opacity shadow-lg shadow-primary/30" onClick={() => { window.print() }}>
+              <span className="material-symbols-outlined text-lg">picture_as_pdf</span>
+              Export PDF
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col items-center">
+        <div className="w-full max-w-[800px] bg-white dark:bg-slate-900 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] rounded-[2.5rem] overflow-hidden border border-slate-100 dark:border-slate-800">
+          <div className="flex flex-col items-center justify-center pt-12 pb-8 px-8 border-b border-slate-50 dark:border-slate-800">
+            <div className="w-20 h-20 bg-primary/10 rounded-[2rem] flex items-center justify-center mb-6 shadow-inner">
+              <span className="material-symbols-outlined text-primary text-4xl">restaurant</span>
+            </div>
+            <h1 className="text-3xl font-black tracking-tighter text-slate-900 dark:text-white uppercase italic">Casa Hotel</h1>
+            <p className="text-[10px] font-black text-slate-400 mt-2 uppercase tracking-[0.3em]">Billing Department</p>
+          </div>
+
+          <div className="bg-slate-50/50 dark:bg-slate-800/50 py-6 border-b border-slate-100 dark:border-slate-800">
+            <h2 className="text-slate-900 dark:text-white tracking-widest text-xs font-black uppercase text-center">Pre-final Restaurant Invoice</h2>
+            <p className="text-center text-[10px] text-slate-500 mt-2 font-bold">INV #: CH-RES-99421 • OCT 24, 2024</p>
+          </div>
+
+          <div className="p-10 grid grid-cols-2 gap-10">
+            <div className="space-y-1">
+              <p className="text-primary text-[10px] font-black uppercase tracking-widest">Guest Name</p>
+              <p className="text-slate-800 dark:text-white text-xl font-black">John Doe</p>
+            </div>
+            <div className="space-y-1 text-right">
+              <p className="text-primary text-[10px] font-black uppercase tracking-widest">Room Number</p>
+              <p className="text-slate-800 dark:text-white text-xl font-black">Suite 402</p>
+            </div>
+          </div>
+
+          <div className="px-10 pb-10">
+            <div className="overflow-hidden rounded-3xl border border-slate-100 dark:border-slate-800 border-separate">
+              <table className="w-full text-left">
+                <thead className="bg-slate-50/50 dark:bg-slate-800/50 uppercase">
+                  <tr className="border-b border-slate-100 dark:border-slate-800">
+                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 tracking-widest">Item Description</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 tracking-widest text-center">Qty</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 tracking-widest text-right">Amount</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-sm font-bold">
+                  <tr>
+                    <td className="px-6 py-5 text-slate-800 dark:text-slate-200">Draft Beer (Premium)</td>
+                    <td className="px-6 py-5 text-slate-500 dark:text-slate-400 text-center">2</td>
+                    <td className="px-6 py-5 text-slate-800 dark:text-white text-right">RWF 12,000</td>
+                  </tr>
+                  <tr>
+                    <td className="px-6 py-5 text-slate-800 dark:text-slate-200">Grilled Tilapia w/ Lemon</td>
+                    <td className="px-6 py-5 text-slate-500 dark:text-slate-400 text-center">1</td>
+                    <td className="px-6 py-5 text-slate-800 dark:text-white text-right">RWF 25,000</td>
+                  </tr>
+                  <tr>
+                    <td className="px-6 py-5 text-slate-800 dark:text-slate-200">Sparkling Water 500ml</td>
+                    <td className="px-6 py-5 text-slate-500 dark:text-slate-400 text-center">1</td>
+                    <td className="px-6 py-5 text-slate-800 dark:text-white text-right">RWF 4,500</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div className="mt-10 flex flex-col items-end gap-3 px-6">
+              <div className="flex justify-between w-full max-w-[280px] text-xs font-bold text-slate-500">
+                <span>Subtotal</span>
+                <span>RWF 41,500</span>
+              </div>
+              <div className="flex justify-between w-full max-w-[280px] text-xs font-bold text-slate-500">
+                <span>Service Charge (10%)</span>
+                <span>RWF 4,150</span>
+              </div>
+              <div className="flex justify-between w-full max-w-[280px] pt-4 mt-2 border-t border-slate-100 dark:border-slate-800">
+                <span className="text-slate-900 dark:text-white text-lg font-black uppercase italic tracking-tighter">Grand Total</span>
+                <span className="text-primary text-2xl font-black">RWF 45,650</span>
+              </div>
+            </div>
+
+            <div className="mt-16 pt-10 border-t border-dashed border-slate-200 dark:border-slate-700">
+              <p className="text-center text-slate-400 text-[10px] font-bold italic mb-16 uppercase tracking-wider">
+                I, the undersigned, agree that the total amount above will be charged to my room account.
+              </p>
+              <div className="flex flex-col items-center">
+                <div className="w-full max-w-[320px] border-b-2 border-slate-200 dark:border-slate-800 mb-4 h-12"></div>
+                <p className="text-primary text-[10px] font-black uppercase tracking-[0.3em]">Guest Signature</p>
+              </div>
+            </div>
+          </div>
+          <div className="h-3 bg-primary w-full"></div>
+        </div>
+
+        <div className="mt-12 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest flex flex-col gap-3">
+          <p>© 2024 Casa Hotel Management System v3.0</p>
+          <div className="flex justify-center gap-6">
+            <span className="flex items-center gap-2"><span className="material-symbols-outlined text-sm">call</span> +250 788 000 000</span>
+            <span className="flex items-center gap-2"><span className="material-symbols-outlined text-sm">language</span> casahotel.rw</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

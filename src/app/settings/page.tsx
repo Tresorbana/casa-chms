@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import TopBar from '@/components/TopBar';
 
 export default function Settings1() {
     const [user, setUser] = useState<any>(null);
@@ -41,59 +42,20 @@ export default function Settings1() {
         <div className="flex-1 min-h-screen relative">
 
 
-            <nav className="sticky top-0 z-40 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-3 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <img alt="Casa Hotel Logo" className="h-10 object-contain" src="logo.png" />
-                    <div className="h-6 w-px bg-slate-200 dark:bg-slate-700"></div>
-                    <h1 className="text-lg font-semibold tracking-tight">System Settings &amp; Security</h1>
-                </div>
-                <div>
+            <TopBar
+                title="Security & Control Center"
+                description="Manage staff access, financial configurations, and monitor system activity logs."
+                actions={
                     <button className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-opacity-90 transition-all shadow-sm hover:shadow-md" onClick={() => { /* openAddUserModal() */ }}>
                         <span className="material-icons-outlined text-sm">person_add</span>
                         Create User
                     </button>
-                </div>
-            </nav>
-            <div className="flex items-center gap-6">
-                <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-full">
-                    <span className="material-symbols-outlined text-secondary text-sm">verified_user</span>
-                    <span className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">System Secure</span>
-                </div>
-                <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors" onClick={() => { document.documentElement.classList.toggle('dark') }}>
-                    <span className="material-symbols-outlined dark:hidden">dark_mode</span>
-                    <span className="material-symbols-outlined hidden dark:block">light_mode</span>
-                </button>
-                <div className="flex items-center gap-3 border-l border-slate-200 dark:border-slate-700 pl-6">
-                    <div className="text-right hidden sm:block">
-                        <p className="text-sm font-semibold">{user?.name || 'Loading...'}</p>
-                        <p className="text-xs text-slate-500">{user?.role || ''}</p>
-                    </div>
-                    <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold cursor-pointer" onClick={handleLogout} title="Click to logout">
-                        {user ? getUserInitials(user.name) : '...'}
-                    </div>
-                </div>
-            </div>
-            <main className="max-w-7xl mx-auto p-6 space-y-8 ml-64 min-h-screen">
-                <div className="flex gap-2 mb-6 overflow-x-auto pb-2 border-b border-slate-100 dark:border-slate-800 p-6"><span className="text-xs font-semibold text-slate-400 uppercase tracking-wider self-center mr-2">Views:</span><a className="px-3 py-1.5 text-xs font-medium rounded-lg transition-all whitespace-nowrap bg-primary text-white shadow-sm" href="/settings">View 1</a><a className="px-3 py-1.5 text-xs font-medium rounded-lg transition-all whitespace-nowrap bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700" href="/settings/view-2">View 2</a><a className="px-3 py-1.5 text-xs font-medium rounded-lg transition-all whitespace-nowrap bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700" href="/settings/view-3">View 3</a></div><header className="flex justify-between items-center mb-10 px-8 pt-8">
+                }
+            />
+            <main className="p-4 lg:p-6 space-y-8 min-h-screen">
+                <div className="mt-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                        <h2 className="text-3xl font-bold text-slate-800 dark:text-white">Security &amp; Control Center</h2>
-                        <p className="text-slate-500 mt-1">Manage your settings here.</p>
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <div className="relative">
-                            <span className="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
-                            <input className="pl-10 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-primary focus:border-primary text-sm w-64 transition-all" placeholder="Search..." type="text" />
-                        </div>
-                        <button className="p-2 text-slate-500 hover:bg-white dark:hover:bg-slate-800 rounded-lg relative transition-colors">
-                            <span className="material-icons-outlined">notifications</span>
-                            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-background-light dark:border-background-dark"></span>
-                        </button>
-                    </div>
-                </header>
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div>
-                        <h2 className="text-2xl font-bold">Security &amp; Control Center</h2>
-                        <p className="text-slate-500 dark:text-slate-400">Manage staff access, financial configurations, and monitor system activity logs.</p>
+                        <p className="text-slate-500 dark:text-slate-400">Manage staff access, financial configurations, and monitor activity.</p>
                     </div>
                     <div className="flex gap-3">
                         <button className="flex items-center gap-2 px-4 py-2 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-all">
@@ -169,14 +131,14 @@ export default function Settings1() {
                                 <div className="space-y-2">
                                     <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">VAT Rate (%)</label>
                                     <div className="relative">
-                                        <input className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg px-4 py-2 focus:ring-primary focus:border-primary" type="number" value="15.00" />
+                                        <input className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg px-4 py-2 focus:ring-primary focus:border-primary" type="number" value="15.00" readOnly />
                                         <span className="absolute right-4 top-2.5 text-slate-400">%</span>
                                     </div>
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Service Charge (%)</label>
                                     <div className="relative">
-                                        <input className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg px-4 py-2 focus:ring-primary focus:border-primary" type="number" value="5.00" />
+                                        <input className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg px-4 py-2 focus:ring-primary focus:border-primary" type="number" value="5.00" readOnly />
                                         <span className="absolute right-4 top-2.5 text-slate-400">%</span>
                                     </div>
                                 </div>
@@ -280,19 +242,19 @@ export default function Settings1() {
                 </section>
             </main>
             <footer className="mt-12 border-t border-slate-200 dark:border-slate-800 px-6 py-8">
-                <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-slate-500 text-sm">
+                <div className="w-full flex flex-col md:flex-row justify-between items-center gap-4 text-slate-500 text-sm">
                     <div className="flex items-center gap-2">
                         <img alt="Casa Hotel Logo Small" className="h-6 opacity-60 grayscale h-10 object-contain" src="logo.png" />
-                        <p>© 2023 Casa Hotel Management System. All rights reserved.</p>
+                        <p>© 2024 Casa Hotel Management System. All rights reserved.</p>
                     </div>
                     <div className="flex gap-6">
                         <a className="hover:text-primary transition-colors" href="#">Privacy Policy</a>
-                        <a className="hover:text-primary transition-colors" href="#">Help Documentation</a>
+                        <a className="hover:text-primary transition-colors" href="#">Terms of Service</a>
                         <a className="hover:text-primary transition-colors" href="#">Support Portal</a>
                     </div>
                 </div>
             </footer>
 
-        </div>
+        </div >
     );
 }
