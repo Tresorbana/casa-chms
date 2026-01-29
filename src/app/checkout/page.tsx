@@ -1,204 +1,191 @@
 'use client';
+import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useSearchParams, useRouter } from 'next/navigation';
+import useSWR, { mutate } from 'swr';
+import { fetcher } from '@/lib/fetcher';
 import TopBar from '@/components/TopBar';
 
-export default function Checkout() {
+function CheckoutContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const roomId = searchParams.get('roomId');
+  const { data: rooms, isLoading } = useSWR('/api/rooms', fetcher);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const safeRooms = Array.isArray(rooms) ? rooms : [];
+  const room = safeRooms.find((r: any) => r.id === roomId || r.number === roomId);
+  const booking = room?.bookings?.[0];
+  const guest = booking?.guest;
+
+  const handleFinalizeCheckout = async () => {
+    if (!room) return;
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/rooms', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: room.id, status: 'CLEANING' }),
+      });
+
+      if (res.ok) {
+        mutate('/api/rooms');
+        mutate('/api/dashboard');
+        router.push('/');
+      } else {
+        alert('Failed to finalize checkout. Please try again.');
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (isLoading) return <div className="p-8 text-center text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Verifying Guest Folio...</div>;
+
+  if (!room) {
+    return (
+      <div className="flex-1 min-h-screen p-8 text-center flex flex-col items-center justify-center gap-4">
+        <div className="w-20 h-20 bg-red-500/10 text-red-500 rounded-[2.5rem] flex items-center justify-center">
+          <span className="material-icons-outlined text-4xl">warning</span>
+        </div>
+        <h1 className="text-2xl font-black">No Active Checkout Found</h1>
+        <p className="text-slate-500">Please select a room from the dashboard to proceed with checkout.</p>
+        <Link href="/" className="bg-primary text-white px-8 py-3 rounded-xl font-bold">Back to Dashboard</Link>
+      </div>
+    );
+  }
+
   return (
     <div className="flex-1 min-h-screen relative">
-
-
       <main className="flex-1 overflow-y-auto p-4 md:p-8 min-h-screen">
         <TopBar
           title="Guest Checkout"
-          description="Finalize billing and payment for departing guests."
+          description={`Finalize billing and payment for ${guest?.name || 'Walk-in Guest'} - Room ${room.number}`}
         />
-        <div className="invoice-container w-full">
+        <div className="invoice-container w-full max-w-5xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 no-print">
             <div>
-              <h1 className="text-2xl font-bold">Guest Checkout</h1>
-              <p className="text-slate-500 dark:text-slate-400">Finalize billing for <span className="font-semibold text-slate-800 dark:text-white">Room 304 - James Anderson</span></p>
+              <h1 className="text-2xl font-black italic tracking-tighter uppercase uppercase">Folio Settlement</h1>
+              <p className="text-slate-500 dark:text-slate-400">Finalizing Room <span className="font-black text-olive-leaf">{room.number}</span></p>
             </div>
             <div className="flex gap-3">
-              <button className="flex items-center gap-2 px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 font-medium" onClick={() => { window.print() }}>
-                <span className="material-icons-outlined text-xl">print</span> Print PDF
-              </button>
-              <button className="flex items-center gap-2 px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 font-medium">
-                <span className="material-icons-outlined text-xl">email</span> Email Invoice
+              <button className="flex items-center gap-2 px-6 py-2 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 font-black text-[10px] uppercase tracking-widest transition-all" onClick={() => { window.print() }}>
+                <span className="material-icons-outlined text-lg">print</span> Print PDF
               </button>
             </div>
           </div>
-          <div className="bg-white dark:bg-slate-900 shadow-xl border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
-            <div className="p-8 border-b border-slate-200 dark:border-slate-700 flex flex-col md:flex-row justify-between items-start gap-8">
+          <div className="bg-white dark:bg-slate-900 shadow-2xl border border-slate-100 dark:border-slate-800 rounded-[2.5rem] overflow-hidden">
+            <div className="p-10 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-start gap-8 bg-cornsilk/30 dark:bg-slate-800/20">
               <div>
-                <img alt="Casa Hotel" className="h-20 w-auto mb-4 h-10 object-contain" src="logo.png" />
-                <h2 className="text-xl font-bold text-secondary">CASA HOTEL</h2>
-                <p className="text-sm text-slate-500">123 Horizon Blvd, Seaside City<br />T: +1 234 567 890 | E: billing@casahotel.com</p>
+                <img alt="Casa Hotel" className="h-12 w-auto mb-6 object-contain grayscale" src="logo.png" />
+                <h2 className="text-2xl font-black text-slate-800 dark:text-white tracking-tighter italic uppercase">Casa Hotel</h2>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Hospitality Excellence</p>
               </div>
               <div className="text-right">
-                <h3 className="text-3xl font-light text-slate-400 mb-2 uppercase tracking-widest">Invoice</h3>
-                <div className="space-y-1 text-sm">
-                  <p><span className="font-medium">Invoice No:</span> #CH-2023-8842</p>
-                  <p><span className="font-medium">Date:</span> Oct 24, 2023</p>
-                  <p><span className="font-medium">Due Date:</span> Upon Checkout</p>
+                <h3 className="text-4xl font-black text-slate-200 dark:text-slate-800 mb-4 uppercase tracking-tighter italic">Invoice</h3>
+                <div className="space-y-1 text-[10px] font-black uppercase tracking-widest text-slate-500">
+                  <p>Folio: #CH-{new Date().getFullYear()}-{room.number}</p>
+                  <p>Date: {new Date().toLocaleDateString()}</p>
+                  <p className="text-primary">Status: PENDING SETTLEMENT</p>
                 </div>
               </div>
             </div>
-            <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-8 bg-slate-50/50 dark:bg-slate-800/30 border-b border-slate-200 dark:border-slate-700">
-              <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Guest Details</p>
-                <p className="font-semibold text-lg">James Anderson</p>
-                <p className="text-slate-600 dark:text-slate-400">james.anderson@email.com</p>
-                <p className="text-slate-600 dark:text-slate-400">+1 (555) 012-3456</p>
+            <div className="p-10 grid grid-cols-1 md:grid-cols-2 gap-10">
+              <div className="space-y-4">
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Guest Details</p>
+                  <p className="font-black text-xl text-slate-800 dark:text-white uppercase italic">{guest?.name || 'Walk-in Guest'}</p>
+                  <p className="text-sm font-bold text-slate-500 mt-1">{guest?.email || 'No email provided'}</p>
+                </div>
+                <div className="pt-4 flex gap-8">
+                  <div>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Room Type</p>
+                    <p className="font-black text-sm text-primary uppercase">{room.type}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Rate</p>
+                    <p className="font-black text-sm text-slate-800 dark:text-white">RWF {room.price?.toLocaleString()}/night</p>
+                  </div>
+                </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Check-in</p>
-                  <p className="font-medium">Oct 20, 2023</p>
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Check-out</p>
-                  <p className="font-medium">Oct 24, 2023</p>
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Room Type</p>
-                  <p className="font-medium text-primary">Deluxe Suite - 304</p>
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Duration</p>
-                  <p className="font-medium">4 Nights</p>
+              <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800">
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Arrival</p>
+                    <p className="font-black text-sm">{booking ? new Date(booking.checkIn).toLocaleDateString() : 'Today'}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Departure</p>
+                    <p className="font-black text-sm">{new Date().toLocaleDateString()}</p>
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="p-0 overflow-x-auto">
-              <table className="w-full text-left border-collapse">
+
+            <div className="p-0 overflow-x-auto px-10">
+              <table className="w-full text-left border-separate border-spacing-y-2">
                 <thead>
-                  <tr className="bg-slate-50 dark:bg-slate-800 text-slate-500 text-xs font-bold uppercase tracking-wider">
-                    <th className="px-8 py-4">Description</th>
-                    <th className="px-4 py-4 text-center">Qty/Days</th>
-                    <th className="px-4 py-4 text-right">Price</th>
-                    <th className="px-4 py-4 text-right">VAT (12%)</th>
-                    <th className="px-8 py-4 text-right">Amount</th>
+                  <tr className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">
+                    <th className="px-4 py-4">Description</th>
+                    <th className="px-4 py-4 text-center">Unit</th>
+                    <th className="px-4 py-4 text-right">Amount</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
-                  <tr>
-                    <td className="px-8 py-4">
-                      <div className="font-semibold">Room Stay (Oct 20 - Oct 24)</div>
-                      <div className="text-xs text-slate-500 italic">Standard Nightly Rate</div>
+                <tbody className="text-sm font-bold">
+                  <tr className="bg-slate-50 dark:bg-slate-800/30 rounded-xl">
+                    <td className="px-6 py-5 first:rounded-l-2xl">
+                      <div className="font-black text-slate-800 dark:text-white uppercase italic">Room Accommodation</div>
+                      <div className="text-[10px] text-slate-400 uppercase font-black mt-1">Stays at RWF {room.price?.toLocaleString()}</div>
                     </td>
-                    <td className="px-4 py-4 text-center">4</td>
-                    <td className="px-4 py-4 text-right">RWF 310,000</td>
-                    <td className="px-4 py-4 text-right">RWF 148,000</td>
-                    <td className="px-8 py-4 text-right font-medium">RWF 1,395,000</td>
-                  </tr>
-                  <tr>
-                    <td className="px-8 py-4">
-                      <div className="font-semibold text-secondary flex items-center gap-1">
-                        <span className="material-icons-outlined text-base">restaurant</span>
-                        Azure Bar &amp; Grill
-                      </div>
-                      <div className="text-xs text-slate-500">Dinner Service (Bill #4421)</div>
-                    </td>
-                    <td className="px-4 py-4 text-center">1</td>
-                    <td className="px-4 py-4 text-right">RWF 105,000</td>
-                    <td className="px-4 py-4 text-right">RWF 15,000</td>
-                    <td className="px-8 py-4 text-right font-medium">RWF 118,000</td>
-                  </tr>
-                  <tr>
-                    <td className="px-8 py-4">
-                      <div className="font-semibold text-secondary flex items-center gap-1">
-                        <span className="material-icons-outlined text-base">local_bar</span>
-                        Sky Lounge
-                      </div>
-                      <div className="text-xs text-slate-500">Drinks &amp; Snacks (Bill #4450)</div>
-                    </td>
-                    <td className="px-4 py-4 text-center">1</td>
-                    <td className="px-4 py-4 text-right">RWF 55,000</td>
-                    <td className="px-4 py-4 text-right">RWF 8,000</td>
-                    <td className="px-8 py-4 text-right font-medium">RWF 62,000</td>
-                  </tr>
-                  <tr>
-                    <td className="px-8 py-4">
-                      <div className="font-semibold">Laundry Services</div>
-                      <div className="text-xs text-slate-500 italic">Express Dry Cleaning - 5 Items</div>
-                    </td>
-                    <td className="px-4 py-4 text-center">1</td>
-                    <td className="px-4 py-4 text-right">RWF 42,000</td>
-                    <td className="px-4 py-4 text-right">RWF 12,000</td>
-                    <td className="px-8 py-4 text-right font-medium">RWF 48,000</td>
-                  </tr>
-                  <tr>
-                    <td className="px-8 py-4">
-                      <div className="font-semibold">Wellness &amp; Spa</div>
-                      <div className="text-xs text-slate-500 italic">60m Deep Tissue Massage</div>
-                    </td>
-                    <td className="px-4 py-4 text-center">1</td>
-                    <td className="px-4 py-4 text-right">RWF 135,000</td>
-                    <td className="px-4 py-4 text-right">RWF 21,000</td>
-                    <td className="px-8 py-4 text-right font-medium">RWF 145,000</td>
+                    <td className="px-4 py-5 text-center text-slate-500">1</td>
+                    <td className="px-6 py-5 text-right font-black text-slate-800 dark:text-white last:rounded-r-2xl">RWF {room.price?.toLocaleString()}</td>
                   </tr>
                 </tbody>
               </table>
             </div>
-            <div className="p-8 bg-slate-50 dark:bg-slate-800/50 flex flex-col md:flex-row justify-between items-start gap-8">
-              <div className="w-full md:w-1/2">
-                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 no-print">Apply Discount Code or Manual Reduction</label>
-                <div className="flex gap-2 no-print">
-                  <input className="flex-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-sm px-4 py-2 focus:ring-primary focus:border-primary" placeholder="e.g. EARLYBIRD10" type="text" />
-                  <button className="bg-slate-800 dark:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-slate-700">Apply</button>
+
+            <div className="p-10 mt-10 bg-slate-50 dark:bg-slate-800/20 border-t border-slate-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-8">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-secondary/10 text-secondary rounded-2xl flex items-center justify-center">
+                  <span className="material-icons-outlined">verified_user</span>
                 </div>
-                <div className="mt-4 p-3 border border-dashed border-slate-300 dark:border-slate-600 rounded-lg text-xs text-slate-500">
-                  <span className="material-icons-outlined text-base align-middle mr-1">info</span>
-                  Managers can apply a maximum of 15% discount without additional authorization.
-                </div>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-relaxed">System-generated folio.<br />Authorized for immediate settlement.</p>
               </div>
               <div className="w-full md:w-1/3 space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-500">Subtotal:</span>
-                  <span className="font-medium">RWF 1,590,000</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-500">VAT (12%):</span>
-                  <span className="font-medium">RWF 195,000</span>
-                </div>
-                <div className="flex justify-between text-sm items-center">
-                  <span className="text-slate-500">Discount (10%):</span>
-                  <span className="font-medium text-red-500">-RWF 159,000</span>
-                </div>
-                <div className="pt-3 border-t border-slate-200 dark:border-slate-700 flex justify-between">
-                  <span className="text-lg font-bold">Grand Total:</span>
-                  <span className="text-2xl font-bold text-primary">RWF 1,625,000</span>
+                <div className="flex justify-between items-end border-t border-slate-200 dark:border-slate-700 pt-4 mt-4">
+                  <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Net Payable</span>
+                  <span className="text-2xl font-black text-primary italic tracking-tighter">RWF {room.price?.toLocaleString()}</span>
                 </div>
               </div>
             </div>
-            <div className="p-8 border-t border-slate-200 dark:border-slate-700 flex flex-col md:flex-row gap-4 items-center justify-between bg-white dark:bg-slate-900 no-print">
-              <div className="flex items-center gap-2">
-                <span className="material-icons-outlined text-secondary">verified_user</span>
-                <span className="text-sm text-slate-500">Secure Payment Guaranteed</span>
-              </div>
-              <div className="flex gap-3 w-full md:w-auto">
-                <button className="flex-1 md:flex-none px-8 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-bold rounded-lg transition-colors">
-                  Cancel
-                </button>
-                <button className="flex-1 md:flex-none flex items-center justify-center gap-2 px-10 py-3 bg-primary hover:bg-orange-500 text-white font-bold rounded-lg shadow-lg shadow-primary/20 transition-all transform hover:scale-[1.02]">
-                  <span className="material-icons-outlined">done_all</span>
-                  Finalize Check-out
-                </button>
-              </div>
-            </div>
-            <div className="hidden print:block p-8 pt-12 text-center text-xs text-slate-400">
-              <p className="mb-2">Thank you for staying at Casa Hotel! We hope to see you again soon.</p>
-              <p>© 2023 Casa Hotel. All Rights Reserved.</p>
+
+            <div className="p-10 border-t border-slate-100 dark:border-slate-800 flex gap-4 no-print bg-white dark:bg-slate-900">
+              <Link href="/" className="flex-1 px-8 py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-black text-[10px] uppercase tracking-widest rounded-2xl text-center hover:bg-slate-200 transition-all">
+                Postpone
+              </Link>
+              <button
+                onClick={handleFinalizeCheckout}
+                disabled={isSubmitting}
+                className="flex-[2] flex items-center justify-center gap-3 px-10 py-4 bg-olive-leaf text-white font-black text-[10px] uppercase tracking-widest rounded-2xl shadow-xl shadow-olive-leaf/30 hover:bg-black-forest transition-all transform hover:scale-[1.01] disabled:opacity-50"
+              >
+                <span className="material-icons-outlined text-base">task_alt</span>
+                {isSubmitting ? 'Processing Settlement...' : 'Finalize & Close Folio'}
+              </button>
             </div>
           </div>
         </div>
       </main>
-      <button className="fixed bottom-6 right-6 p-3 bg-white dark:bg-slate-800 shadow-xl rounded-full border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:scale-110 transition-all no-print" onClick={() => { document.documentElement.classList.toggle('dark') }}>
-        <span className="material-icons-outlined block dark:hidden">dark_mode</span>
-        <span className="material-icons-outlined hidden dark:block">light_mode</span>
-      </button>
-
     </div>
+  );
+}
+
+export default function Checkout() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center font-bold text-slate-400">Loading Checkout...</div>}>
+      <CheckoutContent />
+    </Suspense>
   );
 }

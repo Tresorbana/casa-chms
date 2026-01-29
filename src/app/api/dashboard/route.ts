@@ -37,6 +37,7 @@ export async function GET() {
     const rooms = await prisma.room.findMany({
       orderBy: { number: 'asc' },
       include: {
+        floor: true,
         bookings: {
           where: {
             status: 'CHECKED_IN'

@@ -7,6 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
@@ -17,36 +18,105 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
+model Floor {
+  id    String @id @default(cuid())
+  number Int   @unique
+  rooms Room[]
+}
+
 model Room {
   id       String    @id @default(cuid())
   number   String    @unique
   type     String
   price    Float
   status   String    @default("AVAILABLE")
-  floor    Int
+  floorId  String?
+  floor    Floor?    @relation(fields: [floorId], references: [id])
   bookings Booking[]
 }
 
 model Guest {
-  id       String    @id @default(cuid())
-  name     String
-  email    String?
-  phone    String?
-  bookings Booking[]
+  id          String   @id @default(cuid())
+  name        String
+  email       String?
+  phone       String?
+  nationality String?
+  bookings    Booking[]
 }
 
 model Booking {
-  id          String   @id @default(cuid())
-  roomId      String
-  guestId     String
-  checkIn     DateTime
-  checkOut    DateTime
-  status      String   @default("CONFIRMED")
-  totalAmount Float
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  guest       Guest    @relation(fields: [guestId], references: [id])
-  room        Room     @relation(fields: [roomId], references: [id])
+  id             String          @id @default(cuid())
+  roomId         String
+  guestId        String
+  checkIn        DateTime
+  checkOut       DateTime
+  status         String          @default("CONFIRMED")
+  source         String          @default("DIRECT") // DIRECT, ONLINE, CORPORATE, WALK_IN
+  cancellationReason String?
+  totalAmount    Float
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  guest          Guest           @relation(fields: [guestId], references: [id])
+  room           Room            @relation(fields: [roomId], references: [id])
+  serviceCharges ServiceCharge[]
+}
+
+model ConferenceRoom {
+  id          String              @id @default(cuid())
+  name        String
+  capacity    Int
+  pricePerHour Float
+  bookings    ConferenceBooking[]
+}
+
+model ConferenceBooking {
+  id               String         @id @default(cuid())
+  conferenceRoomId String
+  guestName        String
+  guestEmail       String?
+  startTime        DateTime
+  endTime          DateTime
+  totalAmount      Float
+  status           String         @default("CONFIRMED")
+  createdAt        DateTime       @default(now())
+  conferenceRoom   ConferenceRoom @relation(fields: [conferenceRoomId], references: [id])
+}
+
+model Service {
+  id      String          @id @default(cuid())
+  name    String          @unique // Laundry, Sauna, Massage
+  price   Float
+  unit    String // e.g., "per kg", "per hour"
+  charges ServiceCharge[]
+}
+
+model ServiceCharge {
+  id        String   @id @default(cuid())
+  bookingId String
+  serviceId String
+  quantity  Int      @default(1)
+  totalPrice Float
+  date      DateTime @default(now())
+  booking   Booking  @relation(fields: [bookingId], references: [id])
+  service   Service  @relation(fields: [serviceId], references: [id])
+}
+
+model WebInquiry {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String?
+  message   String
+  status    String   @default("NEW") // NEW, READ, REPLIED
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  message   String
+  type      String   @default("INFO") // INFO, WARNING, SUCCESS
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
 }
 
 model InventoryItem {
@@ -70,12 +140,20 @@ model MenuItem {
 }
 
 model Invoice {
-  id        String        @id @default(cuid())
-  guestName String
-  amount    Float
-  status    String        @default("UNPAID")
-  date      DateTime      @default(now())
-  items     InvoiceItem[]
+  id              String        @id @default(cuid())
+  guestName       String
+  amount          Float
+  status          String        @default("UNPAID")
+  type            String        @default("ROOM") // ROOM, RESTAURANT, SERVICE, MASTER
+  date            DateTime      @default(now())
+  items           InvoiceItem[]
+  
+  // Master Invoice Relations
+  masterInvoiceId String?
+  masterInvoice   Invoice?      @relation("MasterToSub", fields: [masterInvoiceId], references: [id])
+  subInvoices     Invoice[]     @relation("MasterToSub")
+  
+  guestSignature  String?
 }
 
 model InvoiceItem {

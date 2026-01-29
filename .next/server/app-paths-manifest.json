@@ -1,7 +1,24 @@
 {
-  "/api/dashboard/route": "app/api/dashboard/route.js",
+  "/api/notifications/unread-count/route": "app/api/notifications/unread-count/route.js",
+  "/api/notifications/route": "app/api/notifications/route.js",
   "/api/auth/me/route": "app/api/auth/me/route.js",
-  "/page": "app/page.js",
-  "/profile/page": "app/profile/page.js",
-  "/bookings/page": "app/bookings/page.js"
+  "/api/reports/route": "app/api/reports/route.js",
+  "/api/rooms/route": "app/api/rooms/route.js",
+  "/api/conference/bookings/route": "app/api/conference/bookings/route.js",
+  "/api/conference/route": "app/api/conference/route.js",
+  "/api/pos/menu/route": "app/api/pos/menu/route.js",
+  "/api/invoices/route": "app/api/invoices/route.js",
+  "/api/invoices/[id]/route": "app/api/invoices/[id]/route.js",
+  "/api/reports/detailed/route": "app/api/reports/detailed/route.js",
+  "/api/inquiries/route": "app/api/inquiries/route.js",
+  "/calendar/page": "app/calendar/page.js",
+  "/room-status/page": "app/room-status/page.js",
+  "/events/page": "app/events/page.js",
+  "/pos/restaurant/page": "app/pos/restaurant/page.js",
+  "/invoice/[id]/page": "app/invoice/[id]/page.js",
+  "/checkout/page": "app/checkout/page.js",
+  "/invoices/page": "app/invoices/page.js",
+  "/inquiries/page": "app/inquiries/page.js",
+  "/reports/page": "app/reports/page.js",
+  "/notifications/page": "app/notifications/page.js"
 }

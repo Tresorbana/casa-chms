@@ -21,40 +21,47 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { guestName, guestEmail, guestPhone, roomNumber, checkIn, checkOut, totalAmount } = body
+    const { guestName, guestEmail, guestPhone, roomNumber, checkIn, checkOut, totalAmount, nationality } = body
 
     // Find or create guest
     let guest = await prisma.guest.findFirst({
-        where: { email: guestEmail }
+      where: { email: guestEmail }
     })
 
     if (!guest) {
-        guest = await prisma.guest.create({
-            data: {
-                name: guestName,
-                email: guestEmail,
-                phone: guestPhone
-            }
-        })
+      guest = await prisma.guest.create({
+        data: {
+          name: guestName,
+          email: guestEmail,
+          phone: guestPhone,
+          nationality: nationality
+        }
+      })
+    } else if (nationality && !guest.nationality) {
+      // Update nationality if missing
+      guest = await prisma.guest.update({
+        where: { id: guest.id },
+        data: { nationality }
+      })
     }
 
     const room = await prisma.room.findUnique({
-        where: { number: roomNumber }
+      where: { number: roomNumber }
     })
 
     if (!room) {
-        return NextResponse.json({ error: 'Room not found' }, { status: 404 })
+      return NextResponse.json({ error: 'Room not found' }, { status: 404 })
     }
 
     const booking = await prisma.booking.create({
-        data: {
-            guestId: guest.id,
-            roomId: room.id,
-            checkIn: new Date(checkIn),
-            checkOut: new Date(checkOut),
-            totalAmount: parseFloat(totalAmount),
-            status: 'CONFIRMED'
-        }
+      data: {
+        guestId: guest.id,
+        roomId: room.id,
+        checkIn: new Date(checkIn),
+        checkOut: new Date(checkOut),
+        totalAmount: parseFloat(totalAmount),
+        status: 'CONFIRMED'
+      }
     })
 
     return NextResponse.json(booking)

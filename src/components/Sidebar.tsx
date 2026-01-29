@@ -101,6 +101,10 @@ export default function Sidebar() {
             <span className="material-icons-outlined">receipt_long</span>
             Checkout
           </Link>
+          <Link href="/invoices" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive('/invoices') ? activeClass : inactiveClass}`}>
+            <span className="material-icons-outlined">folder_shared</span>
+            Invoices
+          </Link>
           <div className="pt-4 pb-2">
             <p className="px-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Admin</p>
           </div>
@@ -109,13 +113,33 @@ export default function Sidebar() {
             Reports
           </Link>
 
-          <Link href="/cms/requests" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive('/cms/requests') ? activeClass : inactiveClass}`}>
+          <Link href="/inquiries" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive('/inquiries') ? activeClass : inactiveClass}`}>
             <span className="material-icons-outlined">inbox</span>
             Web Requests
           </Link>
-          <Link href="/settings" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive('/settings') ? activeClass : inactiveClass}`}>
-            <span className="material-icons-outlined">settings</span>
-            Settings
+          <Link href="/notifications" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive('/notifications') ? activeClass : inactiveClass}`}>
+            <span className="material-icons-outlined">notifications</span>
+            Notifications
+          </Link>
+
+          <div className="pt-4 pb-2">
+            <p className="px-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Configuration</p>
+          </div>
+          <Link href="/settings/rooms" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive('/settings/rooms') ? activeClass : inactiveClass}`}>
+            <span className="material-icons-outlined">meeting_room</span>
+            Rooms & Floors
+          </Link>
+          <Link href="/settings/conference" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive('/settings/conference') ? activeClass : inactiveClass}`}>
+            <span className="material-icons-outlined">groups</span>
+            Conference
+          </Link>
+          <Link href="/settings/services" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive('/settings/services') ? activeClass : inactiveClass}`}>
+            <span className="material-icons-outlined">spa</span>
+            Services
+          </Link>
+          <Link href="/settings/menu" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive('/settings/menu') ? activeClass : inactiveClass}`}>
+            <span className="material-icons-outlined">restaurant_menu</span>
+            Menu Items
           </Link>
         </nav>
         <div className="p-6 border-t border-slate-100 dark:border-slate-800">

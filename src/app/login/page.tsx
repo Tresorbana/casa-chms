@@ -40,45 +40,63 @@ export default function Login() {
   };
 
   return (
-    <div className="flex-1 min-h-screen relative">
+    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 relative overflow-hidden">
+      {/* Decorative Elements */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[120px] animate-pulse"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-secondary/10 rounded-full blur-[120px]"></div>
 
-      <div className="absolute top-4 right-4">
-        <button className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-slate-500 hover:text-primary bg-white/70 dark:bg-slate-900/70 backdrop-blur rounded-full border border-slate-200/60 dark:border-slate-800/60 shadow-sm" onClick={() => { document.documentElement.classList.toggle('dark') }}>
+      <div className="absolute top-8 right-8 z-50">
+        <button className="flex items-center gap-2 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-white bg-white/5 backdrop-blur-xl rounded-full border border-white/10 transition-all" onClick={() => { document.documentElement.classList.toggle('dark') }}>
           <span className="material-icons-outlined text-sm">dark_mode</span>
-          Switch Theme
+          Theme Engine
         </button>
       </div>
-      <main className="w-full max-w-md">
-        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 px-8 py-10">
-          <div className="flex flex-col items-center gap-3 mb-8">
-            <img alt="Casa Hotel Logo" className="h-16 w-16 rounded-xl object-contain h-10" src="logo.png" />
+
+      <main className="w-full max-w-md relative z-10 transition-all scale-100 hover:scale-[1.01]">
+        <div className="bg-white/5 backdrop-blur-3xl rounded-[3rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] border border-white/10 p-12">
+          <div className="flex flex-col items-center gap-6 mb-12">
+            <div className="w-20 h-20 bg-primary/10 rounded-[2rem] flex items-center justify-center shadow-inner group">
+              <img alt="Casa Hotel Logo" className="h-12 w-12 object-contain grayscale group-hover:grayscale-0 transition-all duration-500" src="logo.png" />
+            </div>
             <div className="text-center">
-              <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">Casa Hotel</h1>
-              <p className="text-xs uppercase tracking-[0.2em] text-secondary font-semibold mt-1">Management System</p>
+              <h1 className="text-4xl font-black tracking-tighter text-white uppercase italic leading-none">Casa Hotel</h1>
+              <p className="text-[10px] uppercase tracking-[0.4em] text-primary font-black mt-2">Central Management</p>
             </div>
           </div>
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">Sign in to your account</h2>
-          <p className="text-xs text-slate-500 mb-6">Use your staff credentials to access the Casa Hotel management console.</p>
-          <form className="space-y-4" onSubmit={handleSubmit}>
+
+          <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (
-              <div className="p-3 text-xs font-medium text-red-500 bg-red-100 dark:bg-red-900/30 rounded-xl border border-red-200 dark:border-red-800">
+              <div className="p-4 text-[10px] font-black uppercase tracking-widest text-red-400 bg-red-500/10 rounded-2xl border border-red-500/20 text-center animate-shake">
                 {error}
               </div>
             )}
-            <div>
-              <label className="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1" htmlFor="email">Email</label>
-              <input className="mt-1 block w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:border-primary focus:ring-1 focus:ring-primary outline-none" id="email" name="email" placeholder="you@example.com" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            </div>
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="block text-xs font-medium text-slate-600 dark:text-slate-300" htmlFor="password">Password</label>
-              </div>
-              <div className="relative">
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4" htmlFor="email">Authentication Identity</label>
+              <div className="relative group">
+                <span className="material-icons-outlined absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary transition-colors text-lg">alternate_email</span>
                 <input
-                  className="mt-1 block w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all focus:scale-[1.01]"
+                  className="w-full rounded-3xl border border-white/5 bg-white/5 px-14 py-5 text-sm font-bold text-white placeholder:text-slate-600 focus:bg-white/10 focus:border-primary/30 outline-none transition-all"
+                  id="email"
+                  name="email"
+                  placeholder="Staff Email Address"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-4" htmlFor="password">Security Protocol</label>
+              <div className="relative group">
+                <span className="material-icons-outlined absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary transition-colors text-lg">lock</span>
+                <input
+                  className="w-full rounded-3xl border border-white/5 bg-white/5 px-14 py-5 text-sm font-bold text-white placeholder:text-slate-600 focus:bg-white/10 focus:border-primary/30 outline-none transition-all"
                   id="password"
                   name="password"
-                  placeholder="Enter your password"
+                  placeholder="Secret Access Key"
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -87,37 +105,45 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                  className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
                 >
-                  <span className="material-icons-outlined text-sm">
+                  <span className="material-icons-outlined text-lg">
                     {showPassword ? 'visibility_off' : 'visibility'}
                   </span>
                 </button>
               </div>
             </div>
-            <div className="flex items-center justify-between pt-2">
-              <label className="inline-flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 cursor-pointer select-none">
-                <input className="rounded border-slate-300 text-primary focus:ring-primary transition-colors" type="checkbox" />
-                <span>Remember this device</span>
+
+            <div className="flex items-center justify-between px-4 pt-2">
+              <label className="flex items-center gap-3 text-[10px] font-black text-slate-500 uppercase tracking-widest cursor-pointer group">
+                <input className="w-4 h-4 rounded-lg bg-white/5 border-white/10 checked:bg-primary transition-all" type="checkbox" />
+                <span className="group-hover:text-slate-300">Maintain Session</span>
               </label>
-              <span className="inline-flex items-center gap-1 text-[11px] text-slate-500">
-                <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                <span>Secure connection</span>
-              </span>
             </div>
-            <button className="w-full mt-4 inline-flex items-center justify-center gap-2 rounded-xl bg-primary text-white text-sm font-semibold py-2.5 shadow-sm hover:bg-amber-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary focus-visible:ring-offset-background-light dark:focus-visible:ring-offset-background-dark transition-colors disabled:opacity-50" disabled={isLoading} type="submit">
-              <span className="material-icons-outlined text-base">login</span>
-              {isLoading ? 'Signing in...' : 'Sign in'}
+
+            <button
+              className="w-full mt-8 group relative overflow-hidden rounded-[2rem] bg-primary px-8 py-5 text-[11px] font-black uppercase tracking-[0.3em] text-white shadow-2xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
+              disabled={isLoading}
+              type="submit"
+            >
+              <span className="relative z-10 flex items-center justify-center gap-3">
+                {isLoading ? 'Decrypting Access...' : 'Authenticate'}
+                <span className="material-icons-outlined text-sm">vpn_key</span>
+              </span>
+              <div className="absolute inset-0 bg-white/20 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300"></div>
             </button>
           </form>
-          <div className="mt-6 border-t border-dashed border-slate-200 dark:border-slate-800 pt-4 text-[11px] text-slate-500 flex items-center justify-between">
-            <span>Need help? Contact front office manager.</span>
-            <span className="font-mono">v1.0</span>
+
+          <div className="mt-12 text-center">
+            <p className="text-[9px] font-black text-slate-600 uppercase tracking-[0.5em]">System Version 3.0.4-LTS</p>
           </div>
         </div>
+
+        <div className="mt-8 flex justify-center gap-8 no-print">
+          <a href="#" className="text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-primary transition-colors">Terminal Support</a>
+          <a href="#" className="text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-primary transition-colors">Safety Protocols</a>
+        </div>
       </main>
-
-
     </div>
   );
 }

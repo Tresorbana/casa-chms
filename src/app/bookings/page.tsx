@@ -6,6 +6,7 @@ import { fetcher } from '@/lib/fetcher';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import TopBar from '@/components/TopBar';
+import { countries } from '@/lib/countries';
 
 export default function Bookings() {
   const router = useRouter();
@@ -43,6 +44,7 @@ export default function Bookings() {
           roomNumber: formData.roomNumber,
           checkIn: formData.checkIn,
           checkOut: formData.checkOut,
+          nationality: formData.nationality,
           totalAmount: 0 // In a real app, calculate based on room price and duration
         })
       });
@@ -110,11 +112,9 @@ export default function Bookings() {
                       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Nationality</label>
                       <select className="w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-800 focus:ring-primary focus:border-primary transition-all px-4 py-2" name="nationality" value={formData.nationality} onChange={handleChange}>
                         <option value="">Select a country</option>
-                        <option value="US">United States</option>
-                        <option value="UK">United Kingdom</option>
-                        <option value="KE">Kenya</option>
-                        <option value="CA">Canada</option>
-                        <option value="DE">Germany</option>
+                        {countries.map(c => (
+                          <option key={c} value={c}>{c}</option>
+                        ))}
                       </select>
                     </div>
                     <div className="space-y-1 md:col-span-2">

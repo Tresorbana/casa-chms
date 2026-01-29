@@ -1,6 +1,8 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import useSWR from 'swr';
+import { fetcher } from '@/lib/fetcher';
 
 interface TopBarProps {
     title: string;
@@ -20,14 +22,17 @@ export default function TopBar({ title, description, actions }: TopBarProps) {
             });
     }, []);
 
-    const notifications = [
-        { id: 1, text: "New booking for Room 302", time: "2 mins ago", icon: "book_online", color: "text-primary" },
-        { id: 2, text: "Stock low on Bath Towels", time: "1 hour ago", icon: "warning", color: "text-amber-500" },
-        { id: 3, text: "Table 4 requested billing", time: "5 mins ago", icon: "restaurant", color: "text-secondary" },
-    ];
+    const { data: notificationsData } = useSWR('/api/notifications', fetcher);
+    const notifications = Array.isArray(notificationsData) ? notificationsData.slice(0, 5).map((n: any) => ({
+        id: n.id,
+        text: n.message,
+        time: new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        icon: n.type === 'WARNING' ? 'warning' : n.type === 'SUCCESS' ? 'check_circle' : 'info',
+        color: n.type === 'WARNING' ? 'text-amber-500' : n.type === 'SUCCESS' ? 'text-primary' : 'text-blue-500'
+    })) : [];
 
     return (
-        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 px-4 lg:px-0">
+        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 px-4 lg:px-0 pl-16 lg:pl-0">
             <div className="flex-1">
                 <h2 className="text-2xl lg:text-3xl font-bold text-slate-800 dark:text-white uppercase tracking-tight">{title}</h2>
                 {description && <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-medium">{description}</p>}
@@ -88,7 +93,7 @@ export default function TopBar({ title, description, actions }: TopBarProps) {
                                         </button>
                                     ))}
                                 </div>
-                                <button className="w-full py-3 text-xs font-bold text-center text-primary hover:bg-primary/5 transition-colors uppercase tracking-widest">View All Notifications</button>
+                                <Link href="/notifications" className="block w-full py-3 text-xs font-bold text-center text-primary hover:bg-primary/5 transition-colors uppercase tracking-widest">View All Notifications</Link>
                             </div>
                         </>
                     )}

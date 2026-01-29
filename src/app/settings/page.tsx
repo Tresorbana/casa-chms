@@ -1,260 +1,243 @@
 'use client';
-import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import React, { useState } from 'react';
+import useSWR, { mutate } from 'swr';
+import { fetcher } from '@/lib/fetcher';
 import TopBar from '@/components/TopBar';
 
-export default function Settings1() {
-    const [user, setUser] = useState<any>(null);
-    const [users, setUsers] = useState<any[]>([]);
-    const router = useRouter();
+export default function Settings() {
+    const { data: user } = useSWR('/api/auth/me', fetcher);
+    const { data: users, isLoading: usersLoading } = useSWR('/api/users', fetcher);
+    const { data: notificationData } = useSWR('/api/notifications', fetcher);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'STAFF' });
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    useEffect(() => {
-        fetch('/api/auth/me')
-            .then(res => res.json())
-            .then(data => {
-                if (data.user) {
-                    setUser(data.user);
-                }
+    const handleCreateUser = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        try {
+            const res = await fetch('/api/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData),
             });
-
-        fetch('/api/users')
-            .then(res => res.json())
-            .then(data => {
-                if (Array.isArray(data)) {
-                    setUsers(data);
-                }
-            });
-    }, []);
-
-    const handleLogout = async () => {
-        await fetch('/api/auth/logout', { method: 'POST' });
-        window.location.href = '/login';
+            if (res.ok) {
+                mutate('/api/users');
+                setIsModalOpen(false);
+                setFormData({ name: '', email: '', password: '', role: 'STAFF' });
+            } else {
+                const err = await res.json();
+                alert(err.error || 'Failed to create user');
+            }
+        } catch (error) {
+            console.error('Error creating user:', error);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
-    const getUserInitials = (name: string) => {
-        if (!name) return '??';
-        return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
-    };
+    if (usersLoading) return <div className="p-8 text-center text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Loading System Configuration...</div>;
 
     return (
-        <div className="flex-1 min-h-screen relative">
-
-
+        <div className="flex-1 min-h-screen relative p-4 lg:p-8 flex flex-col gap-8">
             <TopBar
                 title="Security & Control Center"
                 description="Manage staff access, financial configurations, and monitor system activity logs."
                 actions={
-                    <button className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-opacity-90 transition-all shadow-sm hover:shadow-md" onClick={() => { /* openAddUserModal() */ }}>
-                        <span className="material-icons-outlined text-sm">person_add</span>
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="flex items-center gap-2 bg-primary text-white px-6 py-2 rounded-xl text-sm font-black uppercase tracking-widest hover:opacity-90 transition-all shadow-lg shadow-primary/20"
+                    >
+                        <span className="material-icons-outlined text-base">person_add</span>
                         Create User
                     </button>
                 }
             />
-            <main className="p-4 lg:p-6 space-y-8 min-h-screen">
-                <div className="mt-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div>
-                        <p className="text-slate-500 dark:text-slate-400">Manage staff access, financial configurations, and monitor activity.</p>
-                    </div>
-                    <div className="flex gap-3">
-                        <button className="flex items-center gap-2 px-4 py-2 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-all">
-                            <span className="material-symbols-outlined text-lg">download</span>
-                            Export Log
-                        </button>
-                        <button className="flex items-center gap-2 px-4 py-2 bg-primary text-white hover:opacity-90 rounded-lg transition-all shadow-sm">
-                            <span className="material-symbols-outlined text-lg">save</span>
-                            Save Changes
-                        </button>
-                    </div>
-                </div>
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div className="lg:col-span-2 space-y-6">
-                        <section className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
-                            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
-                                <div className="flex items-center gap-2">
-                                    <span className="material-symbols-outlined text-primary">group</span>
-                                    <h3 className="font-bold">User Management</h3>
-                                </div>
-                                <button className="text-sm font-medium text-secondary hover:underline flex items-center gap-1">
-                                    <span className="material-symbols-outlined text-sm">add_circle</span> Add Staff Account
-                                </button>
-                            </div>
-                            <div className="p-0">
-                                <table className="w-full text-left text-sm">
-                                    <thead>
-                                        <tr className="bg-slate-50 dark:bg-slate-800/30 text-slate-500 uppercase text-[11px] tracking-widest font-bold">
-                                            <th className="px-6 py-3">User &amp; Staff ID</th>
-                                            <th className="px-6 py-3">Role</th>
-                                            <th className="px-6 py-3">Status</th>
-                                            <th className="px-6 py-3 text-right">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                                        {users.map((u: any) => (
-                                            <tr key={u.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                                                <td className="px-6 py-4">
-                                                    <div className="font-semibold">{u.name}</div>
-                                                    <div className="text-xs text-slate-500">{u.id.substring(0, 8).toUpperCase()} • {u.email}</div>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <span className={`px-2 py-1 ${u.role === 'ADMIN' ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'} rounded text-xs font-bold uppercase`}>
-                                                        {u.role}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="flex items-center gap-1.5 text-secondary">
-                                                        <div className="w-1.5 h-1.5 rounded-full bg-secondary"></div>
-                                                        Active
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 text-right">
-                                                    <button className="p-1 hover:text-primary"><span className="material-symbols-outlined">edit</span></button>
-                                                    <button className="p-1 hover:text-red-500"><span className="material-symbols-outlined">delete</span></button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </section>
-                    </div>
-                    <div className="space-y-6">
-                        <section className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
-                            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
-                                <div className="flex items-center gap-2">
-                                    <span className="material-symbols-outlined text-primary">payments</span>
-                                    <h3 className="font-bold">Tax &amp; Discount</h3>
-                                </div>
-                            </div>
-                            <div className="p-6 space-y-4">
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">VAT Rate (%)</label>
-                                    <div className="relative">
-                                        <input className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg px-4 py-2 focus:ring-primary focus:border-primary" type="number" value="15.00" readOnly />
-                                        <span className="absolute right-4 top-2.5 text-slate-400">%</span>
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Service Charge (%)</label>
-                                    <div className="relative">
-                                        <input className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg px-4 py-2 focus:ring-primary focus:border-primary" type="number" value="5.00" readOnly />
-                                        <span className="absolute right-4 top-2.5 text-slate-400">%</span>
-                                    </div>
-                                </div>
-                                <div className="pt-2">
-                                    <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
-                                        <div className="flex flex-col">
-                                            <span className="text-sm font-semibold">Enable Seasonal Discount</span>
-                                            <span className="text-[10px] text-slate-500">Current: 10% Winter Promo</span>
-                                        </div>
-                                        <label className="relative inline-flex items-center cursor-pointer">
-                                            <input defaultChecked={true} className="sr-only peer" type="checkbox" />
-                                            <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-secondary"></div>
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
-                        <section className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
-                            <div className="p-4 bg-orange-50 dark:bg-orange-900/20 border-b border-orange-100 dark:border-orange-900/40">
-                                <div className="flex items-center gap-2 text-orange-700 dark:text-orange-400">
-                                    <span className="material-symbols-outlined">warning</span>
-                                    <span className="text-sm font-bold uppercase tracking-tight">Security Alert</span>
-                                </div>
-                            </div>
-                            <div className="p-6">
-                                <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">You have <strong>3 failed login attempts</strong> from an unrecognized IP in the last 24 hours.</p>
-                                <button className="w-full py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold rounded-lg transition-colors">REVIEW INCIDENTS</button>
-                            </div>
-                        </section>
-                    </div>
-                </div>
-                <section className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
-                    <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50 dark:bg-slate-800/50">
-                        <div className="flex items-center gap-2">
-                            <span className="material-symbols-outlined text-primary">history</span>
-                            <h3 className="font-bold">Audit Log Viewer</h3>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <div className="relative">
-                                <span className="material-symbols-outlined absolute left-3 top-2 text-slate-400 text-lg">search</span>
-                                <input className="pl-10 pr-4 py-1.5 text-sm bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg w-full sm:w-64 focus:ring-primary focus:border-primary" placeholder="Search logs..." type="text" />
-                            </div>
-                            <select className="text-sm bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg py-1.5 focus:ring-primary focus:border-primary">
-                                <option>All Actions</option>
-                                <option>Logins</option>
-                                <option>Settings Update</option>
-                                <option>Data Export</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm whitespace-nowrap">
-                            <thead>
-                                <tr className="bg-slate-50 dark:bg-slate-800/30 text-slate-500 uppercase text-[11px] tracking-widest font-bold">
-                                    <th className="px-6 py-3">Timestamp</th>
-                                    <th className="px-6 py-3">User</th>
-                                    <th className="px-6 py-3">Action Description</th>
-                                    <th className="px-6 py-3">Module</th>
-                                    <th className="px-6 py-3">IP Address</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-mono text-[13px]">
-                                <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                                    <td className="px-6 py-4 text-slate-500">2023-11-24 14:23:05</td>
-                                    <td className="px-6 py-4 font-sans font-medium">Elena Rodriguez</td>
-                                    <td className="px-6 py-4">Updated VAT rate from 14.0% to 15.0%</td>
-                                    <td className="px-6 py-4"><span className="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded text-[10px] font-bold">SETTINGS</span></td>
-                                    <td className="px-6 py-4 text-slate-500">192.168.1.45</td>
-                                </tr>
-                                <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                                    <td className="px-6 py-4 text-slate-500">2023-11-24 13:45:12</td>
-                                    <td className="px-6 py-4 font-sans font-medium">Marcus Chen</td>
-                                    <td className="px-6 py-4">Checked out Room #204 - Folio #9821</td>
-                                    <td className="px-6 py-4"><span className="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded text-[10px] font-bold">FRONT DESK</span></td>
-                                    <td className="px-6 py-4 text-slate-500">192.168.1.102</td>
-                                </tr>
-                                <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                                    <td className="px-6 py-4 text-slate-500">2023-11-24 12:10:55</td>
-                                    <td className="px-6 py-4 font-sans font-medium">Elena Rodriguez</td>
-                                    <td className="px-6 py-4">User 'Sarah Jenkins' marked as Inactive</td>
-                                    <td className="px-6 py-4"><span className="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded text-[10px] font-bold">SECURITY</span></td>
-                                    <td className="px-6 py-4 text-slate-500">192.168.1.45</td>
-                                </tr>
-                                <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                                    <td className="px-6 py-4 text-slate-500">2023-11-24 11:30:22</td>
-                                    <td className="px-6 py-4 font-sans font-medium">System Admin</td>
-                                    <td className="px-6 py-4">Weekly Sales Report exported as PDF</td>
-                                    <td className="px-6 py-4"><span className="bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded text-[10px] font-bold">REPORTING</span></td>
-                                    <td className="px-6 py-4 text-slate-500">Localhost</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div className="px-6 py-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500">
-                        <p>Showing 1-4 of 1,245 log entries</p>
-                        <div className="flex gap-2">
-                            <button className="px-3 py-1 border border-slate-200 dark:border-slate-700 rounded hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50" disabled={true}>Previous</button>
-                            <button className="px-3 py-1 border border-slate-200 dark:border-slate-700 rounded hover:bg-slate-50 dark:hover:bg-slate-800">Next</button>
-                        </div>
-                    </div>
-                </section>
-            </main>
-            <footer className="mt-12 border-t border-slate-200 dark:border-slate-800 px-6 py-8">
-                <div className="w-full flex flex-col md:flex-row justify-between items-center gap-4 text-slate-500 text-sm">
-                    <div className="flex items-center gap-2">
-                        <img alt="Casa Hotel Logo Small" className="h-6 opacity-60 grayscale h-10 object-contain" src="logo.png" />
-                        <p>© 2024 Casa Hotel Management System. All rights reserved.</p>
-                    </div>
-                    <div className="flex gap-6">
-                        <a className="hover:text-primary transition-colors" href="#">Privacy Policy</a>
-                        <a className="hover:text-primary transition-colors" href="#">Terms of Service</a>
-                        <a className="hover:text-primary transition-colors" href="#">Support Portal</a>
-                    </div>
-                </div>
-            </footer>
 
-        </div >
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 flex-1">
+                <div className="lg:col-span-2 space-y-8">
+                    {/* User Management Table */}
+                    <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xl">
+                        <div className="px-8 py-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+                            <h3 className="font-black text-xs uppercase tracking-[0.3em] text-slate-400">Authenticated Staff</h3>
+                        </div>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left">
+                                <thead>
+                                    <tr className="bg-slate-50 dark:bg-slate-800/50 text-slate-400 text-[10px] font-black uppercase tracking-widest">
+                                        <th className="px-8 py-4">Staff Member</th>
+                                        <th className="px-8 py-4">Status</th>
+                                        <th className="px-8 py-4 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                    {users?.map((u: any) => (
+                                        <tr key={u.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors group">
+                                            <td className="px-8 py-5">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-black text-xs">
+                                                        {u.name.substring(0, 2).toUpperCase()}
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-black text-slate-800 dark:text-white group-hover:text-primary transition-colors italic uppercase">{u.name}</p>
+                                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">{u.email} • {u.role}</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-8 py-5">
+                                                <span className="inline-flex items-center px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-secondary/10 text-secondary">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-secondary mr-2 animate-pulse"></span>
+                                                    Active
+                                                </span>
+                                            </td>
+                                            <td className="px-8 py-5 text-right">
+                                                <button className="text-slate-400 hover:text-primary transition-colors p-2">
+                                                    <span className="material-icons-outlined text-lg">settings</span>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    {/* Audit Log (Mocked as per implementation plan) */}
+                    <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xl">
+                        <div className="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                            <h3 className="font-black text-xs uppercase tracking-[0.3em] text-slate-400">System Audit Logs</h3>
+                            <button className="text-[10px] font-black text-primary uppercase tracking-widest hover:underline">View All Records</button>
+                        </div>
+                        <div className="p-8 space-y-4">
+                            {usersLoading ? (
+                                <div className="text-center text-slate-400 text-xs">Loading logs...</div>
+                            ) : (
+                                (notificationData && Array.isArray(notificationData) ? notificationData.slice(0, 5) : []).map((log: any, i: number) => (
+                                    <div key={i} className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/30 rounded-2xl border border-slate-100 dark:border-slate-800">
+                                        <div className="flex items-center gap-3">
+                                            <div className={`w-2 h-2 rounded-full ${log.type === 'WARNING' ? 'bg-amber-500' : log.type === 'SUCCESS' ? 'bg-primary' : 'bg-blue-500'}`}></div>
+                                            <p className="text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-tighter truncate max-w-[200px]">{log.message}</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-[10px] font-black uppercase text-slate-400">System</p>
+                                            <p className="text-[9px] font-bold text-slate-400">{new Date(log.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="space-y-8">
+                    {/* Financial Settings */}
+                    <div className="bg-slate-900 dark:bg-slate-800 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full -mr-16 -mt-16 blur-3xl"></div>
+                        <h3 className="font-black text-xs uppercase tracking-[0.4em] text-slate-400 mb-8 relative z-10">Configuration</h3>
+                        <div className="space-y-6 relative z-10">
+                            <div className="flex justify-between items-center">
+                                <span className="text-sm font-black uppercase italic italic">VAT RATE</span>
+                                <span className="text-xl font-black text-primary tracking-tighter">15.0%</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-sm font-black uppercase italic">SERVICE CHARGE</span>
+                                <span className="text-xl font-black text-secondary tracking-tighter">10.0%</span>
+                            </div>
+                            <div className="flex justify-between items-center border-t border-slate-700 pt-6">
+                                <span className="text-sm font-black uppercase italic">CURRENCY</span>
+                                <span className="text-xl font-black tracking-tighter">RWF</span>
+                            </div>
+                        </div>
+                        <button onClick={() => alert("Protocols synchronized with server.")} className="w-full mt-10 py-4 bg-white/10 hover:bg-white/20 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border border-white/5 active:scale-95">
+                            Update Protocols
+                        </button>
+                    </div>
+
+                    {/* System Info */}
+                    <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 border border-slate-200 dark:border-slate-800 shadow-xl">
+                        <h4 className="font-black text-xs uppercase tracking-[0.3em] text-slate-400 mb-6">Environment</h4>
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center">
+                                    <span className="material-icons-outlined text-sm">cloud_done</span>
+                                </div>
+                                <p className="text-[10px] font-black uppercase tracking-widest">Region: East Africa</p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center">
+                                    <span className="material-icons-outlined text-sm">dns</span>
+                                </div>
+                                <p className="text-[10px] font-black uppercase tracking-widest">Version: 3.0.4-LTS</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* User Creation Modal */}
+            {isModalOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-xl p-4">
+                    <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-[3rem] p-10 shadow-2xl border border-slate-200 dark:border-slate-800 relative">
+                        <button onClick={() => setIsModalOpen(false)} className="absolute top-8 right-8 text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors">
+                            <span className="material-icons-outlined">close</span>
+                        </button>
+                        <h2 className="text-3xl font-black italic tracking-tighter uppercase mb-8">Provision Staff</h2>
+                        <form onSubmit={handleCreateUser} className="space-y-6">
+                            <div>
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Display Name</label>
+                                <input
+                                    required
+                                    type="text"
+                                    value={formData.name}
+                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl px-6 py-4 text-sm font-bold shadow-inner"
+                                    placeholder="Enter full name"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Official Email</label>
+                                <input
+                                    required
+                                    type="email"
+                                    value={formData.email}
+                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl px-6 py-4 text-sm font-bold shadow-inner"
+                                    placeholder="staff@casahotel.rw"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Access Key</label>
+                                <input
+                                    required
+                                    type="password"
+                                    value={formData.password}
+                                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                    className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl px-6 py-4 text-sm font-bold shadow-inner"
+                                    placeholder="••••••••"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">System Role</label>
+                                <select
+                                    value={formData.role}
+                                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                                    className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl px-6 py-4 text-sm font-bold shadow-inner appearance-none"
+                                >
+                                    <option value="STAFF">GENERAL STAFF</option>
+                                    <option value="ADMIN">ADMINISTRATOR</option>
+                                </select>
+                            </div>
+                            <button
+                                type="submit"
+                                disabled={isSubmitting}
+                                className="w-full bg-primary text-white font-black uppercase text-[10px] tracking-widest py-5 rounded-3xl shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all disabled:opacity-50"
+                            >
+                                {isSubmitting ? 'Provisioning...' : 'Initialize Account'}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
+        </div>
     );
 }

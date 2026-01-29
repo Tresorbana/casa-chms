@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Anaheim&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,33 +10,44 @@
 }
 
 .scrollbar-hide::-webkit-scrollbar {
-    display: none;
+  display: none;
 }
 
 .material-icons,
 .material-icons-outlined,
 .material-icons-round,
 .material-symbols-outlined {
-    font-weight: normal;
-    font-style: normal;
-    font-size: 24px;
-    display: inline-block;
-    line-height: 1;
-    text-transform: none;
-    letter-spacing: normal;
-    word-wrap: normal;
-    white-space: nowrap;
-    direction: ltr;
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
-    -moz-osx-font-smoothing: grayscale;
-    font-feature-settings: 'liga';
-    width: 24px;
-    height: 24px;
-    overflow: hidden;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'liga';
+  width: 24px;
+  height: 24px;
+  overflow: hidden;
 }
 
-.material-icons { font-family: 'Material Icons'; }
-.material-icons-outlined { font-family: 'Material Icons Outlined'; }
-.material-icons-round { font-family: 'Material Icons Round'; }
-.material-symbols-outlined { font-family: 'Material Symbols Outlined'; }
+.material-icons {
+  font-family: 'Material Icons';
+}
+
+.material-icons-outlined {
+  font-family: 'Material Icons Outlined';
+}
+
+.material-icons-round {
+  font-family: 'Material Icons Round';
+}
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+}

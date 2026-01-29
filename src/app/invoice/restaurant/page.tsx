@@ -14,21 +14,24 @@ function InvoiceContent() {
     fetcher
   );
 
+  if (isLoading) return <div className="p-8 text-center text-slate-500">Loading invoice...</div>;
+  if (!apiInvoice) return <div className="p-8 text-center text-red-500">Invoice not found</div>;
+
   const invoiceData = {
-    id: invoiceId || 'INV-2024-8842',
-    date: 'Oct 24, 2024',
-    time: '14:30 PM',
-    cashier: 'John Smith',
-    customer: 'Walk-in Guest',
-    items: [
-      { name: 'Grilled Salmon Steak', qty: 2, price: 12500 },
-      { name: 'Espresso Martini', qty: 2, price: 8000 },
-      { name: 'Truffle Mushroom Pizza', qty: 1, price: 15000 }
-    ],
-    subtotal: 56000,
-    tax: 8400,
-    service: 2800,
-    total: 67200
+    id: apiInvoice.id,
+    date: new Date(apiInvoice.date).toLocaleDateString(),
+    time: new Date(apiInvoice.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    cashier: 'System Cashier',
+    customer: apiInvoice.guestName,
+    items: apiInvoice.items.map((item: any) => ({
+      name: item.description,
+      qty: item.quantity,
+      price: item.price
+    })),
+    subtotal: apiInvoice.items.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0),
+    tax: (apiInvoice.items.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0) * 0.15),
+    service: (apiInvoice.items.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0) * 0.05),
+    total: apiInvoice.amount
   };
 
   if (isLoading) return <div className="p-8 text-center text-slate-500">Loading invoice...</div>;
@@ -93,7 +96,7 @@ function InvoiceContent() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
-                  {invoiceData.items.map((item, i) => (
+                  {invoiceData.items.map((item: any, i: number) => (
                     <tr key={i} className="text-sm font-bold">
                       <td className="px-8 py-6 text-slate-800 dark:text-slate-200">{item.name}</td>
                       <td className="px-8 py-6 text-center text-slate-500">{item.qty}</td>

@@ -8,15 +8,17 @@ export default function RoomStatus() {
     const { data: rooms, error, isLoading } = useSWR('/api/rooms', fetcher);
     const [filter, setFilter] = useState('ALL');
 
-    const stats = rooms ? {
-        total: rooms.length,
-        available: rooms.filter((r: any) => r.status === 'AVAILABLE').length,
-        occupied: rooms.filter((r: any) => r.status === 'OCCUPIED').length,
-        cleaning: rooms.filter((r: any) => r.status === 'CLEANING').length,
-        maintenance: rooms.filter((r: any) => r.status === 'MAINTENANCE').length,
-    } : { total: 0, available: 0, occupied: 0, cleaning: 0, maintenance: 0 };
+    const safelyRooms = Array.isArray(rooms) ? rooms : [];
 
-    const filteredRooms = rooms ? rooms.filter((r: any) => filter === 'ALL' || r.status === filter) : [];
+    const stats = {
+        total: safelyRooms.length,
+        available: safelyRooms.filter((r: any) => r.status === 'AVAILABLE').length,
+        occupied: safelyRooms.filter((r: any) => r.status === 'OCCUPIED').length,
+        cleaning: safelyRooms.filter((r: any) => r.status === 'CLEANING').length,
+        maintenance: safelyRooms.filter((r: any) => r.status === 'MAINTENANCE').length,
+    };
+
+    const filteredRooms = safelyRooms.filter((r: any) => filter === 'ALL' || r.status === filter);
 
     if (isLoading) return <div className="p-8">Loading room status...</div>;
 
@@ -33,8 +35,8 @@ export default function RoomStatus() {
                         key={s}
                         onClick={() => setFilter(s)}
                         className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${filter === s
-                            ? 'bg-primary text-white shadow-lg shadow-primary/20'
-                            : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:border-primary'
+                            ? 'bg-olive-leaf text-white shadow-lg shadow-olive-leaf/20'
+                            : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:border-olive-leaf'
                             }`}
                     >
                         {s} {s !== 'ALL' && `(${stats[s.toLowerCase() as keyof typeof stats]})`}
@@ -47,14 +49,14 @@ export default function RoomStatus() {
                     <div
                         key={room.id}
                         className={`p-4 rounded-2xl border-2 transition-all cursor-pointer hover:shadow-xl ${room.status === 'AVAILABLE' ? 'bg-secondary/5 border-secondary hover:bg-secondary/10' :
-                            room.status === 'OCCUPIED' ? 'bg-primary/5 border-primary hover:bg-primary/10' :
+                            room.status === 'OCCUPIED' ? 'bg-olive-leaf/5 border-olive-leaf hover:bg-olive-leaf/10' :
                                 room.status === 'CLEANING' ? 'bg-blue-400/5 border-blue-400 hover:bg-blue-400/10' :
                                     'bg-slate-100 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700'
                             }`}
                     >
                         <div className="flex justify-between items-start mb-4">
                             <span className={`text-2xl font-black ${room.status === 'AVAILABLE' ? 'text-secondary' :
-                                room.status === 'OCCUPIED' ? 'text-primary' :
+                                room.status === 'OCCUPIED' ? 'text-olive-leaf' :
                                     room.status === 'CLEANING' ? 'text-blue-500' :
                                         'text-slate-400'
                                 }`}>{room.number}</span>

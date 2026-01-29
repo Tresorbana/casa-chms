@@ -7,15 +7,23 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: "#F9B233", // Casa Orange
-        secondary: "#4CAF50", // Casa Green
-        "background-light": "#F8FAFC",
-        "background-dark": "#0F172A",
+        primary: "#606c38", // Olive Leaf
+        secondary: "#283618", // Black Forest
+        accent: "#bc6c25", // Copper
+        neutral: "#fefae0", // Cornsilk
+        highlight: "#dda15e", // Light Caramel
+        "olive-leaf": "#606c38",
+        "black-forest": "#283618",
+        "cornsilk": "#fefae0",
+        "light-caramel": "#dda15e",
+        "copper": "#bc6c25",
+        "background-light": "#fefae0", // Using Cornsilk as light background
+        "background-dark": "#283618", // Using Black Forest as dark background
       },
       fontFamily: {
-        display: ["Inter", "sans-serif"],
-        sans: ["Inter", "sans-serif"],
-        mono: ["JetBrains Mono", "monospace"],
+        sans: ["Anaheim", "sans-serif"],
+        display: ["Anaheim", "sans-serif"],
+        body: ["Anaheim", "sans-serif"],
       },
     },
   },

@@ -6,13 +6,14 @@ export async function GET() {
     const rooms = await prisma.room.findMany({
       orderBy: { number: 'asc' },
       include: {
+        floor: true,
         bookings: {
-            where: {
-                status: 'CHECKED_IN'
-            },
-            include: {
-                guest: true
-            }
+          where: {
+            status: 'CHECKED_IN'
+          },
+          include: {
+            guest: true
+          }
         }
       }
     })
@@ -22,18 +23,47 @@ export async function GET() {
   }
 }
 
+export async function POST(request: Request) {
+  try {
+    const body = await request.json()
+    const { number, type, price, floorId } = body
+
+    const room = await prisma.room.create({
+      data: {
+        number,
+        type,
+        price: parseFloat(price),
+        floorId,
+        status: 'AVAILABLE'
+      }
+    })
+
+    return NextResponse.json(room)
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to create room' }, { status: 500 })
+  }
+}
+
 export async function PUT(request: Request) {
   try {
     const body = await request.json()
-    const { id, status } = body
-    
+    const { id, status, number, type, price, floorId } = body
+
+    const data: any = {}
+    if (status) data.status = status
+    if (number) data.number = number
+    if (type) data.type = type
+    if (price) data.price = parseFloat(price)
+    if (floorId) data.floorId = floorId
+
     const room = await prisma.room.update({
-        where: { id },
-        data: { status }
+      where: { id },
+      data
     })
-    
+
     return NextResponse.json(room)
   } catch (error) {
     return NextResponse.json({ error: 'Failed to update room' }, { status: 500 })
   }
 }
+

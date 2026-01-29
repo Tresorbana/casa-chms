@@ -8,189 +8,169 @@ import TopBar from '@/components/TopBar';
 export default function Dashboard() {
   const { data, error, isLoading } = useSWR('/api/dashboard', fetcher);
 
-  if (isLoading || !data) return <div className="p-8">Loading...</div>;
-  if (error) return <div className="p-8">Failed to load data</div>;
+  if (isLoading || !data) return <div className="p-8 text-center text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Loading Intelligence...</div>;
+  if (error) return <div className="p-8 text-center text-red-400 font-black">System Connection Failure</div>;
 
   const stats = data.stats || {};
   const rooms = data.rooms || [];
 
   return (
-    <div className="min-h-screen p-4 lg:p-8">
+    <div className="min-h-screen p-4 lg:p-8 bg-slate-50 dark:bg-slate-950 flex flex-col gap-8">
       <TopBar
         title="Casa Hotel Dashboard"
         description="Real-time occupancy and revenue analytics for Casa Hotel."
       />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-          <div className="flex justify-between items-start mb-4">
-            <div className="p-3 bg-secondary/10 text-secondary rounded-xl">
-              <span className="material-icons-outlined">bed</span>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Stat Cards */}
+        <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-sm group hover:shadow-xl transition-all">
+          <div className="flex justify-between items-start mb-6">
+            <div className="p-4 bg-secondary/10 text-secondary rounded-2xl grayscale group-hover:grayscale-0 transition-all">
+              <span className="material-icons-outlined text-2xl">bed</span>
             </div>
-            <span className="text-xs font-bold text-secondary bg-secondary/10 px-2 py-1 rounded">+2.4%</span>
+            <span className="text-[10px] font-black text-secondary bg-secondary/10 px-3 py-1 rounded-full uppercase tracking-widest">+2.4%</span>
           </div>
-          <h3 className="text-slate-500 text-sm font-medium">Today's Occupancy</h3>
-          <p className="text-3xl font-bold mt-1">{(stats.occupancyRate || 0).toFixed(1)}%</p>
-          <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 mt-4 rounded-full overflow-hidden">
-            <div className="bg-secondary h-full rounded-full" style={{ width: `${stats.occupancyRate || 0}%` }}></div>
+          <h3 className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">Today's Occupancy</h3>
+          <p className="text-4xl font-black italic tracking-tighter uppercase">{(stats.occupancyRate || 0).toFixed(1)}%</p>
+          <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 mt-6 rounded-full overflow-hidden">
+            <div className="bg-secondary h-full rounded-full transition-all duration-1000" style={{ width: `${stats.occupancyRate || 0}%` }}></div>
           </div>
         </div>
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-          <div className="flex justify-between items-start mb-4">
-            <div className="p-3 bg-primary/10 text-primary rounded-xl">
-              <span className="material-icons-outlined">payments</span>
+
+        <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-sm group hover:shadow-xl transition-all">
+          <div className="flex justify-between items-start mb-6">
+            <div className="p-4 bg-primary/10 text-primary rounded-2xl grayscale group-hover:grayscale-0 transition-all">
+              <span className="material-icons-outlined text-2xl">payments</span>
             </div>
-            <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded">On Track</span>
+            <span className="text-[10px] font-black text-primary bg-primary/10 px-3 py-1 rounded-full uppercase tracking-widest">On Track</span>
           </div>
-          <h3 className="text-slate-500 text-sm font-medium">Total Revenue Today</h3>
-          <p className="text-3xl font-bold mt-1">RWF {(stats.revenueToday || 0).toLocaleString()}</p>
-          <p className="text-xs text-slate-400 mt-4 flex items-center gap-1">
-            <span className="material-icons-outlined text-xs text-secondary">trending_up</span>
-            15% higher than yesterday
+          <h3 className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">Revenue Today</h3>
+          <p className="text-4xl font-black italic tracking-tighter uppercase">RWF {(stats.revenueToday || 0).toLocaleString()}</p>
+          <p className="text-[10px] text-slate-400 mt-6 flex items-center gap-2 font-bold uppercase tracking-widest">
+            <span className="material-icons-outlined text-sm text-secondary">trending_up</span>
+            15% higher than prev.
           </p>
         </div>
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-          <div className="flex justify-between items-start mb-4">
-            <div className="p-3 bg-blue-500/10 text-blue-500 rounded-xl">
-              <span className="material-icons-outlined">pending_actions</span>
+
+        <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-sm group hover:shadow-xl transition-all">
+          <div className="flex justify-between items-start mb-6">
+            <div className="p-4 bg-blue-500/10 text-blue-500 rounded-2xl grayscale group-hover:grayscale-0 transition-all">
+              <span className="material-icons-outlined text-2xl">pending_actions</span>
             </div>
-            <button className="text-xs font-bold text-blue-500 hover:underline">View All</button>
+            <button className="text-[10px] font-black text-blue-500 uppercase tracking-widest hover:underline">View All</button>
           </div>
-          <h3 className="text-slate-500 text-sm font-medium">Pending Reservations</h3>
-          <p className="text-3xl font-bold mt-1">{stats.pendingReservations || 0}</p>
-          <p className="text-xs text-slate-400 mt-4">Average response time: 14 mins</p>
+          <h3 className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">Pending Reservations</h3>
+          <p className="text-4xl font-black italic tracking-tighter uppercase">{stats.pendingReservations || 0}</p>
+          <p className="text-[10px] text-slate-400 mt-6 font-bold uppercase tracking-widest">Avg wait: 14 mins</p>
         </div>
       </div>
-      <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+
+      <section className="bg-white dark:bg-slate-900 p-10 rounded-[3rem] border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
           <div>
-            <h3 className="text-xl font-bold text-slate-800 dark:text-white">Room Status Grid</h3>
-            <p className="text-sm text-slate-500">Live floor-wise status of all hotel units</p>
+            <h3 className="text-3xl font-black italic tracking-tighter uppercase text-slate-800 dark:text-white leading-none mb-2">Room Operative Grid</h3>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Live hotel occupancy matrix</p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <div className="flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-400">
-              <span className="w-3 h-3 rounded-full bg-secondary"></span> Available
-            </div>
-            <div className="flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-400">
-              <span className="w-3 h-3 rounded-full bg-primary"></span> Occupied
-            </div>
-            <div className="flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-400">
-              <span className="w-3 h-3 rounded-full bg-blue-400"></span> Cleaning
-            </div>
-            <div className="flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-400">
-              <span className="w-3 h-3 rounded-full bg-slate-300 dark:bg-slate-700"></span> Maintenance
-            </div>
+          <div className="flex flex-wrap gap-4">
+            {[
+              { label: 'Available', color: 'secondary' },
+              { label: 'Occupied', color: 'primary' },
+              { label: 'Cleaning', color: 'blue-400' },
+              { label: 'Maint.', color: 'slate-300' }
+            ].map(status => (
+              <div key={status.label} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <span className={`w-3 h-3 rounded-full bg-${status.color}`}></span> {status.label}
+              </div>
+            ))}
           </div>
         </div>
-        <div className="flex gap-4 border-b border-slate-100 dark:border-slate-800 mb-8 overflow-x-auto scrollbar-hide">
-          <button className="pb-4 px-2 border-b-2 border-primary text-primary font-semibold whitespace-nowrap">Floor 1 (Lobby Level)</button>
-          <button className="pb-4 px-2 border-b-2 border-transparent text-slate-400 hover:text-slate-600 whitespace-nowrap">Floor 2 (Executive)</button>
-          <button className="pb-4 px-2 border-b-2 border-transparent text-slate-400 hover:text-slate-600 whitespace-nowrap">Floor 3 (Suites)</button>
-          <button className="pb-4 px-2 border-b-2 border-transparent text-slate-400 hover:text-slate-600 whitespace-nowrap">Floor 4 (Penthouse)</button>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          <div className="group relative bg-secondary/5 border-2 border-secondary p-4 rounded-2xl hover:shadow-lg transition-all cursor-pointer">
-            <div className="flex justify-between items-start mb-2">
-              <span className="text-lg font-bold text-secondary">101</span>
-              <span className="material-icons-outlined text-secondary text-sm">check_circle</span>
-            </div>
-            <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Standard</p>
-            <p className="text-xs font-medium text-slate-700 dark:text-slate-200 mt-1">Available</p>
-          </div>
-          <div className="bg-primary/5 border-2 border-primary p-4 rounded-2xl cursor-pointer">
-            <div className="flex justify-between items-start mb-2">
-              <span className="text-lg font-bold text-primary">102</span>
-              <span className="material-icons-outlined text-primary text-sm">person</span>
-            </div>
-            <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Deluxe</p>
-            <p className="text-xs font-medium text-slate-700 dark:text-slate-200 mt-1">Mr. Johson</p>
-          </div>
-          <div className="bg-blue-400/5 border-2 border-blue-400 p-4 rounded-2xl cursor-pointer">
-            <div className="flex justify-between items-start mb-2">
-              <span className="text-lg font-bold text-blue-500">103</span>
-              <span className="material-icons-outlined text-blue-500 text-sm">cleaning_services</span>
-            </div>
-            <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Standard</p>
-            <p className="text-xs font-medium text-slate-700 dark:text-slate-200 mt-1">Housekeeping</p>
-          </div>
-          <div className="bg-primary/5 border-2 border-primary p-4 rounded-2xl cursor-pointer">
-            <div className="flex justify-between items-start mb-2">
-              <span className="text-lg font-bold text-primary">104</span>
-              <span className="material-icons-outlined text-primary text-sm">person</span>
-            </div>
-            <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Twin</p>
-            <p className="text-xs font-medium text-slate-700 dark:text-slate-200 mt-1">Ms. Sarah Lee</p>
-          </div>
-          <div className="bg-slate-100 dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700 p-4 rounded-2xl cursor-pointer">
-            <div className="flex justify-between items-start mb-2">
-              <span className="text-lg font-bold text-slate-400">105</span>
-              <span className="material-icons-outlined text-slate-400 text-sm">build</span>
-            </div>
-            <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">King</p>
-            <p className="text-xs font-medium text-slate-400 mt-1">Out of Order</p>
-          </div>
-          <div className="bg-secondary/5 border-2 border-secondary p-4 rounded-2xl cursor-pointer">
-            <div className="flex justify-between items-start mb-2">
-              <span className="text-lg font-bold text-secondary">106</span>
-              <span className="material-icons-outlined text-secondary text-sm">check_circle</span>
-            </div>
-            <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Standard</p>
-            <p className="text-xs font-medium text-slate-700 dark:text-slate-200 mt-1">Available</p>
-          </div>
-          <div className="bg-primary/5 border-2 border-primary p-4 rounded-2xl">
-            <div className="flex justify-between items-start mb-2">
-              <span className="text-lg font-bold text-primary">107</span>
-              <span className="material-icons-outlined text-primary text-sm">person</span>
-            </div>
-            <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Suite</p>
-            <p className="text-xs font-medium text-slate-700 dark:text-slate-200 mt-1">Reserved</p>
-          </div>
-          <div className="bg-secondary/5 border-2 border-secondary p-4 rounded-2xl">
-            <div className="flex justify-between items-start mb-2">
-              <span className="text-lg font-bold text-secondary">108</span>
-              <span className="material-icons-outlined text-secondary text-sm">check_circle</span>
-            </div>
-            <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Standard</p>
-            <p className="text-xs font-medium text-slate-700 dark:text-slate-200 mt-1">Available</p>
-          </div>
-          <div className="bg-secondary/5 border-2 border-secondary p-4 rounded-2xl">
-            <div className="flex justify-between items-start mb-2">
-              <span className="text-lg font-bold text-secondary">109</span>
-              <span className="material-icons-outlined text-secondary text-sm">check_circle</span>
-            </div>
-            <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Standard</p>
-            <p className="text-xs font-medium text-slate-700 dark:text-slate-200 mt-1">Available</p>
-          </div>
-          <div className="bg-blue-400/5 border-2 border-blue-400 p-4 rounded-2xl">
-            <div className="flex justify-between items-start mb-2">
-              <span className="text-lg font-bold text-blue-500">110</span>
-              <span className="material-icons-outlined text-blue-500 text-sm">cleaning_services</span>
-            </div>
-            <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Deluxe</p>
-            <p className="text-xs font-medium text-slate-700 dark:text-slate-200 mt-1">Housekeeping</p>
-          </div>
-          <div className="bg-primary/5 border-2 border-primary p-4 rounded-2xl">
-            <div className="flex justify-between items-start mb-2">
-              <span className="text-lg font-bold text-primary">111</span>
-              <span className="material-icons-outlined text-primary text-sm">person</span>
-            </div>
-            <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Queen</p>
-            <p className="text-xs font-medium text-slate-700 dark:text-slate-200 mt-1">Occupied</p>
-          </div>
-          <div className="bg-secondary/5 border-2 border-secondary p-4 rounded-2xl">
-            <div className="flex justify-between items-start mb-2">
-              <span className="text-lg font-bold text-secondary">112</span>
-              <span className="material-icons-outlined text-secondary text-sm">check_circle</span>
-            </div>
-            <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Deluxe</p>
-            <p className="text-xs font-medium text-slate-700 dark:text-slate-200 mt-1">Available</p>
-          </div>
+
+        <div className="flex flex-col gap-10">
+          {(() => {
+            // Group rooms by floor
+            const roomsByFloor: { [key: number]: any[] } = {};
+            rooms.forEach((room: any) => {
+              const floorNum = room.floor?.number || 0; // Default to 0/Ground if no floor assigned
+              if (!roomsByFloor[floorNum]) roomsByFloor[floorNum] = [];
+              roomsByFloor[floorNum].push(room);
+            });
+
+            // Sort floor numbers
+            const sortedFloors = Object.keys(roomsByFloor).map(Number).sort((a, b) => a - b);
+
+            if (sortedFloors.length === 0) {
+              return (
+                <div className="py-20 text-center text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">
+                  No operative assets discovered.
+                </div>
+              );
+            }
+
+            return sortedFloors.map(floorNum => (
+              <div key={floorNum}>
+                <div className="flex items-center gap-4 mb-6">
+                  <h4 className="text-xl font-black italic tracking-tighter text-slate-800 dark:text-white uppercase">
+                    {floorNum === 1 ? 'Floor 1 (Lobby)' :
+                      floorNum === 2 ? 'Floor 2 (Executive)' :
+                        floorNum === 3 ? 'Floor 3 (Suites)' :
+                          floorNum === 4 ? 'Floor 4 (Penthouse)' :
+                            `Floor ${floorNum}`}
+                  </h4>
+                  <div className="h-px flex-1 bg-slate-100 dark:bg-slate-800"></div>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                  {roomsByFloor[floorNum].map((room: any) => (
+                    <div
+                      key={room.id}
+                      className={`p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm transition-all hover:shadow-xl hover:scale-[1.02] relative group cursor-pointer ${room.status === 'AVAILABLE' ? 'bg-white dark:bg-slate-900 border-l-4 border-l-secondary' :
+                        room.status === 'OCCUPIED' ? 'bg-primary/5 border-l-4 border-l-primary' :
+                          'bg-slate-50 dark:bg-slate-800 border-l-4 border-l-slate-400'
+                        }`}
+                      onClick={() => {
+                        if (room.status === 'OCCUPIED') {
+                          window.location.href = `/checkout?roomId=${room.id}`;
+                        }
+                      }}
+                    >
+                      <div className="flex justify-between items-start mb-4">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Room {room.number}</span>
+                        <span className={`px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${room.status === 'AVAILABLE' ? 'bg-secondary/10 text-secondary' :
+                          room.status === 'OCCUPIED' ? 'bg-primary/10 text-primary' :
+                            'bg-slate-200 dark:bg-slate-700 text-slate-500'
+                          }`}>
+                          {room.status}
+                        </span>
+                      </div>
+                      <h3 className="font-black text-slate-800 dark:text-white uppercase italic tracking-tighter group-hover:text-primary transition-colors mb-1">
+                        {room.type}
+                      </h3>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                        {room.status === 'OCCUPIED' && room.bookings && room.bookings.length > 0
+                          ? room.bookings[0].guest.name
+                          : (room.status || '').toLowerCase()}
+                      </p>
+                      {room.status === 'OCCUPIED' && (
+                        <div className="absolute inset-0 bg-primary/80 opacity-0 group-hover:opacity-100 transition-opacity rounded-[2rem] flex items-center justify-center backdrop-blur-md">
+                          <span className="text-white font-black uppercase text-[10px] tracking-widest flex items-center gap-2">
+                            <span className="material-icons-outlined text-sm">logout</span>
+                            Checkout
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ));
+          })()}
         </div>
       </section>
-      <div className="mt-8 flex justify-between items-center text-slate-400 text-xs">
-        <p>© 2024 Casa Hotel Management System. All rights reserved.</p>
-        <div className="flex gap-6">
-          <a className="hover:text-primary" href="#">System Status</a>
-          <a className="hover:text-primary" href="#">Contact IT Support</a>
+
+      <div className="mt-8 flex justify-between items-center text-slate-400 text-[10px] font-black uppercase tracking-widest">
+        <p>© 2024 Casa Hotel Management System v3.0</p>
+        <div className="flex gap-8">
+          <a className="hover:text-primary transition-colors" href="#">Infrastructural Health</a>
+          <a className="hover:text-primary transition-colors" href="#">Node Support</a>
         </div>
       </div>
     </div>

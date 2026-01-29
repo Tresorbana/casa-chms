@@ -24,3 +24,32 @@ export async function GET() {
         return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 })
     }
 }
+
+export async function POST(request: Request) {
+    const session = await getSession()
+    if (!session || session.user.role !== 'ADMIN') {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    try {
+        const body = await request.json()
+        const { email, name, password, role } = body
+
+        if (!email || !password) {
+            return NextResponse.json({ error: 'Email and password are required' }, { status: 400 })
+        }
+
+        const user = await prisma.user.create({
+            data: {
+                email,
+                name,
+                password, // Note: In a real app, hash this!
+                role: role || 'STAFF',
+            },
+        })
+
+        return NextResponse.json(user)
+    } catch (error) {
+        return NextResponse.json({ error: 'Failed to create user' }, { status: 500 })
+    }
+}
