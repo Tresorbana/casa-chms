@@ -1,19 +1,10 @@
 {
   "/api/notifications/unread-count/route": "app/api/notifications/unread-count/route.js",
   "/api/notifications/route": "app/api/notifications/route.js",
-  "/api/auth/me/route": "app/api/auth/me/route.js",
-  "/api/reports/detailed/route": "app/api/reports/detailed/route.js",
-  "/api/inquiries/route": "app/api/inquiries/route.js",
-  "/api/floors/route": "app/api/floors/route.js",
-  "/api/conference/route": "app/api/conference/route.js",
-  "/api/services/route": "app/api/services/route.js",
   "/api/pos/menu/route": "app/api/pos/menu/route.js",
-  "/invoice/[id]/page": "app/invoice/[id]/page.js",
-  "/reports/page": "app/reports/page.js",
-  "/notifications/page": "app/notifications/page.js",
   "/inquiries/page": "app/inquiries/page.js",
-  "/settings/rooms/page": "app/settings/rooms/page.js",
-  "/settings/conference/page": "app/settings/conference/page.js",
+  "/notifications/page": "app/notifications/page.js",
   "/settings/services/page": "app/settings/services/page.js",
+  "/settings/rooms/page": "app/settings/rooms/page.js",
   "/settings/menu/page": "app/settings/menu/page.js"
 }

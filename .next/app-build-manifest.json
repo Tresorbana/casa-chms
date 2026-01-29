@@ -141,11 +141,6 @@
       "static/chunks/main-app.js",
       "static/chunks/app/api/floors/route.js"
     ],
-    "/settings/conference/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/settings/conference/page.js"
-    ],
     "/settings/services/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
