@@ -1,8 +1,8 @@
 // File: D:\Money\Casa\chms\src\app\settings\conference\page.tsx
-import * as entry from '../../../../../src/app/settings/conference/page.js'
+import * as entry from '../../../../../src/app/settings/conference/page.jsx'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
-type TEntry = typeof import('../../../../../src/app/settings/conference/page.js')
+type TEntry = typeof import('../../../../../src/app/settings/conference/page.jsx')
 
 type SegmentParams<T extends Object = any> = T extends Record<string, any>
   ? { [K in keyof T]: T[K] extends string ? string | string[] | undefined : never }
@@ -20,13 +20,13 @@ checkFields<Diff<{
   preferredRegion?: 'auto' | 'global' | 'home' | string | string[]
   runtime?: 'nodejs' | 'experimental-edge' | 'edge'
   maxDuration?: number
-  
+
   metadata?: any
   generateMetadata?: Function
   viewport?: any
   generateViewport?: Function
   experimental_ppr?: boolean
-  
+
 }, TEntry, ''>>()
 
 
@@ -75,7 +75,7 @@ type MaybeField<T, K extends string> = T extends { [k in K]: infer G } ? G exten
 
 
 
-function checkFields<_ extends { [k in keyof any]: never }>() {}
+function checkFields<_ extends { [k in keyof any]: never }>() { }
 
 // https://github.com/sindresorhus/type-fest
 type Numeric = number | bigint

@@ -90,9 +90,12 @@ export async function GET(request: Request) {
                 // Note: In a real scenario, this would aggregate InvoiceItems linked to Restaurant Invoices
                 const restSales = await prisma.invoice.aggregate({
                     _sum: { amount: true },
-                    where: { ...dateFilter, type: 'RESTAURANT', date: dateFilter.createdAt }
+                    where: {
+                        type: 'RESTAURANT',
+                        ...(dateFilter.createdAt ? { date: dateFilter.createdAt } : {})
+                    }
                 });
-                data = { totalSales: restSales._sum.amount || 0 };
+                data = { totalSales: restSales._sum?.amount || 0 };
                 break;
 
             default:

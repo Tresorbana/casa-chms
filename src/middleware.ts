@@ -1,21 +1,31 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { getSession } from '@/lib/auth'
+import { decrypt } from '@/lib/auth'
 
 export async function middleware(request: NextRequest) {
-    const session = await getSession()
+    const sessionCookie = request.cookies.get('session')?.value
+    const session = sessionCookie ? await decrypt(sessionCookie) : null
+
     const { pathname } = request.nextUrl
 
-    // Protected routes
-    const protectedRoutes = ['/settings', '/dashboard', '/cms', '/pos', '/inventory', '/reports']
-    const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
+    // Protect root / and other routes
+    const isLoginPage = pathname === '/login'
 
-    if (isProtectedRoute && !session) {
+    // Allow public access to static files and api/auth
+    if (pathname.startsWith('/_next') || pathname.startsWith('/api/auth') || pathname === '/favicon.ico' || pathname === '/logo.png') {
+        return NextResponse.next()
+    }
+
+    // If user is not logged in and trying to access protected route (everything except login)
+    if (!session && !isLoginPage) {
+        if (pathname.startsWith('/api')) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        }
         return NextResponse.redirect(new URL('/login', request.url))
     }
 
-    // Redirect to dashboard if already logged in and trying to access login page
-    if (pathname === '/login' && session) {
+    // If user is logged in and trying to access login page
+    if (session && isLoginPage) {
         return NextResponse.redirect(new URL('/', request.url))
     }
 
@@ -23,5 +33,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+    matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 }
