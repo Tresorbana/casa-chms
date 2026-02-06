@@ -3,13 +3,80 @@ import { prisma } from '@/lib/db'
 
 export async function GET() {
     try {
-        const notifications = await prisma.notification.findMany({
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        // 1. Stored Notifications
+        const storedNotifications = await prisma.notification.findMany({
             orderBy: { createdAt: 'desc' },
-            take: 20
-        })
-        return NextResponse.json(notifications)
+            take: 10
+        });
+
+        // 2. New Web Inquiries
+        const newInquiries = await prisma.webInquiry.findMany({
+            where: { status: 'NEW' },
+            orderBy: { createdAt: 'desc' }
+        });
+
+        // 3. Today's Checkouts
+        const checkouts = await prisma.booking.findMany({
+            where: {
+                checkOut: {
+                    gte: today,
+                    lt: tomorrow
+                },
+                status: 'CHECKED_IN'
+            },
+            include: { guest: true, room: true }
+        });
+
+        // 4. Today's Check-ins
+        const checkins = await prisma.booking.findMany({
+            where: {
+                checkIn: {
+                    gte: today,
+                    lt: tomorrow
+                },
+                status: 'CONFIRMED'
+            },
+            include: { guest: true, room: true }
+        });
+
+        // Merge and Map
+        const dynamicNotifications = [
+            ...newInquiries.map(i => ({
+                id: `inq-${i.id}`,
+                message: `New Inquiry from ${i.name}: ${i.subject}`,
+                type: 'INFO',
+                createdAt: i.createdAt,
+                isRead: false
+            })),
+            ...checkouts.map(b => ({
+                id: `out-${b.id}`,
+                message: `Checkout Due: ${b.guest.name} (Room ${b.room.number})`,
+                type: 'WARNING',
+                createdAt: today, // Treat as today's alert
+                isRead: false
+            })),
+            ...checkins.map(b => ({
+                id: `in-${b.id}`,
+                message: `Expected Arrival: ${b.guest.name} (Room ${b.room.number})`,
+                type: 'SUCCESS',
+                createdAt: today,
+                isRead: false
+            }))
+        ];
+
+        // Combine with stored, sort by date desc
+        const allNotifications = [...dynamicNotifications, ...storedNotifications]
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+        return NextResponse.json(allNotifications);
     } catch (error) {
-        return NextResponse.json({ error: 'Failed to fetch notifications' }, { status: 500 })
+        console.error(error);
+        return NextResponse.json({ error: 'Failed to fetch notifications' }, { status: 500 });
     }
 }
 
