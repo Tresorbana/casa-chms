@@ -86,8 +86,6 @@ export async function GET(request: Request) {
                 break;
 
             case 'RESTAURANT_SALES':
-                // Simulating restaurant sales from Invoices of type RESTAURANT
-                // Note: In a real scenario, this would aggregate InvoiceItems linked to Restaurant Invoices
                 const restSales = await prisma.invoice.aggregate({
                     _sum: { amount: true },
                     where: {
@@ -95,7 +93,109 @@ export async function GET(request: Request) {
                         ...(dateFilter.createdAt ? { date: dateFilter.createdAt } : {})
                     }
                 });
-                data = { totalSales: restSales._sum?.amount || 0 };
+                const restRecords = await prisma.invoice.findMany({
+                    where: {
+                        type: 'RESTAURANT',
+                        ...(dateFilter.createdAt ? { date: dateFilter.createdAt } : {})
+                    },
+                    orderBy: { date: 'desc' },
+                    include: { items: true }
+                });
+                data = {
+                    totalSales: restSales._sum?.amount || 0,
+                    records: restRecords.map(inv => ({
+                        id: inv.id,
+                        room: { type: 'DINING', number: 'WALK-IN' },
+                        totalAmount: inv.amount,
+                        createdAt: inv.date
+                    }))
+                };
+                break;
+
+            case 'MENU_PERFORMANCE':
+                // Aggregate invoice items where invoice type is RESTAURANT
+                const menuItems = await prisma.invoiceItem.groupBy({
+                    by: ['description'],
+                    _sum: { quantity: true, price: true },
+                    where: {
+                        invoice: {
+                            type: 'RESTAURANT',
+                            ...(dateFilter.createdAt ? { date: dateFilter.createdAt } : {})
+                        }
+                    },
+                    orderBy: {
+                        _sum: { quantity: 'desc' }
+                    }
+                });
+                data = {
+                    records: menuItems.map(item => ({
+                        id: item.description,
+                        room: { type: 'ITEM', number: item.description },
+                        totalAmount: item._sum.price || 0,
+                        createdAt: new Date().toISOString(), // No specific date for aggregate
+                        quantity: item._sum.quantity
+                    }))
+                };
+                break;
+
+            case 'RESTAURANT_ORDERS':
+                // Similar to SALES but focused on order count/volume
+                const orderCount = await prisma.invoice.count({
+                    where: {
+                        type: 'RESTAURANT',
+                        ...(dateFilter.createdAt ? { date: dateFilter.createdAt } : {})
+                    }
+                });
+                data = {
+                    totalOrders: orderCount,
+                    // Re-use sales records layout
+                    records: []
+                };
+                break;
+
+            case 'EXTRA_SERVICES':
+                const serviceCharges = await prisma.serviceCharge.findMany({
+                    where: dateFilter,
+                    include: { service: true }
+                });
+                data = {
+                    records: serviceCharges.map(sc => ({
+                        id: sc.id,
+                        room: { type: 'SERVICE', number: sc.service.name },
+                        totalAmount: sc.totalPrice,
+                        createdAt: sc.date
+                    }))
+                };
+                break;
+
+            case 'GUEST_STAY':
+                const stays = await prisma.booking.findMany({
+                    where: {
+                        ...dateFilter,
+                        status: 'CHECKED_OUT'
+                    },
+                    include: { guest: true, room: true }
+                });
+                data = {
+                    records: stays.map(b => ({
+                        id: b.id,
+                        room: { type: b.room.type, number: b.room.number },
+                        totalAmount: b.totalAmount,
+                        createdAt: b.checkOut,
+                        details: `${b.guest.name} (${Math.ceil((new Date(b.checkOut).getTime() - new Date(b.checkIn).getTime()) / (1000 * 60 * 60 * 24))} nights)`
+                    }))
+                };
+                break;
+
+            case 'RESERVATIONS':
+                const reservations = await prisma.booking.groupBy({
+                    by: ['status'],
+                    _count: { id: true },
+                    where: dateFilter
+                });
+                data = {
+                    breakdown: reservations.map(r => ({ type: r.status, _count: r._count }))
+                };
                 break;
 
             default:

@@ -3,12 +3,13 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
+import { useUI } from '@/context/UIContext';
 
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
-  const [isOpen, setIsOpen] = useState(false);
+  const { isSidebarOpen, closeSidebar, toggleSidebar } = useUI();
 
   useEffect(() => {
     fetch('/api/auth/me')
@@ -22,7 +23,7 @@ export default function Sidebar() {
 
   // Close sidebar on navigation (mobile)
   useEffect(() => {
-    setIsOpen(false);
+    closeSidebar();
   }, [pathname]);
 
   if (pathname === '/login') return null;
@@ -43,23 +44,23 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile Toggle */}
+      {/* Mobile Toggle - Restored as per user request */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="lg:hidden fixed top-4 left-4 z-[60] p-2 bg-white border border-slate-200 rounded-lg shadow-sm"
+        onClick={toggleSidebar}
+        className="lg:hidden fixed top-4 left-4 z-[60] p-2 bg-white border border-slate-200 rounded-lg shadow-sm hover:bg-slate-50 transition-colors"
       >
-        <span className="material-icons-outlined">{isOpen ? 'close' : 'menu'}</span>
+        <span className="material-icons-outlined text-slate-600">{isSidebarOpen ? 'close' : 'menu'}</span>
       </button>
 
       {/* Backdrop */}
-      {isOpen && (
+      {isSidebarOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-[50] lg:hidden"
-          onClick={() => setIsOpen(false)}
+          onClick={closeSidebar}
         />
       )}
 
-      <aside className={`fixed left-0 top-0 h-full w-64 bg-white border-r border-slate-200 z-50 flex flex-col transition-transform duration-300 lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside className={`fixed left-0 top-0 h-full w-64 bg-white border-r border-slate-200 z-50 flex flex-col transition-transform duration-300 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-6">
           <div className="flex items-center gap-3">
             <Image alt="Casa Hotel Logo" width={40} height={40} className="h-10 w-10 object-contain" src="/logo.png" />

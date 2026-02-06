@@ -24,7 +24,7 @@ export default function Dashboard() {
         title="Management Dashboard"
         description="Real-time hotel occupancy and revenue status."
         actions={
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
             <div className="relative group">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-primary transition-colors">
                 <span className="material-icons-outlined text-sm">calendar_today</span>
@@ -33,12 +33,12 @@ export default function Dashboard() {
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="bg-white border border-slate-200 rounded-2xl pl-12 pr-6 py-2.5 text-[11px] font-black uppercase tracking-widest outline-none focus:ring-2 focus:ring-primary shadow-sm hover:shadow-md transition-all cursor-pointer"
+                className="w-full sm:w-auto bg-white border border-slate-200 rounded-2xl pl-12 pr-6 py-2.5 text-[11px] font-black uppercase tracking-widest outline-none focus:ring-2 focus:ring-primary shadow-sm hover:shadow-md transition-all cursor-pointer"
               />
             </div>
             <Link
               href="/bookings"
-              className="bg-primary text-white font-black uppercase text-[10px] tracking-[0.2em] px-8 py-3 rounded-2xl flex items-center gap-3 shadow-lg shadow-primary/20 hover:scale-[1.05] transition-all"
+              className="bg-primary text-white font-black uppercase text-[10px] tracking-[0.2em] px-8 py-3 rounded-2xl flex items-center justify-center gap-3 shadow-lg shadow-primary/20 hover:scale-[1.05] transition-all"
             >
               <span className="material-icons-outlined text-sm">add</span>
               New Reservation
@@ -83,7 +83,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <section className="bg-white p-10 rounded-[3rem] border border-slate-200 shadow-2xl overflow-hidden">
+      <section className="bg-white p-6 md:p-10 rounded-3xl md:rounded-[3rem] border border-slate-200 shadow-2xl overflow-hidden">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
           <div>
             <h3 className="text-3xl font-black italic tracking-tighter uppercase text-slate-800 leading-none mb-2">Room Status Grid</h3>

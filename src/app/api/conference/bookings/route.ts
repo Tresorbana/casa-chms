@@ -16,7 +16,7 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         const body = await request.json()
-        const { conferenceRoomId, guestName, guestEmail, startTime, endTime, totalAmount } = body
+        const { conferenceRoomId, guestName, guestContact, guestId, guestEmail, startTime, endTime, totalAmount } = body
 
         // Check availability
         const conflict = await prisma.conferenceBooking.findFirst({
@@ -44,6 +44,8 @@ export async function POST(request: Request) {
             data: {
                 conferenceRoomId,
                 guestName,
+                guestContact,
+                guestId,
                 guestEmail,
                 startTime: new Date(startTime),
                 endTime: new Date(endTime),

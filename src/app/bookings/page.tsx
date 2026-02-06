@@ -103,7 +103,7 @@ function BookingsContent() {
                 </div>
                 <span className="material-icons-outlined text-primary">person_add</span>
               </div>
-              <div className="p-10">
+              <div className="p-6 md:p-10">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Full Legal Name</label>
@@ -144,7 +144,7 @@ function BookingsContent() {
                 </div>
                 <span className="material-icons-outlined text-primary">event</span>
               </div>
-              <div className="p-10 space-y-8">
+              <div className="p-6 md:p-10 space-y-8">
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Start Cycle</label>

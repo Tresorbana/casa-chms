@@ -82,8 +82,8 @@ export default function OccupancyCalendar() {
                             <div
                                 key={booking.id}
                                 className={`text-[9px] p-1 rounded font-black truncate border-l-2 shadow-sm ${isConference
-                                        ? 'bg-purple-50 border-purple-500 text-purple-700'
-                                        : 'bg-copper/10 border-copper text-copper'
+                                    ? 'bg-purple-50 border-purple-500 text-purple-700'
+                                    : 'bg-copper/10 border-copper text-copper'
                                     }`}
                                 title={`${booking.guestName} (${isConference ? 'Event' : 'Room ' + booking.roomNumber})`}
                             >
@@ -129,14 +129,16 @@ export default function OccupancyCalendar() {
                 }
             />
 
-            <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-xl overflow-hidden flex-1">
-                <div className="grid grid-cols-7 border-b border-slate-200 bg-cornsilk/50">
-                    {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(day => (
-                        <div key={day} className="py-4 text-center text-[10px] uppercase font-black text-olive-leaf tracking-widest">{day}</div>
-                    ))}
-                </div>
-                <div className="grid grid-cols-7 flex-1">
-                    {days}
+            <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-xl overflow-hidden flex-1 overflow-x-auto">
+                <div className="min-w-[800px]">
+                    <div className="grid grid-cols-7 border-b border-slate-200 bg-cornsilk/50">
+                        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(day => (
+                            <div key={day} className="py-4 text-center text-[10px] uppercase font-black text-olive-leaf tracking-widest">{day}</div>
+                        ))}
+                    </div>
+                    <div className="grid grid-cols-7 flex-1">
+                        {days}
+                    </div>
                 </div>
             </div>
 

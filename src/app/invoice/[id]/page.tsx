@@ -31,7 +31,7 @@ export default function InvoicePage() {
                 }
             `}</style>
 
-            <div className="invoice-container bg-white w-full max-w-4xl p-12 shadow-2xl relative">
+            <div className="invoice-container bg-white w-full max-w-4xl p-6 md:p-12 shadow-2xl relative">
                 {/* Header */}
                 <div className="flex justify-between items-start mb-16 border-b-4 border-slate-900 pb-8">
                     <div>
@@ -70,8 +70,8 @@ export default function InvoicePage() {
                 </div>
 
                 {/* Line Items */}
-                <div className="mb-16">
-                    <table className="w-full text-left">
+                <div className="mb-16 overflow-x-auto">
+                    <table className="w-full text-left min-w-[600px]">
                         <thead>
                             <tr className="border-b-2 border-slate-900">
                                 <th className="py-4 text-xs font-black text-slate-900 uppercase tracking-widest w-16">#</th>

@@ -14,6 +14,14 @@ export default function TopBar({ title, description, actions }: TopBarProps) {
     const [showNotifications, setShowNotifications] = useState(false);
     const [user, setUser] = useState<any>(null);
 
+    const [scrolled, setScrolled] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => setScrolled(window.scrollY > 20);
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
     useEffect(() => {
         fetch('/api/auth/me')
             .then(res => res.json())
@@ -32,9 +40,9 @@ export default function TopBar({ title, description, actions }: TopBarProps) {
     })) : [];
 
     return (
-        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 px-4 lg:px-0 pl-16 lg:pl-0">
-            <div className="flex-1">
-                <h2 className="text-2xl lg:text-3xl font-bold text-slate-800 uppercase tracking-tight">{title}</h2>
+        <div className={`py-6 mb-8 flex flex-col gap-6 md:flex-row md:items-end justify-between transition-all duration-300 ${scrolled ? 'py-4' : ''}`}>
+            <div className="pl-14 lg:pl-0 transition-all">
+                <h1 className="text-3xl font-black italic tracking-tighter uppercase text-slate-800 leading-none mb-2">{title}</h1>
                 {description && <p className="text-slate-500 text-sm mt-1 font-medium">{description}</p>}
             </div>
 
@@ -102,6 +110,6 @@ export default function TopBar({ title, description, actions }: TopBarProps) {
                     </div>
                 </Link>
             </div>
-        </header>
+        </div>
     );
 }

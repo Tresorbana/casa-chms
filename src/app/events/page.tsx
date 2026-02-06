@@ -1,3 +1,4 @@
+'use client';
 import { useState } from 'react';
 import TopBar from '@/components/TopBar';
 import useSWR from 'swr';

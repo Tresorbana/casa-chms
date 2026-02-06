@@ -14,6 +14,8 @@ export default function ConferenceBookingModal({ onClose, onSuccess, initialDate
     const [formData, setFormData] = useState({
         conferenceRoomId: '',
         guestName: '',
+        guestContact: '',
+        guestId: '',
         guestEmail: '',
         startTime: initialDate ? new Date(initialDate.setHours(9, 0, 0, 0)).toISOString().slice(0, 16) : '',
         endTime: initialDate ? new Date(initialDate.setHours(17, 0, 0, 0)).toISOString().slice(0, 16) : '',
@@ -128,6 +130,30 @@ export default function ConferenceBookingModal({ onClose, onSuccess, initialDate
                             onChange={(e) => setFormData({ ...formData, guestName: e.target.value })}
                             className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-xs font-bold outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                         />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Contact Phone</label>
+                            <input
+                                type="text"
+                                required
+                                placeholder="+250..."
+                                value={formData.guestContact}
+                                onChange={(e) => setFormData({ ...formData, guestContact: e.target.value })}
+                                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-xs font-bold outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">ID / Passport</label>
+                            <input
+                                type="text"
+                                placeholder="Optional"
+                                value={formData.guestId}
+                                onChange={(e) => setFormData({ ...formData, guestId: e.target.value })}
+                                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-xs font-bold outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                            />
+                        </div>
                     </div>
 
                     <div className="space-y-2">

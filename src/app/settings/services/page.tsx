@@ -8,24 +8,30 @@ export default function ServicesSettings() {
     const { data: servicesData, isLoading } = useSWR('/api/services', fetcher);
     const services = Array.isArray(servicesData) ? servicesData : [];
     const [isAdding, setIsAdding] = useState(false);
-    const [formData, setFormData] = useState({ name: '', price: '', unit: 'session' });
+    const [formData, setFormData] = useState({
+        name: '',
+        price: '',
+        unit: 'session',
+        type: 'RESIDENT', // RESIDENT | WALKIN
+        serviceId: '',
+        bookingId: '',
+        guestName: '',
+        guestContact: '',
+        quantity: 1
+    });
 
-    const handleAdd = async () => {
-        if (!formData.name || !formData.price) return;
+    const handleCharge = async () => {
+        if (!formData.serviceId) return;
 
-        await fetch('/api/services', {
+        await fetch('/api/services/charge', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                name: formData.name,
-                price: parseFloat(formData.price),
-                unit: formData.unit
-            })
+            body: JSON.stringify(formData)
         });
 
         setIsAdding(false);
-        setFormData({ name: '', price: '', unit: 'session' });
-        mutate('/api/services');
+        setFormData({ ...formData, serviceId: '', bookingId: '', guestName: '', guestContact: '' });
+        alert('Service Charged Successfully');
     };
 
     const handleDelete = async (id: string) => {
@@ -58,47 +64,100 @@ export default function ServicesSettings() {
             />
 
             {isAdding && (
-                <div className="bg-white p-6 rounded-2xl shadow-lg border border-primary/20 animate-in fade-in slide-in-from-top-4">
-                    <h3 className="text-lg font-bold text-slate-800 mb-4">New Service</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase">Service Name</label>
-                            <input
-                                type="text"
-                                placeholder="e.g. Airport Shuttle"
-                                className="w-full bg-slate-50 border-none rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-primary"
-                                value={formData.name}
-                                onChange={e => setFormData({ ...formData, name: e.target.value })}
-                            />
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+                    <div className="bg-white p-8 rounded-[2rem] shadow-2xl border border-slate-100 w-full max-w-lg animate-in fade-in zoom-in duration-200">
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-2xl font-black italic tracking-tighter uppercase text-slate-800">Assign Service</h3>
+                            <button onClick={() => { setIsAdding(false); setFormData({ ...formData, type: 'RESIDENT' }); }} className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-colors">
+                                <span className="material-icons-outlined text-sm">close</span>
+                            </button>
                         </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase">Price</label>
-                            <input
-                                type="number"
-                                placeholder="RWF"
-                                className="w-full bg-slate-50 border-none rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-primary"
-                                value={formData.price}
-                                onChange={e => setFormData({ ...formData, price: e.target.value })}
-                            />
+
+                        <div className="space-y-6">
+                            {/* Toggle Type */}
+                            <div className="flex p-1 bg-slate-100 rounded-xl">
+                                <button
+                                    onClick={() => setFormData({ ...formData, type: 'RESIDENT' })}
+                                    className={`flex-1 py-3 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${formData.type === 'RESIDENT' ? 'bg-white shadow-sm text-primary' : 'text-slate-400 hover:text-slate-600'}`}
+                                >
+                                    Resident
+                                </button>
+                                <button
+                                    onClick={() => setFormData({ ...formData, type: 'WALKIN' })}
+                                    className={`flex-1 py-3 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${formData.type === 'WALKIN' ? 'bg-white shadow-sm text-primary' : 'text-slate-400 hover:text-slate-600'}`}
+                                >
+                                    Walk-in Guest
+                                </button>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Select Service</label>
+                                <select
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
+                                    value={formData.serviceId}
+                                    onChange={e => setFormData({ ...formData, serviceId: e.target.value })}
+                                >
+                                    <option value="">Choose a service...</option>
+                                    {services.map((s: any) => (
+                                        <option key={s.id} value={s.id}>{s.name} - RWF {s.price.toLocaleString()}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {formData.type === 'RESIDENT' ? (
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Room / Guest</label>
+                                    <select
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
+                                        value={formData.bookingId}
+                                        onChange={e => setFormData({ ...formData, bookingId: e.target.value })}
+                                    >
+                                        <option value="">Select active room...</option>
+                                        {/* Ideally we fetch active bookings here */}
+                                        <option value="mock-booking-id">Room 101 - John Doe</option>
+                                    </select>
+                                    <p className="text-[10px] text-orange-400 font-bold italic">* Fetching active bookings logic needed</p>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Guest Name</label>
+                                        <input
+                                            type="text"
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
+                                            placeholder="Full Name"
+                                            value={formData.guestName}
+                                            onChange={e => setFormData({ ...formData, guestName: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Contact</label>
+                                        <input
+                                            type="text"
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
+                                            placeholder="Phone Number"
+                                            value={formData.guestContact}
+                                            onChange={e => setFormData({ ...formData, guestContact: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Quantity</label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 outline-none focus:ring-2 focus:ring-primary/20 font-bold text-sm"
+                                    value={formData.quantity}
+                                    onChange={e => setFormData({ ...formData, quantity: parseInt(e.target.value) })}
+                                />
+                            </div>
+
+                            <button onClick={handleCharge} className="w-full bg-primary text-white py-4 rounded-2xl font-black uppercase tracking-[0.2em] text-xs shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                                Confirm Charge
+                            </button>
                         </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase">Unit</label>
-                            <select
-                                className="w-full bg-slate-50 border-none rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-primary"
-                                value={formData.unit}
-                                onChange={e => setFormData({ ...formData, unit: e.target.value })}
-                            >
-                                <option value="session">Per Session</option>
-                                <option value="hour">Per Hour</option>
-                                <option value="day">Per Day</option>
-                                <option value="item">Per Item</option>
-                                <option value="km">Per Km</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div className="flex gap-4">
-                        <button onClick={handleAdd} className="bg-primary text-white px-6 py-2 rounded-xl font-bold">Save Service</button>
-                        <button onClick={() => setIsAdding(false)} className="bg-slate-200 text-slate-600 px-6 py-2 rounded-xl font-bold">Cancel</button>
                     </div>
                 </div>
             )}

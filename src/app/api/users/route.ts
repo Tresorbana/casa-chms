@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { getSession } from '@/lib/auth'
+import bcrypt from 'bcryptjs'
 
 export async function GET() {
     const session = await getSession()
@@ -39,11 +40,13 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Email and password are required' }, { status: 400 })
         }
 
+        const hashedPassword = await bcrypt.hash(password, 10);
+
         const user = await prisma.user.create({
             data: {
                 email,
                 name,
-                password, // Note: In a real app, hash this!
+                password: hashedPassword,
                 role: role || 'STAFF',
             },
         })
