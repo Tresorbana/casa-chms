@@ -57,29 +57,29 @@ export default function Settings() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 flex-1">
                 <div className="lg:col-span-2 space-y-8">
                     {/* User Management Table */}
-                    <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xl">
-                        <div className="px-8 py-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+                    <div className="bg-white rounded-[2.5rem] border border-slate-200 overflow-hidden shadow-2xl">
+                        <div className="px-8 py-6 border-b border-slate-100 bg-slate-50/50">
                             <h3 className="font-black text-xs uppercase tracking-[0.3em] text-slate-400">Authenticated Staff</h3>
                         </div>
                         <div className="overflow-x-auto">
                             <table className="w-full text-left">
                                 <thead>
-                                    <tr className="bg-slate-50 dark:bg-slate-800/50 text-slate-400 text-[10px] font-black uppercase tracking-widest">
+                                    <tr className="bg-slate-50 text-slate-400 text-[10px] font-black uppercase tracking-widest">
                                         <th className="px-8 py-4">Staff Member</th>
                                         <th className="px-8 py-4">Status</th>
                                         <th className="px-8 py-4 text-right">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                <tbody className="divide-y divide-slate-100">
                                     {users?.map((u: any) => (
-                                        <tr key={u.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors group">
+                                        <tr key={u.id} className="hover:bg-slate-50 transition-colors group">
                                             <td className="px-8 py-5">
                                                 <div className="flex items-center gap-4">
                                                     <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-black text-xs">
                                                         {u.name.substring(0, 2).toUpperCase()}
                                                     </div>
                                                     <div>
-                                                        <p className="font-black text-slate-800 dark:text-white group-hover:text-primary transition-colors italic uppercase">{u.name}</p>
+                                                        <p className="font-black text-slate-800 group-hover:text-primary transition-colors italic uppercase">{u.name}</p>
                                                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">{u.email} • {u.role}</p>
                                                     </div>
                                                 </div>
@@ -103,8 +103,8 @@ export default function Settings() {
                     </div>
 
                     {/* Audit Log (Mocked as per implementation plan) */}
-                    <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xl">
-                        <div className="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                    <div className="bg-white rounded-[2.5rem] border border-slate-200 overflow-hidden shadow-xl">
+                        <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center">
                             <h3 className="font-black text-xs uppercase tracking-[0.3em] text-slate-400">System Audit Logs</h3>
                             <button className="text-[10px] font-black text-primary uppercase tracking-widest hover:underline">View All Records</button>
                         </div>
@@ -113,10 +113,10 @@ export default function Settings() {
                                 <div className="text-center text-slate-400 text-xs">Loading logs...</div>
                             ) : (
                                 (notificationData && Array.isArray(notificationData) ? notificationData.slice(0, 5) : []).map((log: any, i: number) => (
-                                    <div key={i} className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/30 rounded-2xl border border-slate-100 dark:border-slate-800">
+                                    <div key={i} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
                                         <div className="flex items-center gap-3">
                                             <div className={`w-2 h-2 rounded-full ${log.type === 'WARNING' ? 'bg-amber-500' : log.type === 'SUCCESS' ? 'bg-primary' : 'bg-blue-500'}`}></div>
-                                            <p className="text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-tighter truncate max-w-[200px]">{log.message}</p>
+                                            <p className="text-sm font-black text-slate-700 uppercase tracking-tighter truncate max-w-[200px]">{log.message}</p>
                                         </div>
                                         <div className="text-right">
                                             <p className="text-[10px] font-black uppercase text-slate-400">System</p>
@@ -131,7 +131,7 @@ export default function Settings() {
 
                 <div className="space-y-8">
                     {/* Financial Settings */}
-                    <div className="bg-slate-900 dark:bg-slate-800 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden group">
+                    <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden group">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full -mr-16 -mt-16 blur-3xl"></div>
                         <h3 className="font-black text-xs uppercase tracking-[0.4em] text-slate-400 mb-8 relative z-10">Configuration</h3>
                         <div className="space-y-6 relative z-10">
@@ -154,7 +154,7 @@ export default function Settings() {
                     </div>
 
                     {/* System Info */}
-                    <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 border border-slate-200 dark:border-slate-800 shadow-xl">
+                    <div className="bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-xl">
                         <h4 className="font-black text-xs uppercase tracking-[0.3em] text-slate-400 mb-6">Environment</h4>
                         <div className="space-y-4">
                             <div className="flex items-center gap-3">
@@ -177,8 +177,8 @@ export default function Settings() {
             {/* User Creation Modal */}
             {isModalOpen && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-xl p-4">
-                    <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-[3rem] p-10 shadow-2xl border border-slate-200 dark:border-slate-800 relative">
-                        <button onClick={() => setIsModalOpen(false)} className="absolute top-8 right-8 text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors">
+                    <div className="bg-white w-full max-w-md rounded-[3rem] p-10 shadow-2xl border border-slate-200 relative">
+                        <button onClick={() => setIsModalOpen(false)} className="absolute top-8 right-8 text-slate-400 hover:text-slate-800 transition-colors">
                             <span className="material-icons-outlined">close</span>
                         </button>
                         <h2 className="text-3xl font-black italic tracking-tighter uppercase mb-8">Provision Staff</h2>
@@ -190,7 +190,7 @@ export default function Settings() {
                                     type="text"
                                     value={formData.name}
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl px-6 py-4 text-sm font-bold shadow-inner"
+                                    className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-sm font-bold shadow-inner"
                                     placeholder="Enter full name"
                                 />
                             </div>
@@ -201,7 +201,7 @@ export default function Settings() {
                                     type="email"
                                     value={formData.email}
                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                    className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl px-6 py-4 text-sm font-bold shadow-inner"
+                                    className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-sm font-bold shadow-inner"
                                     placeholder="staff@casahotel.rw"
                                 />
                             </div>
@@ -212,7 +212,7 @@ export default function Settings() {
                                     type="password"
                                     value={formData.password}
                                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                    className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl px-6 py-4 text-sm font-bold shadow-inner"
+                                    className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-sm font-bold shadow-inner"
                                     placeholder="••••••••"
                                 />
                             </div>
@@ -221,7 +221,7 @@ export default function Settings() {
                                 <select
                                     value={formData.role}
                                     onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                                    className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl px-6 py-4 text-sm font-bold shadow-inner appearance-none"
+                                    className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-sm font-bold shadow-inner appearance-none"
                                 >
                                     <option value="STAFF">GENERAL STAFF</option>
                                     <option value="ADMIN">ADMINISTRATOR</option>

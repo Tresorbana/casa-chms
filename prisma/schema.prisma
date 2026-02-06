@@ -7,7 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
@@ -19,9 +18,10 @@ model User {
 }
 
 model Floor {
-  id    String @id @default(cuid())
-  number Int   @unique
-  rooms Room[]
+  id     String @id @default(cuid())
+  number Int    @unique
+  name   String?
+  rooms  Room[]
 }
 
 model Room {
@@ -31,42 +31,42 @@ model Room {
   price    Float
   status   String    @default("AVAILABLE")
   floorId  String?
-  floor    Floor?    @relation(fields: [floorId], references: [id])
   bookings Booking[]
+  floor    Floor?    @relation(fields: [floorId], references: [id], onDelete: Cascade)
 }
 
 model Guest {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   name        String
-  email       String?
+  email       String?   @unique
   phone       String?
   nationality String?
   bookings    Booking[]
 }
 
 model Booking {
-  id             String          @id @default(cuid())
-  roomId         String
-  guestId        String
-  checkIn        DateTime
-  checkOut       DateTime
-  status         String          @default("CONFIRMED")
-  source         String          @default("DIRECT") // DIRECT, ONLINE, CORPORATE, WALK_IN
+  id                 String          @id @default(cuid())
+  roomId             String
+  guestId            String
+  checkIn            DateTime
+  checkOut           DateTime
+  status             String          @default("CONFIRMED")
+  totalAmount        Float
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
   cancellationReason String?
-  totalAmount    Float
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  guest          Guest           @relation(fields: [guestId], references: [id])
-  room           Room            @relation(fields: [roomId], references: [id])
-  serviceCharges ServiceCharge[]
+  source             String          @default("DIRECT")
+  guest              Guest           @relation(fields: [guestId], references: [id])
+  room               Room            @relation(fields: [roomId], references: [id])
+  serviceCharges     ServiceCharge[]
 }
 
 model ConferenceRoom {
-  id          String              @id @default(cuid())
-  name        String
-  capacity    Int
+  id           String              @id @default(cuid())
+  name         String
+  capacity     Int
   pricePerHour Float
-  bookings    ConferenceBooking[]
+  bookings     ConferenceBooking[]
 }
 
 model ConferenceBooking {
@@ -84,21 +84,21 @@ model ConferenceBooking {
 
 model Service {
   id      String          @id @default(cuid())
-  name    String          @unique // Laundry, Sauna, Massage
+  name    String          @unique
   price   Float
-  unit    String // e.g., "per kg", "per hour"
+  unit    String
   charges ServiceCharge[]
 }
 
 model ServiceCharge {
-  id        String   @id @default(cuid())
-  bookingId String
-  serviceId String
-  quantity  Int      @default(1)
+  id         String   @id @default(cuid())
+  bookingId  String
+  serviceId  String
+  quantity   Int      @default(1)
   totalPrice Float
-  date      DateTime @default(now())
-  booking   Booking  @relation(fields: [bookingId], references: [id])
-  service   Service  @relation(fields: [serviceId], references: [id])
+  date       DateTime @default(now())
+  booking    Booking  @relation(fields: [bookingId], references: [id])
+  service    Service  @relation(fields: [serviceId], references: [id])
 }
 
 model WebInquiry {
@@ -107,14 +107,14 @@ model WebInquiry {
   email     String
   subject   String?
   message   String
-  status    String   @default("NEW") // NEW, READ, REPLIED
+  status    String   @default("NEW")
   createdAt DateTime @default(now())
 }
 
 model Notification {
   id        String   @id @default(cuid())
   message   String
-  type      String   @default("INFO") // INFO, WARNING, SUCCESS
+  type      String   @default("INFO")
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
 }
@@ -144,16 +144,13 @@ model Invoice {
   guestName       String
   amount          Float
   status          String        @default("UNPAID")
-  type            String        @default("ROOM") // ROOM, RESTAURANT, SERVICE, MASTER
   date            DateTime      @default(now())
-  items           InvoiceItem[]
-  
-  // Master Invoice Relations
+  guestSignature  String?
   masterInvoiceId String?
+  type            String        @default("ROOM")
   masterInvoice   Invoice?      @relation("MasterToSub", fields: [masterInvoiceId], references: [id])
   subInvoices     Invoice[]     @relation("MasterToSub")
-  
-  guestSignature  String?
+  items           InvoiceItem[]
 }
 
 model InvoiceItem {

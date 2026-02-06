@@ -59,7 +59,7 @@ export default function MenuSettings() {
     const safeItems = Array.isArray(menuItems) ? menuItems : [];
 
     return (
-        <div className="flex-1 min-h-screen relative p-4 lg:p-8 flex flex-col gap-8 bg-slate-50 dark:bg-slate-950">
+        <div className="flex-1 min-h-screen relative p-4 lg:p-8 flex flex-col gap-8 bg-slate-50">
             <TopBar
                 title="Menu Management"
                 description="Configure restaurant menu items, pricing, and availability."
@@ -74,11 +74,11 @@ export default function MenuSettings() {
                 }
             />
 
-            <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xl flex-1">
+            <div className="bg-white rounded-[2.5rem] border border-slate-200 overflow-hidden shadow-xl flex-1">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
-                            <tr className="bg-slate-50 dark:bg-slate-800/50 text-slate-400 text-[10px] font-black uppercase tracking-widest">
+                            <tr className="bg-slate-50 text-slate-400 text-[10px] font-black uppercase tracking-widest">
                                 <th className="px-8 py-4">Item Name</th>
                                 <th className="px-8 py-4">Category</th>
                                 <th className="px-8 py-4">Price</th>
@@ -86,23 +86,23 @@ export default function MenuSettings() {
                                 <th className="px-8 py-4 text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                        <tbody className="divide-y divide-slate-100">
                             {isLoading ? (
                                 <tr><td colSpan={5} className="p-8 text-center text-xs text-slate-400">Loading menu...</td></tr>
                             ) : safeItems.length === 0 ? (
                                 <tr><td colSpan={5} className="p-8 text-center text-xs text-slate-400">No items found.</td></tr>
                             ) : (
                                 safeItems.map((item: any) => (
-                                    <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors group">
-                                        <td className="px-8 py-5 font-bold text-slate-800 dark:text-slate-200">{item.name}</td>
+                                    <tr key={item.id} className="hover:bg-slate-50 transition-colors group">
+                                        <td className="px-8 py-5 font-bold text-slate-800">{item.name}</td>
                                         <td className="px-8 py-5 text-sm text-slate-500">{item.category}</td>
                                         <td className="px-8 py-5 font-black text-copper">RWF {item.price.toLocaleString()}</td>
                                         <td className="px-8 py-5">
                                             <button
                                                 onClick={() => toggleAvailability(item)}
                                                 className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest transition-all ${item.available
-                                                        ? 'bg-olive-leaf/10 text-olive-leaf hover:bg-red-500/10 hover:text-red-500'
-                                                        : 'bg-slate-100 text-slate-400 hover:bg-olive-leaf/10 hover:text-olive-leaf'
+                                                    ? 'bg-olive-leaf/10 text-olive-leaf hover:bg-red-500/10 hover:text-red-500'
+                                                    : 'bg-slate-100 text-slate-400 hover:bg-olive-leaf/10 hover:text-olive-leaf'
                                                     }`}
                                             >
                                                 {item.available ? 'Available' : 'Sold Out'}
@@ -123,8 +123,8 @@ export default function MenuSettings() {
 
             {isModalOpen && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-xl p-4">
-                    <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-[3rem] p-10 shadow-2xl border border-slate-200 dark:border-slate-800 relative animate-in fade-in zoom-in duration-200">
-                        <button onClick={() => setIsModalOpen(false)} className="absolute top-8 right-8 text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors">
+                    <div className="bg-white w-full max-w-md rounded-[3rem] p-10 shadow-2xl border border-slate-200 relative animate-in fade-in zoom-in duration-200">
+                        <button onClick={() => setIsModalOpen(false)} className="absolute top-8 right-8 text-slate-400 hover:text-slate-800 transition-colors">
                             <span className="material-icons-outlined">close</span>
                         </button>
                         <h2 className="text-2xl font-black italic tracking-tighter uppercase mb-8">Add Menu Item</h2>
@@ -136,7 +136,7 @@ export default function MenuSettings() {
                                     type="text"
                                     value={formData.name}
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl px-6 py-4 text-sm font-bold shadow-inner focus:ring-2 focus:ring-olive-leaf outline-none"
+                                    className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-sm font-bold shadow-inner focus:ring-2 focus:ring-olive-leaf outline-none"
                                     placeholder="e.g. Grilled Salmon"
                                 />
                             </div>
@@ -146,7 +146,7 @@ export default function MenuSettings() {
                                     <select
                                         value={formData.category}
                                         onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                                        className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl px-4 py-4 text-sm font-bold shadow-inner outline-none appearance-none"
+                                        className="w-full bg-slate-50 border-none rounded-2xl px-4 py-4 text-sm font-bold shadow-inner outline-none appearance-none"
                                     >
                                         {categories.map(c => <option key={c} value={c}>{c}</option>)}
                                     </select>
@@ -158,7 +158,7 @@ export default function MenuSettings() {
                                         type="number"
                                         value={formData.price}
                                         onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                                        className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl px-6 py-4 text-sm font-bold shadow-inner focus:ring-2 focus:ring-olive-leaf outline-none"
+                                        className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-sm font-bold shadow-inner focus:ring-2 focus:ring-olive-leaf outline-none"
                                         placeholder="0"
                                     />
                                 </div>
@@ -168,7 +168,7 @@ export default function MenuSettings() {
                                 <textarea
                                     value={formData.description}
                                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                    className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl px-6 py-4 text-sm font-bold shadow-inner focus:ring-2 focus:ring-olive-leaf outline-none h-24 resize-none"
+                                    className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-sm font-bold shadow-inner focus:ring-2 focus:ring-olive-leaf outline-none h-24 resize-none"
                                     placeholder="Brief description..."
                                 />
                             </div>

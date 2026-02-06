@@ -20,7 +20,7 @@ export default function NotificationsPage() {
     if (isLoading) return <div className="p-8 text-center text-slate-400">Loading Notifications...</div>;
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 lg:p-8 flex flex-col gap-8">
+        <div className="min-h-screen bg-slate-50 p-4 lg:p-8 flex flex-col gap-8">
             <TopBar
                 title="Notifications"
                 description="System alerts and activity logs."
@@ -30,7 +30,7 @@ export default function NotificationsPage() {
                 {notifications?.map((notif: any) => (
                     <div
                         key={notif.id}
-                        className={`relative p-6 rounded-2xl border transition-all ${notif.isRead ? 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 opacity-70' : 'bg-white dark:bg-slate-900 border-olive-leaf shadow-lg shadow-olive-leaf/10'}`}
+                        className={`relative p-6 rounded-2xl border transition-all ${notif.isRead ? 'bg-white border-slate-100 opacity-70' : 'bg-white border-olive-leaf shadow-lg shadow-olive-leaf/10'}`}
                         onClick={() => !notif.isRead && markAsRead(notif.id)}
                     >
                         {!notif.isRead && (
@@ -46,7 +46,7 @@ export default function NotificationsPage() {
                                 </span>
                             </div>
                             <div>
-                                <h4 className="font-bold text-slate-800 dark:text-white mb-1">{notif.message}</h4>
+                                <h4 className="font-bold text-slate-800 mb-1">{notif.message}</h4>
                                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
                                     {new Date(notif.createdAt).toLocaleString()}
                                 </p>

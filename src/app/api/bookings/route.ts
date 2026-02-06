@@ -53,6 +53,39 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Room not found' }, { status: 404 })
     }
 
+    // Check for overlapping bookings
+    const newCheckIn = new Date(checkIn)
+    const newCheckOut = new Date(checkOut)
+
+    if (newCheckOut <= newCheckIn) {
+      return NextResponse.json({
+        error: 'Invalid Dates',
+        message: 'Check-out date must be after check-in date.'
+      }, { status: 400 })
+    }
+
+    const existingBooking = await prisma.booking.findFirst({
+      where: {
+        roomId: room.id,
+        status: { in: ['CONFIRMED', 'CHECKED_IN'] },
+        OR: [
+          {
+            AND: [
+              { checkIn: { lt: newCheckOut } },
+              { checkOut: { gt: newCheckIn } }
+            ]
+          }
+        ]
+      }
+    })
+
+    if (existingBooking) {
+      return NextResponse.json({
+        error: 'Room Conflict',
+        message: `Room ${roomNumber} is already occupied or reserved for these dates.`
+      }, { status: 409 })
+    }
+
     const booking = await prisma.booking.create({
       data: {
         guestId: guest.id,
@@ -63,6 +96,18 @@ export async function POST(request: Request) {
         status: 'CONFIRMED'
       }
     })
+
+    // Update room status to OCCUPIED if the booking is for now/today
+    const now = new Date()
+    const start = new Date(checkIn)
+    const end = new Date(checkOut)
+
+    if (start <= now && end >= now) {
+      await prisma.room.update({
+        where: { id: room.id },
+        data: { status: 'OCCUPIED' }
+      })
+    }
 
     return NextResponse.json(booking)
   } catch (error) {

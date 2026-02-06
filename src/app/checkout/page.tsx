@@ -69,23 +69,23 @@ function CheckoutContent() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 no-print">
             <div>
               <h1 className="text-2xl font-black italic tracking-tighter uppercase uppercase">Folio Settlement</h1>
-              <p className="text-slate-500 dark:text-slate-400">Finalizing Room <span className="font-black text-olive-leaf">{room.number}</span></p>
+              <p className="text-slate-500">Finalizing Room <span className="font-black text-olive-leaf">{room.number}</span></p>
             </div>
             <div className="flex gap-3">
-              <button className="flex items-center gap-2 px-6 py-2 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 font-black text-[10px] uppercase tracking-widest transition-all" onClick={() => { window.print() }}>
+              <button className="flex items-center gap-2 px-6 py-2 border border-slate-200 bg-white rounded-xl hover:bg-slate-50 font-black text-[10px] uppercase tracking-widest transition-all" onClick={() => { window.print() }}>
                 <span className="material-icons-outlined text-lg">print</span> Print PDF
               </button>
             </div>
           </div>
-          <div className="bg-white dark:bg-slate-900 shadow-2xl border border-slate-100 dark:border-slate-800 rounded-[2.5rem] overflow-hidden">
-            <div className="p-10 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-start gap-8 bg-cornsilk/30 dark:bg-slate-800/20">
+          <div className="bg-white shadow-2xl border border-slate-100 rounded-[2.5rem] overflow-hidden">
+            <div className="p-10 border-b border-slate-100 flex flex-col md:flex-row justify-between items-start gap-8 bg-cornsilk/30">
               <div>
                 <img alt="Casa Hotel" className="h-12 w-auto mb-6 object-contain grayscale" src="logo.png" />
-                <h2 className="text-2xl font-black text-slate-800 dark:text-white tracking-tighter italic uppercase">Casa Hotel</h2>
+                <h2 className="text-2xl font-black text-slate-800 tracking-tighter italic uppercase">Casa Hotel</h2>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Hospitality Excellence</p>
               </div>
               <div className="text-right">
-                <h3 className="text-4xl font-black text-slate-200 dark:text-slate-800 mb-4 uppercase tracking-tighter italic">Invoice</h3>
+                <h3 className="text-4xl font-black text-slate-200 mb-4 uppercase tracking-tighter italic">Invoice</h3>
                 <div className="space-y-1 text-[10px] font-black uppercase tracking-widest text-slate-500">
                   <p>Folio: #CH-{new Date().getFullYear()}-{room.number}</p>
                   <p>Date: {new Date().toLocaleDateString()}</p>
@@ -97,7 +97,7 @@ function CheckoutContent() {
               <div className="space-y-4">
                 <div>
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Guest Details</p>
-                  <p className="font-black text-xl text-slate-800 dark:text-white uppercase italic">{guest?.name || 'Walk-in Guest'}</p>
+                  <p className="font-black text-xl text-slate-800 uppercase italic">{guest?.name || 'Walk-in Guest'}</p>
                   <p className="text-sm font-bold text-slate-500 mt-1">{guest?.email || 'No email provided'}</p>
                 </div>
                 <div className="pt-4 flex gap-8">
@@ -107,11 +107,11 @@ function CheckoutContent() {
                   </div>
                   <div>
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Rate</p>
-                    <p className="font-black text-sm text-slate-800 dark:text-white">RWF {room.price?.toLocaleString()}/night</p>
+                    <p className="font-black text-sm text-slate-800">RWF {room.price?.toLocaleString()}/night</p>
                   </div>
                 </div>
               </div>
-              <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800">
+              <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100">
                 <div className="grid grid-cols-2 gap-6">
                   <div>
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Arrival</p>
@@ -135,19 +135,19 @@ function CheckoutContent() {
                   </tr>
                 </thead>
                 <tbody className="text-sm font-bold">
-                  <tr className="bg-slate-50 dark:bg-slate-800/30 rounded-xl">
+                  <tr className="bg-slate-50 rounded-xl">
                     <td className="px-6 py-5 first:rounded-l-2xl">
-                      <div className="font-black text-slate-800 dark:text-white uppercase italic">Room Accommodation</div>
+                      <div className="font-black text-slate-800 uppercase italic">Room Accommodation</div>
                       <div className="text-[10px] text-slate-400 uppercase font-black mt-1">Stays at RWF {room.price?.toLocaleString()}</div>
                     </td>
                     <td className="px-4 py-5 text-center text-slate-500">1</td>
-                    <td className="px-6 py-5 text-right font-black text-slate-800 dark:text-white last:rounded-r-2xl">RWF {room.price?.toLocaleString()}</td>
+                    <td className="px-6 py-5 text-right font-black text-slate-800 last:rounded-r-2xl">RWF {room.price?.toLocaleString()}</td>
                   </tr>
                 </tbody>
               </table>
             </div>
 
-            <div className="p-10 mt-10 bg-slate-50 dark:bg-slate-800/20 border-t border-slate-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-8">
+            <div className="p-10 mt-10 bg-slate-50 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-8">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-secondary/10 text-secondary rounded-2xl flex items-center justify-center">
                   <span className="material-icons-outlined">verified_user</span>
@@ -155,15 +155,15 @@ function CheckoutContent() {
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-relaxed">System-generated folio.<br />Authorized for immediate settlement.</p>
               </div>
               <div className="w-full md:w-1/3 space-y-3">
-                <div className="flex justify-between items-end border-t border-slate-200 dark:border-slate-700 pt-4 mt-4">
+                <div className="flex justify-between items-end border-t border-slate-200 pt-4 mt-4">
                   <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Net Payable</span>
                   <span className="text-2xl font-black text-primary italic tracking-tighter">RWF {room.price?.toLocaleString()}</span>
                 </div>
               </div>
             </div>
 
-            <div className="p-10 border-t border-slate-100 dark:border-slate-800 flex gap-4 no-print bg-white dark:bg-slate-900">
-              <Link href="/" className="flex-1 px-8 py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-black text-[10px] uppercase tracking-widest rounded-2xl text-center hover:bg-slate-200 transition-all">
+            <div className="p-10 border-t border-slate-100 flex gap-4 no-print bg-white">
+              <Link href="/" className="flex-1 px-8 py-4 bg-slate-100 text-slate-600 font-black text-[10px] uppercase tracking-widest rounded-2xl text-center hover:bg-slate-200 transition-all">
                 Postpone
               </Link>
               <button

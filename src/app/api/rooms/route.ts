@@ -9,7 +9,7 @@ export async function GET() {
         floor: true,
         bookings: {
           where: {
-            status: 'CHECKED_IN'
+            status: { in: ['CONFIRMED', 'CHECKED_IN'] }
           },
           include: {
             guest: true
@@ -17,7 +17,30 @@ export async function GET() {
         }
       }
     })
-    return NextResponse.json(rooms)
+
+    const now = new Date()
+    const processedRooms = rooms.map(room => {
+      const activeBooking = room.bookings.find(b => {
+        const start = new Date(b.checkIn)
+        const end = new Date(b.checkOut)
+        return start <= now && end >= now
+      })
+
+      let currentStatus = room.status
+      if (activeBooking && room.status !== 'MAINTENANCE') {
+        currentStatus = 'OCCUPIED'
+      } else if (!activeBooking && room.status === 'OCCUPIED') {
+        currentStatus = 'AVAILABLE'
+      }
+
+      return {
+        ...room,
+        status: currentStatus,
+        activeBooking: activeBooking || null
+      }
+    })
+
+    return NextResponse.json(processedRooms)
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch rooms' }, { status: 500 })
   }

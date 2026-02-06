@@ -3,12 +3,12 @@ module.exports = {
   content: [
     "./src/**/*.{js,ts,jsx,tsx,mdx}",
   ],
-  darkMode: 'class',
+  darkMode: false,
   theme: {
     extend: {
       colors: {
         primary: "#606c38", // Olive Leaf
-        secondary: "#283618", // Black Forest
+        secondary: "#bc6c25", // Copper (Improved visibility)
         accent: "#bc6c25", // Copper
         neutral: "#fefae0", // Cornsilk
         highlight: "#dda15e", // Light Caramel

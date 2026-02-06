@@ -25,12 +25,12 @@ export default function InquiriesPage() {
     if (isLoading) return <div className="p-8 text-center text-slate-400">Loading Inquiries...</div>;
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 lg:p-8 flex flex-col gap-8">
+        <div className="min-h-screen bg-slate-50 p-4 lg:p-8 flex flex-col gap-8">
             <TopBar
                 title="Web Inquiries"
                 description="Manage messages and booking requests from the website."
                 actions={
-                    <div className="flex gap-2 p-1 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <div className="flex gap-2 p-1 bg-white rounded-xl border border-slate-200">
                         {['ALL', 'NEW', 'READ', 'REPLIED'].map(status => (
                             <button
                                 key={status}
@@ -46,14 +46,14 @@ export default function InquiriesPage() {
 
             <div className="grid gap-4">
                 {filteredInquiries?.map((inq: any) => (
-                    <div key={inq.id} className={`bg-white dark:bg-slate-900 p-6 rounded-2xl border ${inq.status === 'NEW' ? 'border-olive-leaf shadow-md shadow-olive-leaf/10' : 'border-slate-100 dark:border-slate-800'} transition-all hover:shadow-lg`}>
+                    <div key={inq.id} className={`bg-white p-6 rounded-2xl border ${inq.status === 'NEW' ? 'border-olive-leaf shadow-md shadow-olive-leaf/10' : 'border-slate-100'} transition-all hover:shadow-lg`}>
                         <div className="flex justify-between items-start mb-4">
                             <div className="flex items-center gap-4">
-                                <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white ${inq.status === 'NEW' ? 'bg-olive-leaf' : 'bg-slate-300 dark:bg-slate-700'}`}>
+                                <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white ${inq.status === 'NEW' ? 'bg-olive-leaf' : 'bg-slate-300'}`}>
                                     {inq.name.charAt(0).toUpperCase()}
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-slate-800 dark:text-white">{inq.name}</h3>
+                                    <h3 className="font-bold text-slate-800">{inq.name}</h3>
                                     <p className="text-xs text-slate-500">{inq.email}</p>
                                 </div>
                             </div>
@@ -71,13 +71,13 @@ export default function InquiriesPage() {
                                 </a>
                             </div>
                         </div>
-                        <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl mb-3">
-                            <h4 className="font-bold text-sm text-slate-700 dark:text-slate-300 mb-2">{inq.subject}</h4>
-                            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{inq.message}</p>
+                        <div className="bg-slate-50 p-4 rounded-xl mb-3">
+                            <h4 className="font-bold text-sm text-slate-700 mb-2">{inq.subject}</h4>
+                            <p className="text-sm text-slate-600 leading-relaxed">{inq.message}</p>
                         </div>
                         {inq.status !== 'NEW' && (
                             <div className="flex justify-end">
-                                <span className={`text-[10px] font-bold px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-400 uppercase tracking-widest`}>
+                                <span className={`text-[10px] font-bold px-2 py-1 rounded bg-slate-100 text-slate-400 uppercase tracking-widest`}>
                                     Status: {inq.status}
                                 </span>
                             </div>

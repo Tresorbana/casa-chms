@@ -38,10 +38,10 @@ export default function Reports() {
   };
 
   return (
-    <div className="flex-1 min-h-screen bg-slate-50 dark:bg-slate-950 p-4 lg:p-8 flex flex-col gap-8">
+    <div className="flex-1 min-h-screen bg-slate-50 p-4 lg:p-8 flex flex-col gap-8">
       <TopBar
         title="Advanced Reporting"
-        description="Comprehensive business intelligence and operational reports."
+        description="Comprehensive business and operational reports."
         actions={
           <button
             onClick={handleExport}
@@ -65,8 +65,8 @@ export default function Reports() {
                     key={report.id}
                     onClick={() => setSelectedReport(report)}
                     className={`w-full text-left px-4 py-3 rounded-xl text-sm font-bold transition-all ${selectedReport.id === report.id
-                      ? 'bg-white dark:bg-slate-900 text-primary shadow-md ring-1 ring-slate-200 dark:ring-slate-800'
-                      : 'text-slate-500 hover:bg-white/50 dark:hover:bg-slate-900/50 hover:text-slate-800 dark:hover:text-slate-200'
+                      ? 'bg-white text-primary shadow-md ring-1 ring-slate-200'
+                      : 'text-slate-500 hover:bg-white/50 hover:text-slate-800'
                       }`}
                   >
                     {report.label}
@@ -78,21 +78,21 @@ export default function Reports() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 shadow-sm border border-slate-200 dark:border-slate-800">
-          <div className="flex flex-wrap items-center justify-between gap-4 mb-8 pb-8 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex-1 bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-200">
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-8 pb-8 border-b border-slate-100">
             <div>
-              <h2 className="text-2xl font-black text-slate-800 dark:text-white">{selectedReport.label}</h2>
+              <h2 className="text-2xl font-black text-slate-800">{selectedReport.label}</h2>
               <p className="text-sm font-medium text-slate-500">View and analyze {selectedReport.label.toLowerCase()} data.</p>
             </div>
             <div className="flex gap-2">
               <input
                 type="date"
-                className="bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-2 text-sm font-bold outline-none focus:ring-2 focus:ring-primary"
+                className="bg-slate-50 border-none rounded-xl px-4 py-2 text-sm font-bold outline-none focus:ring-2 focus:ring-primary"
                 onChange={e => setDateRange({ ...dateRange, start: e.target.value })}
               />
               <input
                 type="date"
-                className="bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-2 text-sm font-bold outline-none focus:ring-2 focus:ring-primary"
+                className="bg-slate-50 border-none rounded-xl px-4 py-2 text-sm font-bold outline-none focus:ring-2 focus:ring-primary"
                 onChange={e => setDateRange({ ...dateRange, end: e.target.value })}
               />
             </div>
@@ -130,9 +130,9 @@ export default function Reports() {
 
               {/* Data Table */}
               {data?.records && Array.isArray(data.records) && data.records.length > 0 && (
-                <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl overflow-hidden">
+                <div className="bg-white border border-slate-100 rounded-2xl overflow-hidden">
                   <table className="w-full text-left text-sm">
-                    <thead className="bg-slate-50 dark:bg-slate-800 text-slate-500 font-bold uppercase text-xs">
+                    <thead className="bg-slate-50 text-slate-500 font-bold uppercase text-xs">
                       <tr>
                         <th className="p-4">Reference</th>
                         <th className="p-4">Details</th>
@@ -140,15 +140,15 @@ export default function Reports() {
                         <th className="p-4 text-right">Date</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                    <tbody className="divide-y divide-slate-100">
                       {data.records.map((rec: any) => (
-                        <tr key={rec.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                        <tr key={rec.id} className="hover:bg-slate-50">
                           <td className="p-4 font-mono text-xs text-slate-400">#{rec.id.slice(-6).toUpperCase()}</td>
                           <td className="p-4">
-                            <div className="font-bold text-slate-800 dark:text-slate-200">{rec.room?.type} {rec.room?.number}</div>
+                            <div className="font-bold text-slate-800">{rec.room?.type} {rec.room?.number}</div>
                             <div className="text-xs text-slate-400">Booking Revenue</div>
                           </td>
-                          <td className="p-4 text-right font-black text-slate-700 dark:text-slate-300">
+                          <td className="p-4 text-right font-black text-slate-700">
                             RWF {rec.totalAmount?.toLocaleString()}
                           </td>
                           <td className="p-4 text-right text-xs text-slate-500">
@@ -164,13 +164,13 @@ export default function Reports() {
               {/* Booking Sources / Breakdown */}
               {(data?.breakdown || data?.sources) && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="border border-slate-100 dark:border-slate-800 rounded-2xl p-6">
+                  <div className="border border-slate-100 rounded-2xl p-6">
                     <h3 className="font-bold mb-4">Breakdown</h3>
                     <div className="space-y-3">
                       {(data.breakdown || data.sources).map((item: any) => (
-                        <div key={item.type || item.source} className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                          <span className="font-bold text-sm text-slate-600 dark:text-slate-300">{item.type || item.source}</span>
-                          <span className="font-black text-slate-800 dark:text-white bg-white dark:bg-slate-700 px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-600">
+                        <div key={item.type || item.source} className="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
+                          <span className="font-bold text-sm text-slate-600">{item.type || item.source}</span>
+                          <span className="font-black text-slate-800 bg-white px-2 py-1 rounded-lg border border-slate-200">
                             {item._count?.id || 0}
                           </span>
                         </div>
@@ -193,13 +193,13 @@ export default function Reports() {
 
 function StatCard({ label, value, icon, color }: { label: string, value: string | number, icon: string, color: 'primary' | 'secondary' | 'slate' }) {
   return (
-    <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 flex items-center gap-4">
+    <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 flex items-center gap-4">
       <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-lg ${color === 'primary' ? 'bg-primary shadow-primary/20' : color === 'secondary' ? 'bg-secondary shadow-secondary/20' : 'bg-slate-500 shadow-slate-500/20'}`}>
         <span className="material-icons-outlined">{icon}</span>
       </div>
       <div>
         <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{label}</p>
-        <p className="text-2xl font-black text-slate-800 dark:text-white">{value}</p>
+        <p className="text-2xl font-black text-slate-800">{value}</p>
       </div>
     </div>
   );

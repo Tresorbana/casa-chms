@@ -42,7 +42,7 @@ export default function ServicesSettings() {
     if (isLoading) return <div className="p-8 text-center text-slate-400">Loading Services...</div>;
 
     return (
-        <div className="flex-1 min-h-screen relative p-4 lg:p-8 flex flex-col gap-8 bg-slate-50 dark:bg-slate-950">
+        <div className="flex-1 min-h-screen relative p-4 lg:p-8 flex flex-col gap-8 bg-slate-50">
             <TopBar
                 title="Service Configuration"
                 description="Manage extraneous charges, spa services, and add-ons."
@@ -58,15 +58,15 @@ export default function ServicesSettings() {
             />
 
             {isAdding && (
-                <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-lg border border-primary/20 animate-in fade-in slide-in-from-top-4">
-                    <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-4">New Service</h3>
+                <div className="bg-white p-6 rounded-2xl shadow-lg border border-primary/20 animate-in fade-in slide-in-from-top-4">
+                    <h3 className="text-lg font-bold text-slate-800 mb-4">New Service</h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                         <div className="space-y-1">
                             <label className="text-xs font-bold text-slate-500 uppercase">Service Name</label>
                             <input
                                 type="text"
                                 placeholder="e.g. Airport Shuttle"
-                                className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-primary"
+                                className="w-full bg-slate-50 border-none rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-primary"
                                 value={formData.name}
                                 onChange={e => setFormData({ ...formData, name: e.target.value })}
                             />
@@ -76,7 +76,7 @@ export default function ServicesSettings() {
                             <input
                                 type="number"
                                 placeholder="RWF"
-                                className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-primary"
+                                className="w-full bg-slate-50 border-none rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-primary"
                                 value={formData.price}
                                 onChange={e => setFormData({ ...formData, price: e.target.value })}
                             />
@@ -84,7 +84,7 @@ export default function ServicesSettings() {
                         <div className="space-y-1">
                             <label className="text-xs font-bold text-slate-500 uppercase">Unit</label>
                             <select
-                                className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-primary"
+                                className="w-full bg-slate-50 border-none rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-primary"
                                 value={formData.unit}
                                 onChange={e => setFormData({ ...formData, unit: e.target.value })}
                             >
@@ -98,26 +98,38 @@ export default function ServicesSettings() {
                     </div>
                     <div className="flex gap-4">
                         <button onClick={handleAdd} className="bg-primary text-white px-6 py-2 rounded-xl font-bold">Save Service</button>
-                        <button onClick={() => setIsAdding(false)} className="bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-6 py-2 rounded-xl font-bold">Cancel</button>
+                        <button onClick={() => setIsAdding(false)} className="bg-slate-200 text-slate-600 px-6 py-2 rounded-xl font-bold">Cancel</button>
                     </div>
                 </div>
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {services.map((service: any) => (
-                    <div key={service.id} className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 hover:shadow-xl transition-all group">
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="w-12 h-12 bg-secondary/10 text-secondary rounded-2xl flex items-center justify-center">
-                                <span className="material-icons-outlined">spa</span>
+                {services.length > 0 ? (
+                    services.map((service: any) => (
+                        <div key={service.id} className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 hover:shadow-xl transition-all group">
+                            <div className="flex justify-between items-start mb-4">
+                                <div className="w-12 h-12 bg-secondary/10 text-secondary rounded-2xl flex items-center justify-center">
+                                    <span className="material-icons-outlined">spa</span>
+                                </div>
+                                <button onClick={() => handleDelete(service.id)} className="text-slate-300 hover:text-red-500 transition-colors">
+                                    <span className="material-icons-outlined">delete</span>
+                                </button>
                             </div>
-                            <button onClick={() => handleDelete(service.id)} className="text-slate-300 hover:text-red-500 transition-colors">
-                                <span className="material-icons-outlined">delete</span>
-                            </button>
+                            <h3 className="text-xl font-black text-slate-800 mb-2">{service.name}</h3>
+                            <p className="text-slate-500 text-sm font-bold">RWF {service.price.toLocaleString()} / {service.unit}</p>
                         </div>
-                        <h3 className="text-xl font-black text-slate-800 dark:text-white mb-2">{service.name}</h3>
-                        <p className="text-slate-500 text-sm font-bold">RWF {service.price.toLocaleString()} / {service.unit}</p>
+                    ))
+                ) : (
+                    <div className="col-span-full py-20 bg-white rounded-[2.5rem] border border-dashed border-slate-200 text-center flex flex-col items-center gap-4">
+                        <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center">
+                            <span className="material-icons-outlined text-4xl text-slate-300">spa</span>
+                        </div>
+                        <div>
+                            <p className="text-lg font-black italic tracking-tighter uppercase text-slate-400">No Services Registered</p>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Add your first service to begin billing</p>
+                        </div>
                     </div>
-                ))}
+                )}
             </div>
         </div>
     );

@@ -23,7 +23,7 @@ export default function RoomStatus() {
     if (isLoading) return <div className="p-8">Loading room status...</div>;
 
     return (
-        <div className="flex-1 min-h-screen bg-slate-50 dark:bg-slate-950 p-4 lg:p-8">
+        <div className="flex-1 min-h-screen bg-slate-50 p-4 lg:p-8">
             <TopBar
                 title="Room Inventory & Status"
                 description="Real-time floor-wise status of all hotel units."
@@ -36,7 +36,7 @@ export default function RoomStatus() {
                         onClick={() => setFilter(s)}
                         className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${filter === s
                             ? 'bg-olive-leaf text-white shadow-lg shadow-olive-leaf/20'
-                            : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:border-olive-leaf'
+                            : 'bg-white text-slate-600 border border-slate-200 hover:border-olive-leaf'
                             }`}
                     >
                         {s} {s !== 'ALL' && `(${stats[s.toLowerCase() as keyof typeof stats]})`}
@@ -51,7 +51,7 @@ export default function RoomStatus() {
                         className={`p-4 rounded-2xl border-2 transition-all cursor-pointer hover:shadow-xl ${room.status === 'AVAILABLE' ? 'bg-secondary/5 border-secondary hover:bg-secondary/10' :
                             room.status === 'OCCUPIED' ? 'bg-olive-leaf/5 border-olive-leaf hover:bg-olive-leaf/10' :
                                 room.status === 'CLEANING' ? 'bg-blue-400/5 border-blue-400 hover:bg-blue-400/10' :
-                                    'bg-slate-100 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700'
+                                    'bg-slate-100 border-slate-200'
                             }`}
                     >
                         <div className="flex justify-between items-start mb-4">
@@ -69,10 +69,10 @@ export default function RoomStatus() {
                         </div>
                         <div className="space-y-1">
                             <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">{room.type}</p>
-                            <p className="text-sm font-bold text-slate-700 dark:text-slate-200">
+                            <p className="text-sm font-bold text-slate-700">
                                 {room.status === 'OCCUPIED' ? 'Guest In-Room' : room.status.charAt(0) + room.status.slice(1).toLowerCase()}
                             </p>
-                            <button className="mt-4 w-full py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:border-primary transition-colors">
+                            <button className="mt-4 w-full py-2 bg-white border border-slate-200 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:border-primary transition-colors">
                                 Manage Details
                             </button>
                         </div>
@@ -82,7 +82,7 @@ export default function RoomStatus() {
 
             {
                 filteredRooms.length === 0 && (
-                    <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">
+                    <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-200">
                         <span className="material-icons-outlined text-4xl text-slate-300 mb-2">hotel</span>
                         <p className="text-slate-500">No rooms found with this status.</p>
                     </div>

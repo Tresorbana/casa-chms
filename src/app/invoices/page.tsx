@@ -15,7 +15,7 @@ export default function InvoicesList() {
     ) || [];
 
     return (
-        <div className="flex-1 min-h-screen bg-slate-50 dark:bg-slate-950 p-4 lg:p-8 flex flex-col gap-8">
+        <div className="flex-1 min-h-screen bg-slate-50 p-4 lg:p-8 flex flex-col gap-8">
             <TopBar
                 title="Invoice Management"
                 description="View and manage guest invoices and billing records."
@@ -23,7 +23,7 @@ export default function InvoicesList() {
                     <input
                         type="search"
                         placeholder="Search invoices..."
-                        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2 text-sm font-bold shadow-sm outline-none focus:ring-2 focus:ring-primary"
+                        className="bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold shadow-sm outline-none focus:ring-2 focus:ring-primary"
                         onChange={(e) => setFilter(e.target.value)}
                     />
                 }
@@ -32,9 +32,9 @@ export default function InvoicesList() {
             {isLoading ? (
                 <div className="py-20 text-center font-bold text-slate-400">Loading Invoices...</div>
             ) : (
-                <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+                <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
                     <table className="w-full text-left">
-                        <thead className="bg-slate-50 dark:bg-slate-800 text-xs text-slate-500 font-bold uppercase tracking-widest">
+                        <thead className="bg-slate-50 text-xs text-slate-500 font-bold uppercase tracking-widest">
                             <tr>
                                 <th className="p-6">Invoice ID</th>
                                 <th className="p-6">Guest</th>
@@ -44,17 +44,17 @@ export default function InvoicesList() {
                                 <th className="p-6 text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                        <tbody className="divide-y divide-slate-100">
                             {filtered.map((inv: any) => (
-                                <tr key={inv.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                <tr key={inv.id} className="hover:bg-slate-50 transition-colors">
                                     <td className="p-6 font-mono text-xs font-bold text-slate-400">#{inv.id.slice(-6).toUpperCase()}</td>
-                                    <td className="p-6 font-bold text-slate-800 dark:text-white">{inv.guestName}</td>
+                                    <td className="p-6 font-bold text-slate-800">{inv.guestName}</td>
                                     <td className="p-6">
-                                        <span className="px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded text-[10px] font-black uppercase text-slate-500">
+                                        <span className="px-2 py-1 bg-slate-100 rounded text-[10px] font-black uppercase text-slate-500">
                                             {inv.type}
                                         </span>
                                     </td>
-                                    <td className="p-6 font-black text-slate-700 dark:text-slate-300">RWF {inv.amount.toLocaleString()}</td>
+                                    <td className="p-6 font-black text-slate-700">RWF {inv.amount.toLocaleString()}</td>
                                     <td className="p-6">
                                         <span className={`inline-block px-2 py-1 rounded text-[10px] font-black uppercase ${inv.status === 'PAID' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
                                             {inv.status}

@@ -1,50 +1,64 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
+    const { searchParams } = new URL(request.url)
+    const dateStr = searchParams.get('date')
+    const targetDate = dateStr ? new Date(dateStr) : new Date()
+    targetDate.setHours(0, 0, 0, 0)
 
-    // Stats
-    const totalRooms = await prisma.room.count()
-    const occupiedRooms = await prisma.room.count({
-      where: { status: 'OCCUPIED' }
-    })
+    const nextDay = new Date(targetDate)
+    nextDay.setDate(targetDate.getDate() + 1)
 
-    const occupancyRate = totalRooms > 0 ? (occupiedRooms / totalRooms) * 100 : 0
-
-    // Today's Bookings
-    const bookingsToday = await prisma.booking.findMany({
-      where: {
-        createdAt: {
-          gte: today
-        }
-      }
-    })
-
-    // Revenue calculation
-    const revenueToday = bookingsToday.reduce((acc: number, booking: any) => acc + booking.totalAmount, 0)
-
-    const allBookings = await prisma.booking.findMany()
-    const totalRevenue = allBookings.reduce((acc: number, booking: any) => acc + booking.totalAmount, 0)
-
-    const pendingReservations = await prisma.booking.count({
-      where: { status: 'PENDING' }
-    })
-
-    // Room Status Grid
+    // Room Status Grid with Dynamic Status for targetDate
     const rooms = await prisma.room.findMany({
       orderBy: { number: 'asc' },
       include: {
         floor: true,
         bookings: {
           where: {
-            status: 'CHECKED_IN'
+            status: { in: ['CONFIRMED', 'CHECKED_IN'] },
+            AND: [
+              { checkIn: { lt: nextDay } },
+              { checkOut: { gt: targetDate } }
+            ]
           },
-          take: 1
+          include: {
+            guest: true
+          }
         }
       }
+    })
+
+    // Process rooms to determine dynamic status
+    const processedRooms = rooms.map(room => {
+      const activeBooking = room.bookings[0] // Since we filtered, the first one is the active one for this date
+      return {
+        ...room,
+        displayStatus: activeBooking ? 'OCCUPIED' : 'AVAILABLE',
+        activeBooking: activeBooking || null
+      }
+    })
+
+    // Stats
+    const totalRooms = processedRooms.length
+    const occupiedRooms = processedRooms.filter(r => r.displayStatus === 'OCCUPIED').length
+    const occupancyRate = totalRooms > 0 ? (occupiedRooms / totalRooms) * 100 : 0
+
+    // Bookings created TODAY (not for targetDate, but physical creation)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const bookingsCreatedToday = await prisma.booking.findMany({
+      where: {
+        createdAt: { gte: today }
+      }
+    })
+
+    const revenueToday = bookingsCreatedToday.reduce((acc: number, booking: any) => acc + booking.totalAmount, 0)
+
+    const pendingReservations = await prisma.booking.count({
+      where: { status: 'PENDING' }
     })
 
     return NextResponse.json({
@@ -53,7 +67,7 @@ export async function GET() {
         revenueToday,
         pendingReservations
       },
-      rooms
+      rooms: processedRooms
     })
   } catch (error) {
     console.error(error)

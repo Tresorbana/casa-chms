@@ -30,10 +30,10 @@ export default function Login() {
         window.location.href = '/';
       } else {
         const data = await res.json();
-        setError(data.error || 'Login failed');
+        setError(data.error || 'Authentication Failed: Invalid Email or Password');
       }
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      setError('Connection Protocol Failure: Unable to reach authentication server.');
     } finally {
       setIsLoading(false);
     }
@@ -45,12 +45,6 @@ export default function Login() {
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[120px] animate-pulse"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-secondary/10 rounded-full blur-[120px]"></div>
 
-      <div className="absolute top-8 right-8 z-50">
-        <button className="flex items-center gap-2 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-white bg-white/5 backdrop-blur-xl rounded-full border border-white/10 transition-all" onClick={() => { document.documentElement.classList.toggle('dark') }}>
-          <span className="material-icons-outlined text-sm">dark_mode</span>
-          Theme Engine
-        </button>
-      </div>
 
       <main className="w-full max-w-md relative z-10 transition-all scale-100 hover:scale-[1.01]">
         <div className="bg-white/5 backdrop-blur-3xl rounded-[3rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] border border-white/10 p-12">

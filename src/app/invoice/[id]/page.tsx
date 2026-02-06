@@ -18,11 +18,10 @@ export default function InvoicePage() {
     if (!invoice) return <div className="min-h-screen flex items-center justify-center font-bold text-red-500">Invoice not found</div>;
 
     const total = invoice.amount;
-    const tax = total * 0.18; // Default 18% VAT simulation
-    const subtotal = total - tax;
+    // Tax removed
 
     return (
-        <div className="min-h-screen bg-slate-100 dark:bg-slate-950 p-4 lg:p-8 flex justify-center">
+        <div className="min-h-screen bg-slate-100 p-4 lg:p-8 flex justify-center">
             <style jsx global>{`
                 @media print {
                     @page { margin: 0; }
@@ -49,9 +48,9 @@ export default function InvoicePage() {
                         </div>
                         <h2 className="font-bold text-xl text-slate-900">Casa Hotel</h2>
                         <p className="text-sm text-slate-500 w-48 ml-auto">
-                            123 Luxury Avenue<br />
-                            Kigali, Rwanda<br />
-                            +250 788 000 000
+                            Property Address<br />
+                            City, Country<br />
+                            +000 000 000 000
                         </p>
                     </div>
                 </div>
@@ -114,14 +113,8 @@ export default function InvoicePage() {
                 {/* Totals */}
                 <div className="flex justify-end mb-16">
                     <div className="w-64 space-y-3">
-                        <div className="flex justify-between text-sm">
-                            <span className="font-bold text-slate-500">Subtotal</span>
-                            <span className="font-bold text-slate-900">{subtotal.toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                            <span className="font-bold text-slate-500">Tax (18%)</span>
-                            <span className="font-bold text-slate-900">{tax.toLocaleString()}</span>
-                        </div>
+
+
                         <div className="flex justify-between text-xl border-t-2 border-slate-900 pt-3">
                             <span className="font-black text-slate-900">Total</span>
                             <span className="font-black text-primary">RWF {total.toLocaleString()}</span>
