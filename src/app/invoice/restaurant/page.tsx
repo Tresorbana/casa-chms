@@ -1,144 +1,194 @@
 'use client';
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { Suspense } from 'react';
 import useSWR from 'swr';
 import { fetcher } from '@/lib/fetcher';
-import { useSearchParams } from 'next/navigation';
-import TopBar from '@/components/TopBar';
+import { useSearchParams, useRouter } from 'next/navigation';
+import Image from 'next/image';
 
-function InvoiceContent() {
+const HOTEL = {
+  name: 'Casa Hotel',
+  tagline: 'Restaurant & Dining',
+  address: 'KG 11 Ave, Kiyovu · Kigali, Rwanda',
+  phone: '+250 788 000 000',
+  website: 'www.casahotel.rw',
+  tin: 'TIN: 123456789',
+};
+
+function RestaurantInvoiceContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const invoiceId = searchParams.get('id');
 
-  const { data: apiInvoice, error, isLoading } = useSWR(
+  const { data: apiInvoice, isLoading } = useSWR(
     invoiceId ? `/api/invoices/${invoiceId}` : null,
     fetcher
   );
 
-  if (isLoading) return <div className="p-8 text-center text-slate-500">Loading invoice...</div>;
-  if (!apiInvoice) return <div className="p-8 text-center text-red-500">Invoice not found</div>;
+  if (!invoiceId) return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <p className="font-bold text-slate-400">No invoice ID specified.</p>
+    </div>
+  );
 
-  const invoiceData = {
-    id: apiInvoice.id,
-    date: new Date(apiInvoice.date).toLocaleDateString(),
-    time: new Date(apiInvoice.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    cashier: 'System Cashier',
-    customer: apiInvoice.guestName,
-    items: apiInvoice.items.map((item: any) => ({
-      name: item.description,
-      qty: item.quantity,
-      price: item.price
-    })),
-    subtotal: apiInvoice.items.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0),
-    tax: (apiInvoice.items.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0) * 0.15),
-    service: (apiInvoice.items.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0) * 0.05),
-    total: apiInvoice.amount
-  };
+  if (isLoading) return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="text-center">
+        <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin mx-auto mb-4" />
+        <p className="font-bold text-slate-400 uppercase tracking-widest text-sm">Loading Invoice...</p>
+      </div>
+    </div>
+  );
 
-  if (isLoading) return <div className="p-8 text-center text-slate-500">Loading invoice...</div>;
+  if (!apiInvoice) return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="text-center">
+        <span className="material-icons-outlined text-5xl text-red-300 block mb-4">receipt_long</span>
+        <p className="font-bold text-red-500 text-xl">Invoice not found</p>
+        <button onClick={() => router.back()} className="mt-4 text-primary text-sm font-bold hover:underline">← Go back</button>
+      </div>
+    </div>
+  );
+
+  const subtotal = apiInvoice.items?.reduce((s: number, i: any) => s + i.price * i.quantity, 0) ?? apiInvoice.amount;
+  const grandTotal = apiInvoice.amount;
+  const invoiceRef = `INV-${apiInvoice.id.slice(-8).toUpperCase()}`;
+  const invoiceDate = new Date(apiInvoice.date);
 
   return (
-    <div className="flex-1 min-h-screen bg-slate-50 p-4 lg:p-8 flex flex-col gap-8">
-      <TopBar
-        title="Restaurant Invoice Management"
-        description="Review, print, and finalize restaurant billing sessions."
-        actions={
-          <div className="flex gap-3">
-            <button className="bg-white border border-slate-200 p-2 rounded-xl text-slate-500 hover:text-primary transition-all shadow-sm" onClick={() => window.print()}>
-              <span className="material-symbols-outlined text-lg">print</span>
-            </button>
-            <button className="bg-primary hover:bg-opacity-90 text-white px-6 py-2 rounded-xl text-sm font-black uppercase tracking-widest shadow-lg shadow-primary/30">
-              Download PDF
-            </button>
-          </div>
+    <div className="min-h-screen bg-slate-100 print:bg-white">
+      <style>{`
+        @media print {
+          @page { margin: 10mm; size: A4; }
+          body { background: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          .no-print { display: none !important; }
+          .inv-card { box-shadow: none !important; border: none !important; border-radius: 0 !important; }
         }
-      />
+      `}</style>
 
-      <div className="flex flex-col items-center">
-        <div className="w-full max-w-[850px] bg-white shadow-2xl rounded-[3rem] overflow-hidden border border-slate-100">
-          <div className="h-3 w-full bg-primary/80"></div>
-          <div className="p-12">
-            <div className="flex justify-between items-start mb-16">
+      {/* Toolbar */}
+      <div className="no-print sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-slate-200 px-6 py-3 flex items-center justify-between gap-4">
+        <button onClick={() => router.back()} className="flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-primary transition-colors">
+          <span className="material-icons-outlined text-base">arrow_back</span>
+          Back to POS
+        </button>
+        <div className="flex items-center gap-3">
+          <span className={`text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full ${apiInvoice.status === 'PAID' ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'}`}>
+            {apiInvoice.status}
+          </span>
+          <button
+            onClick={() => window.print()}
+            className="flex items-center gap-2 bg-primary text-white px-5 py-2 rounded-xl text-sm font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
+          >
+            <span className="material-icons-outlined text-base">picture_as_pdf</span>
+            Print / PDF
+          </button>
+        </div>
+      </div>
+
+      {/* Invoice */}
+      <div className="p-6 md:p-10 flex justify-center">
+        <div className="inv-card bg-white w-full max-w-[720px] shadow-2xl shadow-slate-300/50 rounded-2xl overflow-hidden border border-slate-200">
+          {/* Top accent */}
+          <div className="h-2 bg-primary" />
+
+          {/* Receipt-style header */}
+          <div className="flex flex-col items-center pt-10 pb-8 px-10 border-b border-slate-100">
+            <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 mb-4 overflow-hidden">
+              <Image src="/logo.png" alt="Casa Hotel Logo" width={52} height={52} className="object-contain" onError={(e: any) => { e.currentTarget.style.display = 'none'; }} />
+            </div>
+            <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">{HOTEL.name}</h1>
+            <p className="text-xs font-bold text-primary/60 uppercase tracking-widest mt-1">{HOTEL.tagline}</p>
+            <p className="text-xs text-slate-400 font-medium mt-2 text-center">{HOTEL.address}</p>
+            <p className="text-xs text-slate-400 font-medium">{HOTEL.phone} · {HOTEL.website}</p>
+            <p className="text-xs text-slate-400 font-medium">{HOTEL.tin}</p>
+          </div>
+
+          {/* Invoice meta */}
+          <div className="bg-primary/5 px-10 py-5 flex justify-between items-center border-b border-slate-100">
+            <div>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Invoice No.</p>
+              <p className="text-base font-black text-primary">{invoiceRef}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Date & Time</p>
+              <p className="text-sm font-black text-slate-700">
+                {invoiceDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+              </p>
+              <p className="text-xs text-slate-500 font-medium">{invoiceDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+            </div>
+          </div>
+
+          {/* Billed to */}
+          <div className="px-10 py-5 border-b border-slate-100">
+            <div className="flex justify-between items-start">
               <div>
-                <h2 className="text-2xl font-black tracking-tighter text-slate-900 uppercase italic">Casa Hotel</h2>
-                <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Kigali, Rwanda</p>
+                <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-1">Guest</p>
+                <p className="text-lg font-black text-slate-800">{apiInvoice.guestName}</p>
               </div>
-              <div className="text-right">
-                <h3 className="text-4xl font-black text-slate-100 uppercase tracking-tighter mb-2">Invoice</h3>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{invoiceData.id}</p>
-              </div>
+              <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mt-1 ${apiInvoice.status === 'PAID' ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'}`}>
+                {apiInvoice.status}
+              </span>
             </div>
+          </div>
 
-            <div className="grid grid-cols-2 gap-12 mb-16">
-              <div className="space-y-4">
-                <p className="text-[10px] font-black uppercase tracking-widest text-primary">Billing Details</p>
-                <div className="space-y-1">
-                  <p className="text-sm font-black text-slate-800 uppercase">{invoiceData.customer}</p>
-                  <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Method: Cash/MOMo</p>
-                </div>
-              </div>
-              <div className="space-y-4 text-right">
-                <p className="text-[10px] font-black uppercase tracking-widest text-primary">Transaction Info</p>
-                <div className="space-y-1">
-                  <p className="text-sm font-black text-slate-800 uppercase">{invoiceData.date}</p>
-                  <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Cashier: {invoiceData.cashier}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="overflow-hidden rounded-[2rem] border border-slate-100 mb-10">
-              <table className="w-full text-left">
-                <thead className="bg-slate-50/50">
-                  <tr>
-                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Item Description</th>
-                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Qty</th>
-                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Unit Price</th>
-                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Total</th>
+          {/* Items */}
+          <div className="px-10 py-6">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-slate-200">
+                  <th className="text-left pb-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">Item</th>
+                  <th className="text-center pb-3 text-[10px] font-black text-slate-400 uppercase tracking-widest w-12">Qty</th>
+                  <th className="text-right pb-3 text-[10px] font-black text-slate-400 uppercase tracking-widest w-28">Price</th>
+                  <th className="text-right pb-3 text-[10px] font-black text-slate-400 uppercase tracking-widest w-28">Total</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {apiInvoice.items?.map((item: any, i: number) => (
+                  <tr key={item.id || i} className="hover:bg-slate-50/50">
+                    <td className="py-3 font-semibold text-slate-700">{item.description}</td>
+                    <td className="py-3 text-center text-slate-500">{item.quantity}</td>
+                    <td className="py-3 text-right text-slate-500">RWF {item.price.toLocaleString()}</td>
+                    <td className="py-3 text-right font-black text-slate-800">RWF {(item.quantity * item.price).toLocaleString()}</td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
-                  {invoiceData.items.map((item: any, i: number) => (
-                    <tr key={i} className="text-sm font-bold">
-                      <td className="px-8 py-6 text-slate-800">{item.name}</td>
-                      <td className="px-8 py-6 text-center text-slate-500">{item.qty}</td>
-                      <td className="px-8 py-6 text-right text-slate-500">RWF {item.price.toLocaleString()}</td>
-                      <td className="px-8 py-6 text-right text-slate-900 font-black">RWF {(item.qty * item.price).toLocaleString()}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-            <div className="flex flex-col items-end gap-3 px-8">
-              <div className="flex justify-between w-full max-w-[320px] text-xs font-black text-slate-400 uppercase tracking-widest">
-                <span>Subtotal</span>
-                <span>RWF {invoiceData.subtotal.toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between w-full max-w-[320px] text-xs font-black text-slate-400 uppercase tracking-widest">
-                <span></span>
-                <span></span>
-              </div>
-              <div className="flex justify-between w-full max-w-[320px] pt-6 mt-2 border-t border-slate-100">
-                <span className="text-slate-900 text-xl font-black uppercase italic tracking-tighter">Grand Total</span>
-                <span className="text-primary text-3xl font-black">RWF {invoiceData.total.toLocaleString()}</span>
-              </div>
+          {/* Totals */}
+          <div className="px-10 pb-8 flex flex-col items-end gap-2 border-t border-slate-100 pt-6">
+            <div className="flex justify-between w-full max-w-[260px] text-sm text-slate-500 font-medium">
+              <span>Subtotal</span>
+              <span>RWF {subtotal.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between w-full max-w-[260px] pt-3 mt-1 border-t-2 border-primary/30">
+              <span className="text-lg font-black text-slate-900 uppercase tracking-tight">Total</span>
+              <span className="text-2xl font-black text-primary">RWF {grandTotal.toLocaleString()}</span>
             </div>
           </div>
-          <div className="bg-slate-50/50 p-12 text-center border-t border-slate-100">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-4">Thank you for dining with us</p>
-            <div className="w-32 h-32 mx-auto bg-slate-200 rounded-2xl flex items-center justify-center opacity-40">
-              <span className="material-symbols-outlined text-4xl">qr_code_2</span>
-            </div>
+
+          {/* Thank you footer */}
+          <div className="bg-slate-50 border-t border-slate-100 px-10 py-8 text-center">
+            <p className="text-xs font-black text-slate-400 uppercase tracking-[0.3em] mb-1">Thank you for dining at Casa Hotel</p>
+            <p className="text-xs text-slate-300 font-medium">{HOTEL.website} · {HOTEL.phone}</p>
           </div>
+
+          {/* Bottom bar */}
+          <div className="h-2 bg-primary/20" />
         </div>
       </div>
     </div>
   );
 }
 
-export default function RestaurantInvoice() {
+export default function RestaurantInvoicePage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-slate-500">Initializing invoice...</div>}>
-      <InvoiceContent />
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+      </div>
+    }>
+      <RestaurantInvoiceContent />
     </Suspense>
   );
 }

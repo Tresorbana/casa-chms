@@ -7,18 +7,18 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: "#606c38", // Olive Leaf
-        secondary: "#bc6c25", // Copper (Improved visibility)
-        accent: "#bc6c25", // Copper
-        neutral: "#fefae0", // Cornsilk
-        highlight: "#dda15e", // Light Caramel
-        "olive-leaf": "#606c38",
-        "black-forest": "#283618",
-        "cornsilk": "#fefae0",
-        "light-caramel": "#dda15e",
-        "copper": "#bc6c25",
-        "background-light": "#fefae0", // Using Cornsilk as light background
-        "background-dark": "#283618", // Using Black Forest as dark background
+        primary: "#183d57", // Deep Navy Blue
+        secondary: "#1a6e8e", // Ocean Teal
+        accent: "#1a6e8e", // Ocean Teal
+        neutral: "#f0f4f8", // Light Blue-Gray
+        highlight: "#2e9ec9", // Sky Blue
+        "olive-leaf": "#183d57", // Remapped to Deep Navy Blue
+        "black-forest": "#0d2535", // Dark Navy
+        "cornsilk": "#f0f4f8",
+        "light-caramel": "#2e9ec9",
+        "copper": "#1a6e8e",
+        "background-light": "#f0f4f8", // Light Blue-Gray background
+        "background-dark": "#0d2535", // Dark Navy background
       },
       fontFamily: {
         sans: ["Anaheim", "sans-serif"],

@@ -1,18 +1,21 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url)
+    const skip = parseInt(searchParams.get('skip') ?? '0')
+    const take = Math.min(parseInt(searchParams.get('take') ?? '100'), 200)
+
     const bookings = await prisma.booking.findMany({
-      include: {
-        guest: true,
-        room: true
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
+      include: { guest: true, room: { select: { id: true, number: true, type: true } } },
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take,
     })
-    return NextResponse.json(bookings)
+    return NextResponse.json(bookings, {
+      headers: { 'Cache-Control': 'private, s-maxage=15, stale-while-revalidate=30' },
+    })
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch bookings' }, { status: 500 })
   }

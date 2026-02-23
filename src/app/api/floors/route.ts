@@ -9,7 +9,9 @@ export async function GET() {
                 rooms: true,
             },
         });
-        return NextResponse.json(floors);
+        return NextResponse.json(floors, {
+            headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600' },
+        });
     } catch (error) {
         return NextResponse.json({ error: 'Failed to fetch floors' }, { status: 500 });
     }

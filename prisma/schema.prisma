@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -33,6 +34,9 @@ model Room {
   floorId  String?
   bookings Booking[]
   floor    Floor?    @relation(fields: [floorId], references: [id], onDelete: Cascade)
+
+  @@index([floorId])
+  @@index([status])
 }
 
 model Guest {
@@ -59,6 +63,15 @@ model Booking {
   guest              Guest           @relation(fields: [guestId], references: [id])
   room               Room            @relation(fields: [roomId], references: [id])
   serviceCharges     ServiceCharge[]
+
+  @@index([status])
+  @@index([roomId])
+  @@index([guestId])
+  @@index([checkIn])
+  @@index([checkOut])
+  @@index([createdAt])
+  // Composite for date-range occupancy queries (dashboard)
+  @@index([status, checkIn, checkOut])
 }
 
 model ConferenceRoom {
@@ -82,6 +95,10 @@ model ConferenceBooking {
   status           String         @default("CONFIRMED")
   createdAt        DateTime       @default(now())
   conferenceRoom   ConferenceRoom @relation(fields: [conferenceRoomId], references: [id])
+
+  @@index([conferenceRoomId])
+  @@index([status])
+  @@index([startTime, endTime])
 }
 
 model Service {
@@ -93,17 +110,22 @@ model Service {
 }
 
 model ServiceCharge {
-  id         String   @id @default(cuid())
-  bookingId  String?
-  serviceId  String
-  guestName  String?
+  id           String   @id @default(cuid())
+  bookingId    String?
+  serviceId    String
+  guestName    String?
   guestContact String?
-  status     String   @default("PENDING") // PAID, PENDING
-  quantity   Int      @default(1)
-  totalPrice Float
-  date       DateTime @default(now())
-  booking    Booking? @relation(fields: [bookingId], references: [id])
-  service    Service  @relation(fields: [serviceId], references: [id])
+  status       String   @default("PENDING")
+  quantity     Int      @default(1)
+  totalPrice   Float
+  date         DateTime @default(now())
+  booking      Booking? @relation(fields: [bookingId], references: [id])
+  service      Service  @relation(fields: [serviceId], references: [id])
+
+  @@index([bookingId])
+  @@index([serviceId])
+  @@index([status])
+  @@index([date])
 }
 
 model WebInquiry {
@@ -114,6 +136,9 @@ model WebInquiry {
   message   String
   status    String   @default("NEW")
   createdAt DateTime @default(now())
+
+  @@index([status])
+  @@index([createdAt])
 }
 
 model Notification {
@@ -122,6 +147,9 @@ model Notification {
   type      String   @default("INFO")
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
+
+  @@index([isRead])
+  @@index([createdAt])
 }
 
 model InventoryItem {
@@ -133,6 +161,8 @@ model InventoryItem {
   minStock  Int      @default(10)
   price     Float
   updatedAt DateTime @updatedAt
+
+  @@index([category])
 }
 
 model MenuItem {
@@ -142,6 +172,9 @@ model MenuItem {
   price       Float
   description String?
   available   Boolean @default(true)
+
+  @@index([available])
+  @@index([category])
 }
 
 model Invoice {
@@ -156,6 +189,10 @@ model Invoice {
   masterInvoice   Invoice?      @relation("MasterToSub", fields: [masterInvoiceId], references: [id])
   subInvoices     Invoice[]     @relation("MasterToSub")
   items           InvoiceItem[]
+
+  @@index([masterInvoiceId])
+  @@index([status])
+  @@index([date])
 }
 
 model InvoiceItem {
@@ -165,4 +202,6 @@ model InvoiceItem {
   quantity    Int
   price       Float
   invoice     Invoice @relation(fields: [invoiceId], references: [id])
+
+  @@index([invoiceId])
 }

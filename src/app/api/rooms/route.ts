@@ -3,44 +3,35 @@ import { prisma } from '@/lib/db'
 
 export async function GET() {
   try {
+    const now = new Date()
+
     const rooms = await prisma.room.findMany({
       orderBy: { number: 'asc' },
       include: {
         floor: true,
         bookings: {
           where: {
-            status: { in: ['CONFIRMED', 'CHECKED_IN'] }
+            status: { in: ['CONFIRMED', 'CHECKED_IN'] },
+            checkIn: { lte: now },
+            checkOut: { gte: now },
           },
-          include: {
-            guest: true
-          }
-        }
-      }
+          include: { guest: { select: { name: true, phone: true } } },
+          take: 1,
+        },
+      },
     })
 
-    const now = new Date()
     const processedRooms = rooms.map(room => {
-      const activeBooking = room.bookings.find(b => {
-        const start = new Date(b.checkIn)
-        const end = new Date(b.checkOut)
-        return start <= now && end >= now
-      })
-
+      const activeBooking = room.bookings[0] ?? null
       let currentStatus = room.status
-      if (activeBooking && room.status !== 'MAINTENANCE') {
-        currentStatus = 'OCCUPIED'
-      } else if (!activeBooking && room.status === 'OCCUPIED') {
-        currentStatus = 'AVAILABLE'
-      }
-
-      return {
-        ...room,
-        status: currentStatus,
-        activeBooking: activeBooking || null
-      }
+      if (activeBooking && room.status !== 'MAINTENANCE') currentStatus = 'OCCUPIED'
+      else if (!activeBooking && room.status === 'OCCUPIED') currentStatus = 'AVAILABLE'
+      return { ...room, status: currentStatus, activeBooking }
     })
 
-    return NextResponse.json(processedRooms)
+    return NextResponse.json(processedRooms, {
+      headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' },
+    })
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch rooms' }, { status: 500 })
   }

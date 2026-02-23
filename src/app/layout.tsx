@@ -5,6 +5,7 @@ import './globals.css'
 import Sidebar from '@/components/Sidebar'
 import { UIProvider } from '@/context/UIContext'
 import MobileBottomNav from '@/components/MobileBottomNav'
+import SWRProvider from '@/components/SWRProvider'
 
 export default function RootLayout({
   children,
@@ -25,11 +26,13 @@ export default function RootLayout({
       </head>
       <body className={`font-sans bg-background-light text-slate-900 transition-colors duration-200 overflow-x-hidden`}>
         <UIProvider>
-          <Sidebar />
-          <MobileBottomNav />
-          <main className={isLoginPage ? "min-h-screen w-full" : "lg:pl-64 min-h-screen transition-all duration-300 w-full pb-20 lg:pb-0"}>
-            {children}
-          </main>
+          <SWRProvider>
+            <Sidebar />
+            <MobileBottomNav />
+            <main className={isLoginPage ? "min-h-screen w-full" : "lg:pl-64 min-h-screen transition-all duration-300 w-full pb-20 lg:pb-0"}>
+              {children}
+            </main>
+          </SWRProvider>
         </UIProvider >
       </body >
     </html >

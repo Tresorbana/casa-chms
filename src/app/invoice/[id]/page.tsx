@@ -1,150 +1,227 @@
 'use client';
-import React, { useRef } from 'react';
+import React from 'react';
 import useSWR from 'swr';
 import { fetcher } from '@/lib/fetcher';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
+
+const HOTEL = {
+    name: 'Casa Hotel',
+    tagline: 'Hospitality & Excellence',
+    address: 'KG 11 Ave, Kiyovu',
+    city: 'Kigali, Rwanda',
+    phone: '+250 788 000 000',
+    email: 'info@casahotel.rw',
+    website: 'www.casahotel.rw',
+    tin: 'TIN: 123456789',
+};
 
 export default function InvoicePage() {
     const params = useParams();
-    const { data: invoice, isLoading } = useSWR(params.id ? `/api/invoices/${params.id}` : null, fetcher);
+    const router = useRouter();
+    const { data: invoice, isLoading } = useSWR(
+        params.id ? `/api/invoices/${params.id}` : null,
+        fetcher
+    );
 
-    // Print functionality
-    const handlePrint = () => {
-        window.print();
-    };
+    if (isLoading) return (
+        <div className="min-h-screen flex items-center justify-center bg-slate-50">
+            <div className="text-center">
+                <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin mx-auto mb-4" />
+                <p className="font-bold text-slate-400 uppercase tracking-widest text-sm">Loading Invoice...</p>
+            </div>
+        </div>
+    );
 
-    if (isLoading) return <div className="min-h-screen flex items-center justify-center font-bold text-slate-400">Loading Invoice...</div>;
-    if (!invoice) return <div className="min-h-screen flex items-center justify-center font-bold text-red-500">Invoice not found</div>;
+    if (!invoice) return (
+        <div className="min-h-screen flex items-center justify-center bg-slate-50">
+            <div className="text-center">
+                <span className="material-icons-outlined text-5xl text-red-300 block mb-4">receipt_long</span>
+                <p className="font-bold text-red-500 text-xl">Invoice not found</p>
+                <button onClick={() => router.back()} className="mt-4 text-primary text-sm font-bold hover:underline">← Go back</button>
+            </div>
+        </div>
+    );
 
-    const total = invoice.amount;
-    // Tax removed
+    const subtotal = invoice.items?.reduce((s: number, i: any) => s + i.price * i.quantity, 0) ?? invoice.amount;
+    const subInvoicesTotal = invoice.subInvoices?.reduce((s: number, i: any) => s + i.amount, 0) ?? 0;
+    const grandTotal = invoice.amount;
+    const invoiceRef = `INV-${invoice.id.slice(-8).toUpperCase()}`;
 
     return (
-        <div className="min-h-screen bg-slate-100 p-4 lg:p-8 flex justify-center">
-            <style jsx global>{`
-                @media print {
-                    @page { margin: 0; }
-                    body { background: white; -webkit-print-color-adjust: exact; }
-                    nav, aside, button { display: none !important; }
-                    .invoice-container { box-shadow: none !important; margin: 0 !important; width: 100% !important; max-width: none !important; }
-                }
-            `}</style>
+        <div className="min-h-screen bg-slate-100 print:bg-white">
+            <style>{`
+        @media print {
+          @page { margin: 12mm; size: A4; }
+          body { background: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          .no-print { display: none !important; }
+          .invoice-wrap { padding: 0 !important; background: white !important; }
+          .invoice-card { box-shadow: none !important; border: none !important; }
+        }
+      `}</style>
 
-            <div className="invoice-container bg-white w-full max-w-4xl p-6 md:p-12 shadow-2xl relative">
-                {/* Header */}
-                <div className="flex justify-between items-start mb-16 border-b-4 border-slate-900 pb-8">
-                    <div>
-                        <h1 className="text-4xl font-black text-slate-900 uppercase tracking-tighter mb-2">INVOICE</h1>
-                        <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">#{invoice.id.slice(-8).toUpperCase()}</p>
-                        <span className={`inline-block mt-4 px-3 py-1 text-xs font-black uppercase tracking-widest rounded-full ${invoice.status === 'PAID' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
-                            {invoice.status}
-                        </span>
-                    </div>
-                    <div className="text-right">
-                        {/* Logo Placeholder */}
-                        <div className="bg-slate-900 text-white w-16 h-16 flex items-center justify-center font-black text-2xl mb-4 ml-auto">
-                            CH
-                        </div>
-                        <h2 className="font-bold text-xl text-slate-900">Casa Hotel</h2>
-                        <p className="text-sm text-slate-500 w-48 ml-auto">
-                            Property Address<br />
-                            City, Country<br />
-                            +000 000 000 000
-                        </p>
-                    </div>
-                </div>
-
-                {/* Details */}
-                <div className="flex justify-between mb-16">
-                    <div>
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Billed To</p>
-                        <h3 className="text-xl font-bold text-slate-900">{invoice.guestName}</h3>
-                        <p className="text-sm text-slate-500 max-w-xs mt-1">Guest ID: {invoice.guestId || 'Walk-in'}</p>
-                    </div>
-                    <div className="text-right">
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Invoice Date</p>
-                        <h3 className="text-xl font-bold text-slate-900">{new Date(invoice.date).toLocaleDateString()}</h3>
-                        <p className="text-sm text-slate-500 mt-1">Due on Receipt</p>
-                    </div>
-                </div>
-
-                {/* Line Items */}
-                <div className="mb-16 overflow-x-auto">
-                    <table className="w-full text-left min-w-[600px]">
-                        <thead>
-                            <tr className="border-b-2 border-slate-900">
-                                <th className="py-4 text-xs font-black text-slate-900 uppercase tracking-widest w-16">#</th>
-                                <th className="py-4 text-xs font-black text-slate-900 uppercase tracking-widest">Description</th>
-                                <th className="py-4 text-xs font-black text-slate-900 uppercase tracking-widest text-right w-24">Qty</th>
-                                <th className="py-4 text-xs font-black text-slate-900 uppercase tracking-widest text-right w-32">Price</th>
-                                <th className="py-4 text-xs font-black text-slate-900 uppercase tracking-widest text-right w-32">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                            {invoice.items?.map((item: any, i: number) => (
-                                <tr key={item.id} className="text-sm">
-                                    <td className="py-4 text-slate-400 font-bold">{i + 1}</td>
-                                    <td className="py-4 font-bold text-slate-800">{item.description}</td>
-                                    <td className="py-4 text-right text-slate-500">{item.quantity}</td>
-                                    <td className="py-4 text-right text-slate-500">{item.price.toLocaleString()}</td>
-                                    <td className="py-4 text-right font-bold text-slate-900">{(item.quantity * item.price).toLocaleString()}</td>
-                                </tr>
-                            ))}
-                            {/* Master Invoice: Sub Invoices */}
-                            {invoice.subInvoices?.map((sub: any, i: number) => (
-                                <tr key={sub.id} className="text-sm bg-slate-50">
-                                    <td className="py-4 text-slate-400 font-bold">Ref</td>
-                                    <td className="py-4 font-bold text-slate-800">
-                                        LINKED INVOICE #{sub.id.slice(-6).toUpperCase()}
-                                        <span className="ml-2 text-[10px] uppercase font-bold text-slate-400 bg-white px-2 py-1 rounded border border-slate-200">
-                                            {sub.type}
-                                        </span>
-                                    </td>
-                                    <td className="py-4 text-right text-slate-500">1</td>
-                                    <td className="py-4 text-right text-slate-500">{sub.amount.toLocaleString()}</td>
-                                    <td className="py-4 text-right font-bold text-slate-900">{sub.amount.toLocaleString()}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-
-                {/* Totals */}
-                <div className="flex justify-end mb-16">
-                    <div className="w-64 space-y-3">
-
-
-                        <div className="flex justify-between text-xl border-t-2 border-slate-900 pt-3">
-                            <span className="font-black text-slate-900">Total</span>
-                            <span className="font-black text-primary">RWF {total.toLocaleString()}</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Footer / Signature */}
-                <div className="grid grid-cols-2 gap-12 border-t border-slate-200 pt-8 mt-auto">
-                    <div>
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-16">Guest Signature</p>
-                        <div className="h-px bg-slate-900 w-full mb-2"></div>
-                        <p className="text-xs text-slate-400">By signing, I agree to the <span className="underline">Terms & Conditions</span>.</p>
-                    </div>
-                    <div>
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-16">Authorized Signature</p>
-                        <div className="h-px bg-slate-900 w-full mb-2"></div>
-                        <p className="text-xs text-slate-400">Casa Hotel Management</p>
-                    </div>
-                </div>
-
-                {/* Actions */}
-                <div className="absolute top-12 right-12 print:hidden flex gap-4">
+            {/* Toolbar */}
+            <div className="no-print sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-slate-200 px-6 py-3 flex items-center justify-between gap-4">
+                <button onClick={() => router.back()} className="flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-primary transition-colors">
+                    <span className="material-icons-outlined text-base">arrow_back</span>
+                    Back
+                </button>
+                <div className="flex items-center gap-3">
+                    <span className={`text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full ${invoice.status === 'PAID' ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'}`}>
+                        {invoice.status}
+                    </span>
                     <button
-                        onClick={handlePrint}
-                        className="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold hover:bg-slate-800 transition-all shadow-xl flex items-center gap-2"
+                        onClick={() => window.print()}
+                        className="flex items-center gap-2 bg-primary text-white px-5 py-2 rounded-xl text-sm font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
                     >
-                        <span className="material-icons-outlined">print</span>
-                        Print Invoice
+                        <span className="material-icons-outlined text-base">print</span>
+                        Print / PDF
                     </button>
+                </div>
+            </div>
+
+            {/* Invoice Body */}
+            <div className="invoice-wrap p-6 md:p-10 flex justify-center">
+                <div className="invoice-card bg-white w-full max-w-[860px] shadow-2xl shadow-slate-300/50 rounded-2xl overflow-hidden border border-slate-200 print:rounded-none">
+
+                    {/* Colour top bar */}
+                    <div className="h-2 bg-primary print:bg-primary" />
+
+                    <div className="p-10 md:p-14">
+                        {/* ── HEADER: Hotel info + Invoice meta ── */}
+                        <div className="flex flex-col sm:flex-row justify-between items-start gap-8 mb-14">
+                            {/* Hotel identity */}
+                            <div className="flex items-start gap-4">
+                                <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 flex-shrink-0 overflow-hidden">
+                                    <Image src="/logo.png" alt="Casa Hotel Logo" width={56} height={56} className="object-contain" onError={(e: any) => { e.currentTarget.style.display = 'none'; }} />
+                                    {/* Fallback initials if logo fails */}
+                                    <span className="text-white font-black text-xl hidden">CH</span>
+                                </div>
+                                <div>
+                                    <h1 className="text-2xl font-black text-slate-900 tracking-tighter uppercase">{HOTEL.name}</h1>
+                                    <p className="text-xs font-bold text-primary/70 uppercase tracking-widest mt-0.5">{HOTEL.tagline}</p>
+                                    <div className="mt-3 space-y-0.5 text-xs text-slate-500 font-medium">
+                                        <p>{HOTEL.address}</p>
+                                        <p>{HOTEL.city}</p>
+                                        <p>{HOTEL.phone} · {HOTEL.email}</p>
+                                        <p>{HOTEL.tin}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Invoice title + ref */}
+                            <div className="text-left sm:text-right flex-shrink-0">
+                                <h2 className="text-5xl font-black text-slate-100 uppercase tracking-tight leading-none select-none">INVOICE</h2>
+                                <p className="text-base font-black text-primary mt-2 tracking-widest">{invoiceRef}</p>
+                                <div className="mt-4 space-y-1 text-xs font-medium text-slate-500">
+                                    <p><span className="font-bold text-slate-700">Date:</span> {new Date(invoice.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
+                                    <p><span className="font-bold text-slate-700">Type:</span> {invoice.type || 'ROOM'}</p>
+                                    <p><span className="font-bold text-slate-700">Status:</span>{' '}
+                                        <span className={invoice.status === 'PAID' ? 'text-emerald-600' : 'text-amber-600'}>{invoice.status}</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* ── BILLED TO ── */}
+                        <div className="bg-slate-50 rounded-2xl p-6 mb-10 flex flex-col sm:flex-row justify-between gap-6">
+                            <div>
+                                <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-2">Billed To</p>
+                                <h3 className="text-xl font-black text-slate-800">{invoice.guestName}</h3>
+                                <p className="text-sm text-slate-500 mt-1">Guest · {invoice.guestSignature ? 'Signed' : 'Pending signature'}</p>
+                            </div>
+                            <div className="sm:text-right">
+                                <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-2">From</p>
+                                <h3 className="text-base font-black text-slate-800">{HOTEL.name}</h3>
+                                <p className="text-sm text-slate-500 mt-1">{HOTEL.website}</p>
+                            </div>
+                        </div>
+
+                        {/* ── LINE ITEMS ── */}
+                        <div className="mb-10 overflow-x-auto rounded-2xl border border-slate-100">
+                            <table className="w-full text-left text-sm min-w-[560px]">
+                                <thead>
+                                    <tr className="bg-slate-50 border-b border-slate-200">
+                                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] w-10">#</th>
+                                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Description</th>
+                                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] text-center w-16">Qty</th>
+                                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] text-right w-32">Unit Price</th>
+                                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] text-right w-32">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-50">
+                                    {/* Direct line items */}
+                                    {invoice.items?.map((item: any, i: number) => (
+                                        <tr key={item.id} className="hover:bg-slate-50/50 transition-colors">
+                                            <td className="px-6 py-4 text-slate-400 font-bold text-xs">{i + 1}</td>
+                                            <td className="px-6 py-4 font-semibold text-slate-800">{item.description}</td>
+                                            <td className="px-6 py-4 text-center text-slate-500">{item.quantity}</td>
+                                            <td className="px-6 py-4 text-right text-slate-600">RWF {item.price.toLocaleString()}</td>
+                                            <td className="px-6 py-4 text-right font-black text-slate-800">RWF {(item.quantity * item.price).toLocaleString()}</td>
+                                        </tr>
+                                    ))}
+                                    {/* Sub-invoices (master invoice) */}
+                                    {invoice.subInvoices?.map((sub: any) => (
+                                        <tr key={sub.id} className="bg-slate-50/30 hover:bg-slate-50 transition-colors">
+                                            <td className="px-6 py-4 text-slate-400 font-bold text-xs">—</td>
+                                            <td className="px-6 py-4">
+                                                <span className="font-semibold text-slate-800">Invoice #{sub.id.slice(-6).toUpperCase()}</span>
+                                                <span className="ml-2 text-[10px] font-black text-primary/70 bg-primary/5 px-2 py-0.5 rounded-full uppercase">{sub.type}</span>
+                                            </td>
+                                            <td className="px-6 py-4 text-center text-slate-500">1</td>
+                                            <td className="px-6 py-4 text-right text-slate-600">RWF {sub.amount.toLocaleString()}</td>
+                                            <td className="px-6 py-4 text-right font-black text-slate-800">RWF {sub.amount.toLocaleString()}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* ── TOTALS ── */}
+                        <div className="flex justify-end mb-14">
+                            <div className="w-72 space-y-3">
+                                {invoice.items && invoice.items.length > 0 && (
+                                    <div className="flex justify-between text-sm font-medium text-slate-500">
+                                        <span>Subtotal</span>
+                                        <span>RWF {subtotal.toLocaleString()}</span>
+                                    </div>
+                                )}
+                                {subInvoicesTotal > 0 && (
+                                    <div className="flex justify-between text-sm font-medium text-slate-500">
+                                        <span>Linked Invoices</span>
+                                        <span>RWF {subInvoicesTotal.toLocaleString()}</span>
+                                    </div>
+                                )}
+                                <div className="flex justify-between text-lg pt-4 border-t-2 border-primary/30">
+                                    <span className="font-black text-slate-900 uppercase tracking-tight">Grand Total</span>
+                                    <span className="font-black text-primary text-2xl">RWF {grandTotal.toLocaleString()}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* ── SIGNATURE ── */}
+                        <div className="grid grid-cols-2 gap-12 border-t border-slate-100 pt-10">
+                            <div>
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-12">Guest Signature</p>
+                                <div className="h-px bg-slate-200 w-full mb-3" />
+                                <p className="text-xs text-slate-400">By signing, I confirm the above charges are correct.</p>
+                            </div>
+                            <div>
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-12">Authorized By</p>
+                                <div className="h-px bg-slate-200 w-full mb-3" />
+                                <p className="text-xs text-slate-400">{HOTEL.name} · Front Desk</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Footer strip */}
+                    <div className="bg-primary/5 border-t border-primary/10 px-14 py-6 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-slate-400 font-medium">
+                        <span>{HOTEL.name} — {HOTEL.city}</span>
+                        <div className="flex gap-6">
+                            <span className="flex items-center gap-1.5"><span className="material-icons-outlined text-sm text-primary/60">call</span>{HOTEL.phone}</span>
+                            <span className="flex items-center gap-1.5"><span className="material-icons-outlined text-sm text-primary/60">language</span>{HOTEL.website}</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
