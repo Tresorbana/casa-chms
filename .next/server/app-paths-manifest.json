@@ -1,10 +1,9 @@
 {
-  "/api/dashboard/route": "app/api/dashboard/route.js",
+  "/api/inquiries/route": "app/api/inquiries/route.js",
   "/api/auth/me/route": "app/api/auth/me/route.js",
   "/api/notifications/route": "app/api/notifications/route.js",
-  "/notifications/page": "app/notifications/page.js",
-  "/profile/page": "app/profile/page.js",
+  "/login/page": "app/login/page.js",
   "/page": "app/page.js",
-  "/calendar/page": "app/calendar/page.js",
-  "/room-status/page": "app/room-status/page.js"
+  "/bookings/page": "app/bookings/page.js",
+  "/inquiries/page": "app/inquiries/page.js"
 }

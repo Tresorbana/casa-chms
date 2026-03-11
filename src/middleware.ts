@@ -19,10 +19,15 @@ export async function middleware(request: NextRequest) {
     // If user is not logged in and trying to access protected route (everything except login)
     if (!session && !isLoginPage) {
         if (pathname.startsWith('/api')) {
+            // Allow public submission of inquiries
+            if (pathname === '/api/inquiries' && request.method === 'POST') {
+                return NextResponse.next()
+            }
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
         return NextResponse.redirect(new URL('/login', request.url))
     }
+
 
     // If user is logged in and trying to access login page
     if (session && isLoginPage) {
