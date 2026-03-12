@@ -57,8 +57,9 @@ export async function PUT(request: Request) {
         })
 
         // Send automated email if response is provided
+        let emailResult = null;
         if (response !== undefined && inquiry.email) {
-            await sendEmail({
+            emailResult = await sendEmail({
                 to: inquiry.email,
                 subject: `Response to your inquiry: ${inquiry.subject}`,
                 text: `Dear ${inquiry.name},\n\nThank you for your inquiry regarding "${inquiry.subject}".\n\nOur response:\n${response}\n\nBest regards,\nCasa Hotel Huye Team`,
@@ -80,9 +81,19 @@ export async function PUT(request: Request) {
                     </div>
                 `
             });
+            
+            if (!emailResult.success) {
+                console.error('CRITICAL: Automated email failed to send:', emailResult.error);
+            } else {
+                console.log('Automated email sent successfully to:', inquiry.email);
+            }
         }
 
-        return NextResponse.json(inquiry)
+        return NextResponse.json({ 
+            ...inquiry, 
+            emailSent: emailResult?.success ?? false,
+            emailError: emailResult?.success ? null : emailResult?.error 
+        })
     } catch (error) {
         console.error('Inquiry update/email error:', error)
         return NextResponse.json({ error: 'Failed to update inquiry' }, { status: 500 })
