@@ -67,9 +67,17 @@ export default function CMSRequests() {
                                         {new Date(req.createdAt).toLocaleDateString()}
                                     </td>
                                     <td className="px-8 py-6 text-right">
-                                        <button className="px-6 py-2 bg-slate-900 hover:bg-primary text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-xl transition-all shadow-lg active:scale-95">
-                                            Process Inquiry
-                                        </button>
+                                        <div className="flex gap-2 justify-end">
+                                            <a 
+                                                href={`mailto:${req.email}?subject=Regarding your inquiry: ${req.subject || 'Booking Request'}`}
+                                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-xl transition-all shadow-lg active:scale-95 flex items-center gap-1"
+                                            >
+                                                <span className="material-icons-outlined text-sm">email</span> Email
+                                            </a>
+                                            <button className="px-6 py-2 bg-slate-900 hover:bg-primary text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-xl transition-all shadow-lg active:scale-95">
+                                                Process Inquiry
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}

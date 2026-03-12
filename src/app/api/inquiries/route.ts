@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-
-
+import { sendEmail } from '@/lib/email'
 
 export async function GET() {
     try {
@@ -57,8 +56,35 @@ export async function PUT(request: Request) {
             data
         })
 
+        // Send automated email if response is provided
+        if (response !== undefined && inquiry.email) {
+            await sendEmail({
+                to: inquiry.email,
+                subject: `Response to your inquiry: ${inquiry.subject}`,
+                text: `Dear ${inquiry.name},\n\nThank you for your inquiry regarding "${inquiry.subject}".\n\nOur response:\n${response}\n\nBest regards,\nCasa Hotel Huye Team`,
+                html: `
+                    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; rounded: 12px;">
+                        <h2 style="color: #1e293b; border-bottom: 2px solid #57534e; padding-bottom: 10px;">Casa Hotel Huye</h2>
+                        <p style="color: #475569; font-size: 16px;">Dear ${inquiry.name},</p>
+                        <p style="color: #475569; font-size: 16px;">Thank you for reaching out to us regarding <strong>${inquiry.subject}</strong>.</p>
+                        <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #57534e;">
+                            <p style="color: #1e293b; font-weight: bold; margin-bottom: 10px;">Our Response:</p>
+                            <p style="color: #334155; line-height: 1.6;">${response.replace(/\n/g, '<br>')}</p>
+                        </div>
+                        <p style="color: #475569; font-size: 16px;">We look forward to welcoming you soon.</p>
+                        <p style="color: #64748b; font-size: 14px; margin-top: 30px; border-top: 1px solid #f1f5f9; padding-top: 20px;">
+                            Best regards,<br>
+                            <strong>Casa Hotel Huye Team</strong><br>
+                            Southern Province, Rwanda
+                        </p>
+                    </div>
+                `
+            });
+        }
+
         return NextResponse.json(inquiry)
     } catch (error) {
+        console.error('Inquiry update/email error:', error)
         return NextResponse.json({ error: 'Failed to update inquiry' }, { status: 500 })
     }
 }

@@ -48,6 +48,12 @@ export default function InquiriesPage() {
                                 Mark Read
                             </button>
                         )}
+                        <a 
+                            href={`mailto:${inq.email}?subject=Regarding your inquiry: ${inq.subject || 'Booking Request'}`}
+                            className="text-xs font-bold text-olive-leaf border border-olive-leaf px-3 py-1 rounded-lg hover:bg-olive-leaf hover:text-white transition-colors flex items-center gap-1"
+                        >
+                            <span className="material-icons-outlined text-sm">email</span> Email
+                        </a>
                         <button 
                             onClick={() => setIsReplying(!isReplying)}
                             className="text-xs font-bold text-white bg-primary px-3 py-1 rounded-lg hover:bg-primary/90 transition-colors shadow-sm flex items-center gap-1"
