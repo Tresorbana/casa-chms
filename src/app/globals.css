@@ -1,16 +1,75 @@
-@import url('https://fonts.googleapis.com/css2?family=Anaheim&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --gold: #D4AF37;
+  --gold-light: #F0C040;
+  --gold-dim: rgba(212, 175, 55, 0.12);
+  --gold-border: rgba(212, 175, 55, 0.2);
+  --gold-glow: rgba(212, 175, 55, 0.3);
+  --surface: #111111;
+  --surface-alt: #161616;
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border: rgba(255, 255, 255, 0.1);
+}
+
 @layer base {
+  html {
+    background-color: #000000;
+  }
   body {
-    @apply bg-background-light text-slate-900 transition-colors duration-200 font-sans;
+    @apply bg-black text-white font-sans antialiased;
+  }
+  h1, h2, h3, h4 {
+    color: #D4AF37;
+    letter-spacing: 0.025em;
   }
 }
 
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
+/* Premium scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.2); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(212, 175, 55, 0.4); }
+
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+
+/* 21st.dev premium card */
+.card {
+  background: #111111;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+}
+
+/* Gold shimmer line */
+.shimmer-border::after {
+  content: '';
+  position: absolute;
+  inset-x: 0;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212,175,55,0.4), transparent);
+}
+
+/* Premium focus ring */
+.focus-gold:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.25);
+  border-color: rgba(212, 175, 55, 0.5);
+}
+
+/* Grain overlay for premium texture */
+.grain::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  opacity: 0.03;
+  border-radius: inherit;
 }
 
 .material-icons,

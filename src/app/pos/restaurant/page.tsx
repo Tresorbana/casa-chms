@@ -1,295 +1,189 @@
 'use client';
-import Link from 'next/link';
-import Image from 'next/image';
 import useSWR from 'swr';
 import { fetcher } from '@/lib/fetcher';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import TopBar from '@/components/TopBar';
 
-export default function PosRestaurant1() {
+export default function PosRestaurant() {
     const { data: menuItems, error } = useSWR('/api/pos/menu', fetcher);
     const [orderType, setOrderType] = useState('resident');
     const [cart, setCart] = useState<any[]>([]);
     const [residentRoom, setResidentRoom] = useState('');
+    const [walkInName, setWalkInName] = useState('');
+    const [walkInContact, setWalkInContact] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isCartOpen, setIsCartOpen] = useState(false); // Mobile cart toggle
+    const [isCartOpen, setIsCartOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('All Items');
     const [searchTerm, setSearchTerm] = useState('');
     const router = useRouter();
 
-    const [walkInName, setWalkInName] = useState('');
-    const [walkInContact, setWalkInContact] = useState('');
-
-
-    const safeMenuItems = Array.isArray(menuItems) ? menuItems : [];
-    const categories = ["All Items", ...Array.from(new Set(safeMenuItems.map((item: any) => item.category)))];
-
-    const filteredItems = safeMenuItems.filter((item: any) => {
-        const matchesCategory = selectedCategory === 'All Items' || item.category === selectedCategory;
-        const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
-        return matchesCategory && matchesSearch;
+    const safeItems = Array.isArray(menuItems) ? menuItems : [];
+    const categories = ['All Items', ...Array.from(new Set(safeItems.map((item: any) => item.category)))];
+    const filteredItems = safeItems.filter((item: any) => {
+        const matchCat = selectedCategory === 'All Items' || item.category === selectedCategory;
+        const matchSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
+        return matchCat && matchSearch;
     });
 
-    const switchType = (type: string) => {
-        setOrderType(type);
-    };
-
-    const addToCart = (item: any) => {
-        setCart([...cart, item]);
-    };
+    const addToCart = (item: any) => setCart(prev => [...prev, item]);
+    const cartTotal = cart.reduce((sum, item) => sum + item.price, 0);
 
     const handleFinalize = async () => {
-        if (cart.length === 0) {
-            alert('Cart is empty');
-            return;
-        }
-
+        if (cart.length === 0) { alert('Cart is empty'); return; }
         setIsSubmitting(true);
         try {
-            const total = cart.reduce((sum, item) => sum + item.price, 0);
-
-            const guestDescription = orderType === 'resident'
-                ? `Room ${residentRoom}`
-                : `${walkInName || 'Guest'} (${walkInContact || 'No Contact'})`;
-
+            const guestDescription = orderType === 'resident' ? `Room ${residentRoom}` : `${walkInName || 'Guest'} (${walkInContact || 'No Contact'})`;
             const res = await fetch('/api/invoices', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    guestName: guestDescription,
-                    amount: total,
-                    status: 'PENDING',
-                    items: cart.map(item => ({
-                        description: item.name,
-                        quantity: 1,
-                        price: item.price
-                    }))
-                })
+                body: JSON.stringify({ guestName: guestDescription, amount: cartTotal, status: 'PENDING', items: cart.map(item => ({ description: item.name, quantity: 1, price: item.price })) })
             });
-
-            if (res.ok) {
-                const invoice = await res.json();
-                router.push(`/invoice/restaurant?id=${invoice.id}`);
-            } else {
-                alert('Failed to create invoice');
-            }
-        } catch (err) {
-            alert('Error creating invoice');
-        } finally {
-            setIsSubmitting(false);
-        }
+            if (res.ok) { const invoice = await res.json(); router.push(`/invoice/restaurant?id=${invoice.id}`); }
+            else alert('Failed to create invoice');
+        } catch { alert('Error creating invoice'); }
+        finally { setIsSubmitting(false); }
     };
 
+    const inputStyle = { background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.08)', color: 'white' };
+
     return (
-        <div className="flex-1 min-h-screen relative flex flex-col lg:flex-row bg-cornsilk/10">
-            <main className="flex-1 flex flex-col overflow-hidden min-h-screen">
-                <div className="flex-1 flex flex-col p-4 lg:p-8 overflow-hidden">
-                    <TopBar
-                        title="Restaurant POS"
-                        description="Professional Point of Sale for Casa Hotel Restaurant & Bar."
-                        actions={
-                            <button
-                                className="lg:hidden relative p-2 bg-primary text-white rounded-xl shadow-lg"
-                                onClick={() => setIsCartOpen(!isCartOpen)}
-                            >
-                                <span className="material-icons-outlined">shopping_cart</span>
-                                {cart.length > 0 && (
-                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">
-                                        {cart.length}
-                                    </span>
-                                )}
-                            </button>
-                        }
-                    />
-                    <section className="flex-1 flex flex-col p-2 lg:p-6 overflow-hidden">
-                        <div className="flex flex-col md:flex-row gap-4 mb-6">
-                            <div className="relative flex-1">
-                                <span className="material-icons-round absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
-                                <input
-                                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-olive-leaf outline-none shadow-sm"
-                                    placeholder="Search menu items..."
-                                    type="text"
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="flex gap-3 mb-6 overflow-x-auto pb-2 hide-scrollbar">
-                            {categories.map((cat: any) => (
-                                <button
-                                    key={cat}
-                                    onClick={() => setSelectedCategory(cat)}
-                                    className={`px-5 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all ${selectedCategory === cat ? 'bg-black-forest text-cornsilk shadow-md' : 'bg-white border border-slate-200 text-slate-600 hover:border-olive-leaf hover:text-olive-leaf'}`}
-                                >
-                                    {cat}
-                                </button>
-                            ))}
-                        </div>
-
-                        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 overflow-y-auto pr-2 pb-20 lg:pb-0">
-                            {error ? (
-                                <div className="p-12 text-center col-span-full text-red-400 font-bold uppercase tracking-widest text-xs">Failed to load menu.</div>
-                            ) : !menuItems ? (
-                                <div className="p-12 text-center col-span-full text-slate-400 flex flex-col items-center gap-4">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-olive-leaf"></div>
-                                    <span className="text-xs font-bold uppercase tracking-widest">Connecting to Kitchen...</span>
-                                </div>
-                            ) : filteredItems.length > 0 ? (
-                                filteredItems.map((item: any) => (
-                                    <button key={item.id} className="group relative flex flex-col bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 text-left" onClick={() => addToCart(item)}>
-                                        <div className="h-32 w-full bg-cornsilk/30 flex items-center justify-center group-hover:bg-cornsilk/50 transition-colors">
-                                            <span className="material-icons text-5xl text-olive-leaf/40">restaurant_menu</span>
-                                        </div>
-                                        <div className="p-4">
-                                            <h3 className="font-bold text-sm text-slate-800 group-hover:text-olive-leaf transition-colors line-clamp-1">{item.name}</h3>
-                                            <p className="text-xs text-slate-500 mt-1 mb-3">{item.category}</p>
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-copper font-black">RWF {item.price.toLocaleString()}</span>
-                                                <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center group-hover:bg-olive-leaf group-hover:text-white transition-all shadow-sm">
-                                                    <span className="material-icons-round text-sm">add</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </button>
-                                ))
-                            ) : (
-                                <div className="p-12 text-center col-span-full text-slate-400 py-32 flex flex-col items-center gap-4">
-                                    <span className="material-icons-outlined text-6xl opacity-20">restaurant</span>
-                                    <div>
-                                        <p className="font-black italic text-xl uppercase tracking-tighter text-slate-300">No Menu Items Found</p>
-                                        <p className="text-[10px] uppercase font-bold tracking-widest mt-1">Try adjusting your filters or search keywords</p>
-                                    </div>
-                                </div>
+        <div className="flex-1 min-h-screen relative flex flex-col lg:flex-row" style={{ background: '#000000' }}>
+            {/* Main content */}
+            <main className="flex-1 flex flex-col overflow-hidden min-h-screen p-4 lg:p-8">
+                <TopBar
+                    title="Restaurant POS"
+                    description="Point of Sale for Casa Hotel Restaurant & Bar."
+                    actions={
+                        <button className="lg:hidden relative p-2 rounded-xl bg-gold text-black" onClick={() => setIsCartOpen(!isCartOpen)}>
+                            <span className="material-icons-outlined">shopping_cart</span>
+                            {cart.length > 0 && (
+                                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                                    {cart.length}
+                                </span>
                             )}
-                        </div>
-                    </section>
+                        </button>
+                    }
+                />
+
+                {/* Search + categories */}
+                <div className="flex flex-col md:flex-row gap-4 mb-6">
+                    <div className="relative flex-1">
+                        <span className="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/20 text-[18px]">search</span>
+                        <input className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm text-white placeholder:text-white/20 outline-none" style={inputStyle}
+                            placeholder="Search menu items..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+                    </div>
+                </div>
+                <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
+                    {categories.map((cat: any) => (
+                        <button key={cat} onClick={() => setSelectedCategory(cat)}
+                            className={`px-4 py-1.5 rounded-full text-xs font-black whitespace-nowrap transition-all ${selectedCategory === cat ? 'bg-gold text-black shadow-gold-sm' : 'text-white/40 hover:text-white/70'}`}
+                            style={selectedCategory !== cat ? { border: '1px solid rgba(255,255,255,0.08)' } : {}}>
+                            {cat}
+                        </button>
+                    ))}
                 </div>
 
-                {/* Mobile Cart Overlay */}
-                {isCartOpen && (
-                    <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setIsCartOpen(false)}></div>
-                )}
-
-                <div className={`fixed inset-y-0 right-0 w-80 bg-white shadow-2xl z-50 transform transition-transform duration-300 lg:relative lg:transform-none lg:w-96 border-l border-slate-100 flex flex-col ${isCartOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}`}>
-                    <div className="p-6 border-b border-slate-100 bg-slate-50/50">
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="font-black text-xl italic text-slate-800">Current Order</h3>
-                            <button className="text-xs font-bold text-red-500 hover:text-red-600 uppercase tracking-wider" onClick={() => setCart([])}>Clear All</button>
-                        </div>
-
-                        {/* Order Details Input Block inside Sidebar */}
-                        <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm mb-2 space-y-4">
-                            <div className="flex p-1 bg-slate-100 rounded-lg">
-                                <button
-                                    className={`flex-1 py-1.5 rounded-md text-xs font-bold uppercase tracking-wide transition-all ${orderType === 'resident' ? 'bg-white text-olive-leaf shadow-sm' : 'text-slate-500'}`}
-                                    onClick={() => switchType('resident')}
-                                >
-                                    Resident
-                                </button>
-                                <button
-                                    className={`flex-1 py-1.5 rounded-md text-xs font-bold uppercase tracking-wide transition-all ${orderType === 'walkin' ? 'bg-white text-olive-leaf shadow-sm' : 'text-slate-500'}`}
-                                    onClick={() => switchType('walkin')}
-                                >
-                                    Walk-in
-                                </button>
+                {/* Menu grid */}
+                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 overflow-y-auto pb-24 lg:pb-4">
+                    {error ? (
+                        <div className="col-span-full p-12 text-center text-red-400 font-bold">Failed to load menu.</div>
+                    ) : !menuItems ? (
+                        <div className="col-span-full p-12 text-center text-white/30 text-sm">Loading menu...</div>
+                    ) : filteredItems.length > 0 ? filteredItems.map((item: any) => (
+                        <button key={item.id} onClick={() => addToCart(item)}
+                            className="group flex flex-col rounded-2xl overflow-hidden text-left transition-all hover:border-gold/30 hover:-translate-y-0.5 hover:shadow-gold-sm"
+                            style={{ background: '#111111', border: '1px solid rgba(255,255,255,0.07)' }}>
+                            <div className="h-28 w-full flex items-center justify-center bg-gold/[0.03] group-hover:bg-gold/[0.06] transition-colors">
+                                <span className="material-icons-outlined text-4xl text-gold/25">restaurant_menu</span>
                             </div>
-
-                            {orderType === 'resident' ? (
-                                <div className="relative">
-                                    <span className="material-icons-round absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">meeting_room</span>
-                                    <input
-                                        className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-olive-leaf outline-none"
-                                        placeholder="Room Number..."
-                                        type="text"
-                                        value={residentRoom}
-                                        onChange={(e) => setResidentRoom(e.target.value)}
-                                    />
-                                </div>
-                            ) : (
-                                <div className="space-y-2">
-                                    <div className="relative">
-                                        <span className="material-icons-round absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">person</span>
-                                        <input
-                                            className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-olive-leaf outline-none"
-                                            placeholder="Guest Name..."
-                                            type="text"
-                                            value={walkInName}
-                                            onChange={(e) => setWalkInName(e.target.value)}
-                                        />
-                                    </div>
-                                    <div className="relative">
-                                        <span className="material-icons-round absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">phone</span>
-                                        <input
-                                            className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-olive-leaf outline-none"
-                                            placeholder="Contact Info..."
-                                            type="text"
-                                            value={walkInContact}
-                                            onChange={(e) => setWalkInContact(e.target.value)}
-                                        />
+                            <div className="p-4">
+                                <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-1">{item.category}</p>
+                                <h3 className="font-bold text-sm text-white/80 group-hover:text-white transition-colors line-clamp-1 mb-3">{item.name}</h3>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-gold font-black text-sm">RWF {item.price.toLocaleString()}</span>
+                                    <div className="w-7 h-7 bg-gold/10 rounded-full flex items-center justify-center group-hover:bg-gold group-hover:text-black transition-all">
+                                        <span className="material-icons-outlined text-[14px] text-gold group-hover:text-black">add</span>
                                     </div>
                                 </div>
-                            )}
-                        </div>
-                    </div>
-                    <div className="flex-1 overflow-y-auto p-6 space-y-4">
-                        {cart.length === 0 ? (
-                            <div className="text-center text-slate-400 py-20 flex flex-col items-center gap-4">
-                                <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center">
-                                    <span className="material-icons-outlined text-4xl opacity-50">shopping_cart</span>
-                                </div>
-                                <p className="font-bold">Cart is empty</p>
                             </div>
-                        ) : (
-                            cart.map((item, index) => (
-                                <div key={index} className="flex gap-3 group">
-                                    <div className="h-16 w-16 bg-slate-100 rounded-xl flex items-center justify-center shrink-0">
-                                        <span className="material-icons text-slate-300">restaurant</span>
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex justify-between items-start mb-1">
-                                            <h4 className="font-bold text-sm truncate text-slate-800 pr-2">{item.name}</h4>
-                                            <p className="font-black text-sm text-copper whitespace-nowrap">{item.price.toLocaleString()}</p>
-                                        </div>
-                                        <p className="text-xs text-slate-500 mb-2 truncate">{item.category}</p>
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-3 bg-slate-50 rounded-lg p-1 border border-slate-100">
-                                                <button className="w-5 h-5 flex items-center justify-center hover:bg-white rounded transition-colors shadow-sm">
-                                                    <span className="material-icons-round text-[10px]">remove</span>
-                                                </button>
-                                                <span className="text-xs font-bold w-3 text-center">1</span>
-                                                <button className="w-5 h-5 flex items-center justify-center hover:bg-white rounded transition-colors shadow-sm">
-                                                    <span className="material-icons-round text-[10px]">add</span>
-                                                </button>
-                                            </div>
-                                            <button className="text-slate-300 hover:text-red-500 transition-colors p-1" onClick={() => setCart(cart.filter((_, i) => i !== index))}>
-                                                <span className="material-icons-round text-lg">delete_outline</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))
-                        )}
-                    </div>
-                    <div className="p-6 bg-white border-t border-slate-100 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]">
-                        <div className="space-y-2 mb-6">
-                            <div className="flex justify-between text-xl font-black mt-4 pt-4 border-t border-slate-100 text-slate-900 items-baseline">
-                                <span className="text-sm uppercase tracking-widest text-olive-leaf">Total</span>
-                                <span className="text-2xl">RWF {(cart.reduce((sum, item) => sum + item.price, 0)).toLocaleString()}</span>
-                            </div>
-                        </div>
-                        <button
-                            className="w-full bg-olive-leaf hover:bg-black-forest text-white font-bold py-4 rounded-2xl shadow-xl shadow-olive-leaf/20 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:shadow-none transform active:scale-[0.98]"
-                            onClick={handleFinalize}
-                            disabled={isSubmitting || cart.length === 0}
-                        >
-                            <span className="material-icons-round">{isSubmitting ? 'sync' : 'receipt_long'}</span>
-                            {isSubmitting ? 'Processing...' : 'Finalize Order'}
                         </button>
-                    </div>
+                    )) : (
+                        <div className="col-span-full py-24 text-center text-white/25">
+                            <span className="material-icons-outlined text-5xl block mb-3 opacity-30">restaurant</span>
+                            <p className="font-black text-sm uppercase tracking-widest">No menu items found</p>
+                        </div>
+                    )}
                 </div>
             </main>
-        </div >
+
+            {/* Mobile overlay */}
+            {isCartOpen && <div className="fixed inset-0 z-40 lg:hidden" style={{ background: 'rgba(0,0,0,0.7)' }} onClick={() => setIsCartOpen(false)} />}
+
+            {/* Cart sidebar */}
+            <div className={`fixed inset-y-0 right-0 w-80 z-50 flex flex-col transform transition-transform duration-300 lg:relative lg:w-96 lg:translate-x-0 ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}
+                style={{ background: '#0a0a0a', borderLeft: '1px solid rgba(255,255,255,0.06)' }}>
+                <div className="p-6" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div className="flex justify-between items-center mb-5">
+                        <h3 className="font-black text-lg text-white uppercase tracking-tighter">Order</h3>
+                        <button className="text-[9px] font-black uppercase tracking-widest text-red-400/60 hover:text-red-400 transition-colors" onClick={() => setCart([])}>Clear</button>
+                    </div>
+                    {/* Order type toggle */}
+                    <div className="flex p-1 rounded-xl gap-1 mb-4" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                        {['resident', 'walkin'].map(t => (
+                            <button key={t} onClick={() => setOrderType(t)}
+                                className={`flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${orderType === t ? 'bg-gold text-black' : 'text-white/40 hover:text-white'}`}>
+                                {t === 'resident' ? 'Resident' : 'Walk-in'}
+                            </button>
+                        ))}
+                    </div>
+                    {orderType === 'resident' ? (
+                        <input className="w-full rounded-xl px-4 py-2.5 text-sm font-bold outline-none" style={inputStyle} placeholder="Room Number..." value={residentRoom} onChange={e => setResidentRoom(e.target.value)} />
+                    ) : (
+                        <div className="space-y-2">
+                            <input className="w-full rounded-xl px-4 py-2.5 text-sm font-bold outline-none" style={inputStyle} placeholder="Guest Name..." value={walkInName} onChange={e => setWalkInName(e.target.value)} />
+                            <input className="w-full rounded-xl px-4 py-2.5 text-sm font-bold outline-none" style={inputStyle} placeholder="Contact..." value={walkInContact} onChange={e => setWalkInContact(e.target.value)} />
+                        </div>
+                    )}
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-6 space-y-3">
+                    {cart.length === 0 ? (
+                        <div className="text-center text-white/20 py-16 flex flex-col items-center gap-3">
+                            <span className="material-icons-outlined text-4xl opacity-30">shopping_cart</span>
+                            <p className="font-bold text-sm">Cart is empty</p>
+                        </div>
+                    ) : cart.map((item, index) => (
+                        <div key={index} className="flex gap-3 group">
+                            <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-gold/[0.06]">
+                                <span className="material-icons-outlined text-gold/40 text-[18px]">restaurant</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <div className="flex justify-between items-start">
+                                    <h4 className="font-bold text-sm text-white/70 truncate pr-2">{item.name}</h4>
+                                    <p className="font-black text-xs text-gold whitespace-nowrap">RWF {item.price.toLocaleString()}</p>
+                                </div>
+                                <p className="text-[9px] text-white/25 mt-0.5">{item.category}</p>
+                            </div>
+                            <button className="text-white/15 hover:text-red-400 transition-colors" onClick={() => setCart(cart.filter((_, i) => i !== index))}>
+                                <span className="material-icons-outlined text-[16px]">close</span>
+                            </button>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="p-6" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div className="flex justify-between items-baseline mb-5">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Total</span>
+                        <span className="text-2xl font-black text-gold">RWF {cartTotal.toLocaleString()}</span>
+                    </div>
+                    <button onClick={handleFinalize} disabled={isSubmitting || cart.length === 0}
+                        className="w-full bg-gold text-black font-black py-4 rounded-2xl shadow-gold hover:bg-gold-light transition-all flex items-center justify-center gap-3 disabled:opacity-50">
+                        <span className="material-icons-outlined text-base">{isSubmitting ? 'sync' : 'receipt_long'}</span>
+                        {isSubmitting ? 'Processing...' : 'Finalize Order'}
+                    </button>
+                </div>
+            </div>
+        </div>
     );
 }

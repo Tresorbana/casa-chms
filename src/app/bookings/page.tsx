@@ -85,8 +85,11 @@ function BookingsContent() {
     }
   };
 
+  const inputClass = "w-full bg-[#0a0a0a] border border-gold/20 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/25 focus:ring-2 focus:ring-gold/30 focus:border-gold/50 outline-none transition-all";
+  const labelClass = "text-[10px] font-black text-gold/50 uppercase tracking-widest";
+
   return (
-    <div className="flex-1 min-h-screen relative bg-slate-50 p-4 lg:p-8">
+    <div className="flex-1 min-h-screen relative p-4 lg:p-8" style={{ background: '#000000' }}>
       <TopBar
         title="Bookings & Assignment"
         description="Manage guest bookings and room assignments."
@@ -94,36 +97,38 @@ function BookingsContent() {
 
       <form onSubmit={handleSubmit} className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Guest Profile Card */}
           <div className="lg:col-span-7">
-            <div className="bg-white rounded-[2.5rem] shadow-xl border border-slate-200 overflow-hidden">
-              <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div className="bg-navy-surface rounded-[2rem] shadow-xl border border-gold/15 overflow-hidden relative">
+              <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
+              <div className="p-8 border-b border-gold/[0.1] flex items-center justify-between bg-black/20">
                 <div>
-                  <h2 className="text-xl font-black italic tracking-tighter uppercase">Guest Entity Profile</h2>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Biometric & Contact Matrix</p>
+                  <h2 className="text-xl font-black italic tracking-tighter uppercase text-gold">Guest Entity Profile</h2>
+                  <p className="text-[10px] font-black text-white/35 uppercase tracking-widest">Biometric & Contact Matrix</p>
                 </div>
-                <span className="material-icons-outlined text-primary">person_add</span>
+                <span className="material-icons-outlined text-gold/50">person_add</span>
               </div>
               <div className="p-6 md:p-10">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Full Legal Name</label>
-                    <input className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-primary outline-none" placeholder="e.g. John Doe" type="text" name="name" value={formData.name} onChange={handleChange} required />
+                    <label className={labelClass}>Full Legal Name</label>
+                    <input className={inputClass} placeholder="e.g. John Doe" type="text" name="name" value={formData.name} onChange={handleChange} required />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Signal Number</label>
-                    <input className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-primary outline-none" placeholder="+1 (555) 000-0000" type="tel" name="phone" value={formData.phone} onChange={handleChange} required />
+                    <label className={labelClass}>Signal Number</label>
+                    <input className={inputClass} placeholder="+1 (555) 000-0000" type="tel" name="phone" value={formData.phone} onChange={handleChange} required />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Electronic Mail</label>
-                    <input className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-primary outline-none" placeholder="john.doe@example.com" type="email" name="email" value={formData.email} onChange={handleChange} required />
+                    <label className={labelClass}>Electronic Mail</label>
+                    <input className={inputClass} placeholder="john.doe@example.com" type="email" name="email" value={formData.email} onChange={handleChange} required />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Identity Certificate</label>
-                    <input className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-primary outline-none" placeholder="A12345678" type="text" name="idNumber" value={formData.idNumber} onChange={handleChange} />
+                    <label className={labelClass}>Identity Certificate</label>
+                    <input className={inputClass} placeholder="A12345678" type="text" name="idNumber" value={formData.idNumber} onChange={handleChange} />
                   </div>
                   <div className="space-y-2 md:col-span-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nationality Origin</label>
-                    <select className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-primary outline-none" name="nationality" value={formData.nationality} onChange={handleChange}>
+                    <label className={labelClass}>Nationality Origin</label>
+                    <select className={inputClass} name="nationality" value={formData.nationality} onChange={handleChange}>
                       <option value="">Select Origin...</option>
                       {countries.map(c => (
                         <option key={c} value={c}>{c}</option>
@@ -135,30 +140,32 @@ function BookingsContent() {
             </div>
           </div>
 
+          {/* Allocation Card */}
           <div className="lg:col-span-5 space-y-8">
-            <div className="bg-white rounded-[2.5rem] shadow-xl border border-slate-200 overflow-hidden">
-              <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div className="bg-navy-surface rounded-[2rem] shadow-xl border border-gold/15 overflow-hidden relative">
+              <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
+              <div className="p-8 border-b border-gold/[0.1] flex items-center justify-between bg-black/20">
                 <div>
-                  <h2 className="text-xl font-black italic tracking-tighter uppercase">Allocation Specs</h2>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Temporal & Spatial Parameters</p>
+                  <h2 className="text-xl font-black italic tracking-tighter uppercase text-gold">Allocation Specs</h2>
+                  <p className="text-[10px] font-black text-white/35 uppercase tracking-widest">Temporal & Spatial Parameters</p>
                 </div>
-                <span className="material-icons-outlined text-primary">event</span>
+                <span className="material-icons-outlined text-gold/50">event</span>
               </div>
-              <div className="p-6 md:p-10 space-y-8">
-                <div className="grid grid-cols-2 gap-6">
+              <div className="p-6 md:p-10 space-y-6">
+                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Start Cycle</label>
-                    <input className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-primary outline-none" type="date" name="checkIn" value={formData.checkIn} onChange={handleChange} required />
+                    <label className={labelClass}>Start Cycle</label>
+                    <input className={inputClass} type="date" name="checkIn" value={formData.checkIn} onChange={handleChange} required />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">End Cycle</label>
-                    <input className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-primary outline-none" type="date" name="checkOut" value={formData.checkOut} onChange={handleChange} required />
+                    <label className={labelClass}>End Cycle</label>
+                    <input className={inputClass} type="date" name="checkOut" value={formData.checkOut} onChange={handleChange} required />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Room Type</label>
-                  <select className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-primary outline-none" name="roomType" value={formData.roomType} onChange={handleChange} required>
+                  <label className={labelClass}>Room Type</label>
+                  <select className={inputClass} name="roomType" value={formData.roomType} onChange={handleChange} required>
                     <option value="">Select Category...</option>
                     <option value="standard">Standard Single (RWF 45,000/night)</option>
                     <option value="double">Deluxe Double (RWF 75,000/night)</option>
@@ -168,16 +175,16 @@ function BookingsContent() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Room Number</label>
-                  <input className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-primary outline-none" placeholder="e.g. 101" type="text" name="roomNumber" value={formData.roomNumber} onChange={handleChange} required />
+                  <label className={labelClass}>Room Number</label>
+                  <input className={inputClass} placeholder="e.g. 101" type="text" name="roomNumber" value={formData.roomNumber} onChange={handleChange} required />
                 </div>
 
-                <div className="pt-6 border-t border-slate-100">
+                <div className="pt-6 border-t border-gold/[0.1]">
                   <div className="flex justify-between items-center mb-6">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Estimated Yield</span>
-                    <span className="text-2xl font-black text-slate-800 italic tracking-tighter">RWF {estimatedTotal.toLocaleString()}</span>
+                    <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Estimated Yield</span>
+                    <span className="text-2xl font-black text-gold italic tracking-tighter">RWF {estimatedTotal.toLocaleString()}</span>
                   </div>
-                  <button className="w-full bg-slate-900 text-white font-black uppercase text-[10px] tracking-[0.2em] py-5 rounded-2xl hover:bg-slate-800 shadow-xl shadow-slate-200 transition-all transform hover:scale-[1.02]" type="submit">
+                  <button className="w-full bg-gold text-black font-black uppercase text-[10px] tracking-[0.2em] py-4 rounded-2xl hover:bg-gold-light shadow-xl shadow-gold/20 transition-all transform hover:scale-[1.02]" type="submit">
                     Confirm Booking
                   </button>
                 </div>
@@ -192,7 +199,7 @@ function BookingsContent() {
 
 export default function Bookings() {
   return (
-    <Suspense fallback={<div className="p-20 text-center text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 italic">Initializing Registration Matrix...</div>}>
+    <Suspense fallback={<div className="p-20 text-center text-[10px] font-black uppercase tracking-[0.3em] text-gold/40 italic">Initializing Registration Matrix...</div>}>
       <BookingsContent />
     </Suspense>
   );

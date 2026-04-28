@@ -21,94 +21,66 @@ interface DayBookingsModalProps {
 
 export default function DayBookingsModal({ date, bookings, onClose }: DayBookingsModalProps) {
     return (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-            <div className="bg-white rounded-[2.5rem] w-full max-w-2xl overflow-hidden shadow-2xl border border-slate-200 animate-in fade-in zoom-in duration-300">
-                <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.85)' }}>
+            <div className="w-full max-w-2xl rounded-[2rem] overflow-hidden animate-slide-up shadow-2xl" style={{ background: '#111111', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <div className="h-0.5 bg-gradient-to-r from-transparent via-gold/50 to-transparent" />
+
+                {/* Header */}
+                <div className="px-8 py-6 flex justify-between items-center" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(0,0,0,0.3)' }}>
                     <div>
-                        <h2 className="text-2xl font-black italic tracking-tighter uppercase text-slate-800">
-                            Daily Bookings
-                        </h2>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mt-1">
-                            Booking List for {date.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
+                        <h2 className="text-xl font-black uppercase tracking-tighter text-gold">Daily Bookings</h2>
+                        <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] mt-0.5">
+                            {date.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
                         </p>
                     </div>
-                    <button
-                        onClick={onClose}
-                        className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center hover:bg-red-50 hover:text-red-500 hover:border-red-100 transition-all group"
-                    >
-                        <span className="material-icons-outlined text-xl group-hover:rotate-90 transition-transform">close</span>
+                    <button onClick={onClose} className="w-9 h-9 rounded-xl flex items-center justify-center text-white/30 hover:text-white hover:bg-white/[0.06] transition-all">
+                        <span className="material-icons-outlined text-[18px]">close</span>
                     </button>
                 </div>
 
-                <div className="p-8 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                <div className="p-6 max-h-[60vh] overflow-y-auto space-y-3">
                     {bookings.length === 0 ? (
                         <div className="py-12 text-center">
-                            <div className="w-16 h-16 bg-slate-100 text-slate-300 rounded-[1.5rem] flex items-center justify-center mx-auto mb-4">
-                                <span className="material-icons-outlined text-3xl">event_busy</span>
-                            </div>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">No rooms reserved for this date.</p>
+                            <span className="material-icons-outlined text-4xl text-white/15 block mb-3">event_busy</span>
+                            <p className="text-[10px] font-black text-white/25 uppercase tracking-widest">No bookings for this date</p>
                         </div>
-                    ) : (
-                        <div className="space-y-4">
-                            {bookings.map((booking) => (
-                                <div
-                                    key={booking.id}
-                                    className="p-6 rounded-[2rem] border border-slate-100 bg-white hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5 transition-all group relative overflow-hidden"
-                                >
-                                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform"></div>
-
-                                    <div className="flex justify-between items-start relative z-10">
-                                        <div>
-                                            <div className="flex items-center gap-3 mb-2">
-                                                <span className={`text-[10px] font-black text-white px-3 py-1 rounded-full uppercase tracking-tighter italic ${booking.type === 'CONFERENCE' ? 'bg-purple-500' : 'bg-primary'}`}>
-                                                    {booking.type === 'CONFERENCE' ? booking.roomNumber : `Room ${booking.roomNumber}`}
-                                                </span>
-                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">
-                                                    {booking.roomType}
-                                                </span>
-                                            </div>
-                                            <h4 className={`text-xl font-black italic tracking-tighter uppercase group-hover:transition-colors ${booking.type === 'CONFERENCE' ? 'text-purple-900 group-hover:text-purple-600' : 'text-slate-800 group-hover:text-primary'}`}>
-                                                {booking.guestName}
-                                            </h4>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Stay Revenue</p>
-                                            <p className="text-lg font-black text-olive-leaf italic tracking-tighter">
-                                                RWF {booking.revenue.toLocaleString()}
-                                            </p>
-                                        </div>
+                    ) : bookings.map((booking) => (
+                        <div key={booking.id} className="p-5 rounded-2xl transition-all hover:border-gold/20"
+                            style={{ background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.06)' }}>
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <span className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full text-black ${booking.type === 'CONFERENCE' ? 'bg-purple-400' : 'bg-gold'}`}>
+                                            {booking.type === 'CONFERENCE' ? booking.roomNumber : `Room ${booking.roomNumber}`}
+                                        </span>
+                                        <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">{booking.roomType}</span>
                                     </div>
-
-                                    <div className="mt-4 flex items-center gap-6 pt-4 border-t border-slate-50 relative z-10">
-                                        <div className="flex items-center gap-2">
-                                            <span className="material-icons-outlined text-sm text-slate-300">calendar_today</span>
-                                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                                                {new Date(booking.checkIn).toLocaleDateString()} — {new Date(booking.checkOut).toLocaleDateString()}
-                                            </span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <span className={`w-2 h-2 rounded-full ${booking.status === 'CHECKED_IN' ? 'bg-secondary' : booking.type === 'CONFERENCE' ? 'bg-purple-500' : 'bg-primary'}`}></span>
-                                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                                                {booking.status}
-                                            </span>
-                                        </div>
-                                    </div>
+                                    <h4 className={`text-lg font-black uppercase tracking-tighter ${booking.type === 'CONFERENCE' ? 'text-purple-400' : 'text-white/80'}`}>
+                                        {booking.guestName}
+                                    </h4>
                                 </div>
-                            ))}
+                                <div className="text-right">
+                                    <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-0.5">Revenue</p>
+                                    <p className="font-black text-gold">RWF {booking.revenue.toLocaleString()}</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-5 mt-3 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                                <div className="flex items-center gap-1.5 text-[9px] font-black text-white/30 uppercase tracking-widest">
+                                    <span className="material-icons-outlined text-[14px]">calendar_today</span>
+                                    {new Date(booking.checkIn).toLocaleDateString()} — {new Date(booking.checkOut).toLocaleDateString()}
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                    <span className={`w-1.5 h-1.5 rounded-full ${booking.type === 'CONFERENCE' ? 'bg-purple-400' : 'bg-gold'}`} />
+                                    <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">{booking.status}</span>
+                                </div>
+                            </div>
                         </div>
-                    )}
+                    ))}
                 </div>
 
-                <div className="p-8 border-t border-slate-100 bg-slate-50/50 flex justify-between items-center">
-                    <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Daily Bookings</p>
-                        <p className="text-xl font-black text-slate-800 italic tracking-tighter uppercase">
-                            {bookings.length} {bookings.length === 1 ? 'Booking' : 'Bookings'} Found
-                        </p>
-                    </div>
-                    <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">
-                        Casa Management System v3.0
-                    </p>
+                <div className="px-8 py-4 flex justify-between items-center" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', background: 'rgba(0,0,0,0.2)' }}>
+                    <p className="text-sm font-black text-white/50">{bookings.length} {bookings.length === 1 ? 'Booking' : 'Bookings'}</p>
+                    <p className="text-[9px] font-black text-white/20 uppercase tracking-widest">Casa Hotel v3.0</p>
                 </div>
             </div>
         </div>

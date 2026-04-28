@@ -28,17 +28,17 @@ function PreviewContent() {
   );
 
   if (!invoiceId) return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50">
-      <p className="text-slate-400 font-bold">No invoice specified.</p>
+    <div className="min-h-screen flex items-center justify-center bg-black">
+      <p className="text-white/30 font-bold">No invoice specified.</p>
     </div>
   );
   if (isLoading) return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50">
+    <div className="min-h-screen flex items-center justify-center bg-black">
       <div className="w-10 h-10 rounded-full border-4 border-primary border-t-transparent animate-spin" />
     </div>
   );
   if (!invoice) return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50">
+    <div className="min-h-screen flex items-center justify-center bg-black">
       <p className="text-red-400 font-bold">Invoice not found.</p>
     </div>
   );
@@ -47,7 +47,7 @@ function PreviewContent() {
   const invoiceRef = `INV-${invoice.id.slice(-8).toUpperCase()}`;
 
   return (
-    <div className="flex-1 min-h-screen bg-slate-50 print:bg-white">
+    <div className="flex-1 min-h-screen bg-black print:bg-white">
       <style>{`
         @media print {
           @page { margin: 10mm; }
@@ -57,19 +57,16 @@ function PreviewContent() {
       `}</style>
 
       {/* Toolbar */}
-      <div className="no-print sticky top-0 z-50 w-full border-b border-slate-200 bg-white/90 backdrop-blur px-5 py-3 flex justify-between items-center gap-3">
-        <button onClick={() => router.back()} className="flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-primary transition-colors">
+      <div className="no-print sticky top-0 z-50 px-5 py-3 flex justify-between items-center gap-3" style={{ background: '#111111', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+        <button onClick={() => router.back()} className="flex items-center gap-2 text-sm font-bold text-white/50 hover:text-white transition-colors">
           <span className="material-symbols-outlined text-base">arrow_back</span>
           Back
         </button>
         <div className="flex items-center gap-3">
-          <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${invoice.status === 'PAID' ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'}`}>
+          <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${invoice.status === 'PAID' ? 'bg-emerald-400/10 text-emerald-400 border border-emerald-400/20' : 'bg-amber-400/10 text-amber-400 border border-amber-400/20'}`}>
             {invoice.status}
           </span>
-          <button
-            className="flex items-center justify-center rounded-xl h-10 bg-primary text-white gap-2 text-[10px] font-black uppercase tracking-widest px-6 hover:bg-primary/90 transition-all shadow-lg shadow-primary/30"
-            onClick={() => window.print()}
-          >
+          <button className="flex items-center gap-2 bg-gold text-black px-5 py-2 rounded-xl text-sm font-bold hover:bg-gold-light transition-all shadow-gold-sm" onClick={() => window.print()}>
             <span className="material-symbols-outlined text-base">picture_as_pdf</span>
             Print / PDF
           </button>
@@ -180,7 +177,7 @@ function PreviewContent() {
 export default function InvoicePreviewPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center bg-black">
         <div className="w-10 h-10 rounded-full border-4 border-primary border-t-transparent animate-spin" />
       </div>
     }>

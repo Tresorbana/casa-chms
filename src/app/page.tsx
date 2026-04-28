@@ -34,7 +34,7 @@ export default function Dashboard() {
   }, [rooms]);
 
   if (isLoading || !data) return (
-    <div className="p-8 text-center text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
+    <div className="p-8 text-center text-[10px] font-black uppercase tracking-[0.3em] text-gold/40">
       Loading System Data...
     </div>
   );
@@ -43,26 +43,26 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="min-h-screen p-4 lg:p-8 bg-slate-50 flex flex-col gap-8">
+    <div className="min-h-screen p-4 lg:p-8 flex flex-col gap-8" style={{ background: '#000000' }}>
       <TopBar
         title="Management Dashboard"
         description="Real-time hotel occupancy and revenue status."
         actions={
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
             <div className="relative group">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-primary transition-colors">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-hover:text-gold transition-colors">
                 <span className="material-icons-outlined text-sm">calendar_today</span>
               </span>
               <input
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="w-full sm:w-auto bg-white border border-slate-200 rounded-2xl pl-12 pr-6 py-2.5 text-[11px] font-black uppercase tracking-widest outline-none focus:ring-2 focus:ring-primary shadow-sm hover:shadow-md transition-all cursor-pointer"
+                className="w-full sm:w-auto bg-navy-surface border border-gold/20 rounded-2xl pl-12 pr-6 py-2.5 text-[11px] font-black uppercase tracking-widest text-white outline-none focus:ring-2 focus:ring-gold/30 focus:border-gold/40 shadow-sm hover:border-gold/35 transition-all cursor-pointer"
               />
             </div>
             <Link
               href="/bookings"
-              className="bg-primary text-white font-black uppercase text-[10px] tracking-[0.2em] px-8 py-3 rounded-2xl flex items-center justify-center gap-3 shadow-lg shadow-primary/20 hover:scale-[1.05] transition-all"
+              className="bg-gold text-black font-black uppercase text-[10px] tracking-[0.2em] px-8 py-3 rounded-2xl flex items-center justify-center gap-3 shadow-lg shadow-gold/20 hover:bg-gold-light hover:scale-[1.05] transition-all"
             >
               <span className="material-icons-outlined text-sm">add</span>
               New Reservation
@@ -72,54 +72,58 @@ export default function Dashboard() {
       />
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-navy-surface p-8 rounded-[2rem] border border-gold/15 shadow-xl shadow-black/30 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-0.5 h-full bg-gradient-to-b from-gold/60 to-transparent" />
           <div className="flex justify-between items-start mb-6">
-            <div className="p-4 bg-secondary/10 text-secondary rounded-2xl">
+            <div className="p-3 bg-gold/10 text-gold rounded-2xl ring-1 ring-gold/20">
               <span className="material-icons-outlined text-2xl">bed</span>
             </div>
           </div>
-          <h3 className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">Target Occupancy</h3>
-          <p className="text-4xl font-black italic tracking-tighter uppercase">{(stats.occupancyRate || 0).toFixed(1)}%</p>
-          <div className="w-full bg-slate-100 h-2 mt-6 rounded-full overflow-hidden">
-            <div className="bg-secondary h-full rounded-full transition-all duration-1000" style={{ width: `${stats.occupancyRate || 0}%` }} />
+          <h3 className="text-white/40 text-[10px] font-black uppercase tracking-widest mb-1">Target Occupancy</h3>
+          <p className="text-4xl font-black italic tracking-tighter uppercase text-white">{(stats.occupancyRate || 0).toFixed(1)}%</p>
+          <div className="w-full bg-white/[0.06] h-1.5 mt-6 rounded-full overflow-hidden">
+            <div className="bg-gold h-full rounded-full transition-all duration-1000" style={{ width: `${stats.occupancyRate || 0}%` }} />
           </div>
         </div>
 
-        <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm">
+        <div className="bg-navy-surface p-8 rounded-[2rem] border border-gold/15 shadow-xl shadow-black/30 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-0.5 h-full bg-gradient-to-b from-gold/60 to-transparent" />
           <div className="flex justify-between items-start mb-6">
-            <div className="p-4 bg-primary/10 text-primary rounded-2xl">
+            <div className="p-3 bg-gold/10 text-gold rounded-2xl ring-1 ring-gold/20">
               <span className="material-icons-outlined text-2xl">payments</span>
             </div>
           </div>
-          <h3 className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">Revenue Performance</h3>
-          <p className="text-4xl font-black italic tracking-tighter uppercase">RWF {(stats.revenueToday || 0).toLocaleString()}</p>
+          <h3 className="text-white/40 text-[10px] font-black uppercase tracking-widest mb-1">Revenue Performance</h3>
+          <p className="text-3xl font-black italic tracking-tighter uppercase text-white">RWF {(stats.revenueToday || 0).toLocaleString()}</p>
         </div>
 
-        <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm">
+        <div className="bg-navy-surface p-8 rounded-[2rem] border border-gold/15 shadow-xl shadow-black/30 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-0.5 h-full bg-gradient-to-b from-gold/60 to-transparent" />
           <div className="flex justify-between items-start mb-6">
-            <div className="p-4 bg-blue-500/10 text-blue-500 rounded-2xl">
+            <div className="p-3 bg-gold/10 text-gold rounded-2xl ring-1 ring-gold/20">
               <span className="material-icons-outlined text-2xl">pending_actions</span>
             </div>
           </div>
-          <h3 className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">Bookings</h3>
-          <p className="text-4xl font-black italic tracking-tighter uppercase">{stats.pendingReservations || 0}</p>
+          <h3 className="text-white/40 text-[10px] font-black uppercase tracking-widest mb-1">Bookings</h3>
+          <p className="text-4xl font-black italic tracking-tighter uppercase text-white">{stats.pendingReservations || 0}</p>
         </div>
       </div>
 
       {/* Room Grid */}
-      <section className="bg-white p-6 md:p-10 rounded-3xl md:rounded-[3rem] border border-slate-200 shadow-2xl overflow-hidden">
+      <section className="bg-navy-surface p-6 md:p-10 rounded-3xl border border-gold/15 shadow-2xl shadow-black/40 overflow-hidden relative">
+        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
           <div>
-            <h3 className="text-3xl font-black italic tracking-tighter uppercase text-slate-800 leading-none mb-2">Room Status Grid</h3>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">
+            <h3 className="text-3xl font-black italic tracking-tighter uppercase text-gold leading-none mb-2">Room Status Grid</h3>
+            <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">
               Live hotel room status for {new Date(selectedDate).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
             </p>
           </div>
           <div className="flex flex-wrap gap-4">
-            {[{ label: 'Available', color: 'secondary' }, { label: 'Occupied', color: 'primary' }].map(status => (
-              <div key={status.label} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                <span className={`w-3 h-3 rounded-full bg-${status.color}`} /> {status.label}
+            {[{ label: 'Available', color: 'bg-gold' }, { label: 'Occupied', color: 'bg-gold-light' }].map(status => (
+              <div key={status.label} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white/40">
+                <span className={`w-3 h-3 rounded-full ${status.color} opacity-80`} /> {status.label}
               </div>
             ))}
           </div>
@@ -127,39 +131,39 @@ export default function Dashboard() {
 
         <div className="flex flex-col gap-10">
           {sortedFloors.length === 0 ? (
-            <div className="py-20 text-center text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">
+            <div className="py-20 text-center text-[10px] font-black uppercase tracking-[0.4em] text-white/25">
               No rooms found.
             </div>
           ) : sortedFloors.map(floorNum => (
             <div key={floorNum}>
               <div className="flex items-center gap-4 mb-6">
-                <h4 className="text-xl font-black italic tracking-tighter text-slate-800 uppercase">
+                <h4 className="text-xl font-black italic tracking-tighter text-gold uppercase">
                   {roomsByFloor[floorNum][0]?.floor?.name || `Floor ${floorNum}`}
                 </h4>
-                <div className="h-px flex-1 bg-slate-100" />
+                <div className="h-px flex-1 bg-gold/[0.12]" />
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                 {roomsByFloor[floorNum].map((room: any) => (
                   <div
                     key={room.id}
                     onClick={() => setSelectedRoom(room)}
-                    className="relative group cursor-pointer aspect-square bg-white rounded-[2rem] border border-slate-100 flex flex-col items-center justify-center p-6 hover:shadow-2xl transition-all duration-500 overflow-hidden hover:-translate-y-1"
+                    className="relative group cursor-pointer aspect-square bg-black rounded-[1.5rem] border border-gold/[0.12] flex flex-col items-center justify-center p-4 hover:shadow-xl hover:shadow-gold/10 hover:border-gold/30 transition-all duration-300 overflow-hidden hover:-translate-y-1"
                   >
-                    <div className={`absolute top-4 right-4 w-2.5 h-2.5 rounded-full ${room.displayStatus === 'OCCUPIED' ? 'bg-primary' : 'bg-secondary'} animate-pulse`} />
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Room</span>
-                    <h5 className="text-3xl font-black italic tracking-tighter text-slate-800">{room.number}</h5>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-3 truncate max-w-full px-2">
+                    <div className={`absolute top-3 right-3 w-2 h-2 rounded-full ${room.displayStatus === 'OCCUPIED' ? 'bg-gold' : 'bg-gold-light'} animate-pulse`} />
+                    <span className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-2">Room</span>
+                    <h5 className="text-3xl font-black italic tracking-tighter text-gold">{room.number}</h5>
+                    <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mt-2 truncate max-w-full px-2 text-center">
                       {room.displayStatus === 'OCCUPIED' && room.activeBooking
                         ? room.activeBooking.guest.name
                         : (room.displayStatus || '').toLowerCase()}
                     </p>
-                    <div className="absolute inset-0 bg-slate-900/80 opacity-0 group-hover:opacity-100 transition-opacity rounded-[2rem] flex flex-col items-center justify-center gap-3 backdrop-blur-md">
-                      <span className="text-white font-black uppercase text-[10px] tracking-widest flex items-center gap-2">
+                    <div className="absolute inset-0 bg-black/90 opacity-0 group-hover:opacity-100 transition-opacity rounded-[1.5rem] flex flex-col items-center justify-center gap-2 backdrop-blur-sm">
+                      <span className="text-gold font-black uppercase text-[9px] tracking-widest flex items-center gap-2">
                         <span className="material-icons-outlined text-sm">settings</span>
                         Room Details
                       </span>
                       {room.displayStatus === 'OCCUPIED' && (
-                        <span className="text-primary-foreground/60 text-[8px] font-black uppercase tracking-tighter px-3 py-1 bg-white/10 rounded-full">
+                        <span className="text-gold/50 text-[8px] font-black uppercase tracking-tighter px-3 py-1 bg-gold/10 rounded-full border border-gold/20">
                           Active Booking
                         </span>
                       )}
@@ -181,11 +185,11 @@ export default function Dashboard() {
         />
       )}
 
-      <div className="mt-8 flex justify-between items-center text-slate-400 text-[10px] font-black uppercase tracking-widest">
+      <div className="mt-4 flex justify-between items-center text-white/20 text-[10px] font-black uppercase tracking-widest">
         <p>© 2024 Casa Hotel Management System v3.0</p>
         <div className="flex gap-8">
-          <a className="hover:text-primary transition-colors" href="#">Status</a>
-          <a className="hover:text-primary transition-colors" href="#">Support</a>
+          <a className="hover:text-gold/60 transition-colors" href="#">Status</a>
+          <a className="hover:text-gold/60 transition-colors" href="#">Support</a>
         </div>
       </div>
     </div>

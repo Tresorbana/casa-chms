@@ -2,29 +2,76 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useUI } from '@/context/UIContext';
+
+const NAV_ITEMS = [
+  { href: '/', icon: 'dashboard', label: 'Dashboard' },
+  { href: '/bookings', icon: 'book_online', label: 'Guest Registration' },
+  { href: '/calendar', icon: 'calendar_month', label: 'Occupancy Calendar' },
+  { href: '/room-status', icon: 'hotel', label: 'Room Status' },
+  { href: '/events', icon: 'event', label: 'Events' },
+];
+
+const OPS_ITEMS = [
+  { href: '/pos/restaurant', icon: 'restaurant', label: 'Restaurant POS' },
+  { href: '/checkout', icon: 'receipt_long', label: 'Checkout' },
+  { href: '/invoices', icon: 'folder_shared', label: 'Invoices' },
+];
+
+const ADMIN_ITEMS = [
+  { href: '/reports', icon: 'assessment', label: 'Reports' },
+  { href: '/inquiries', icon: 'inbox', label: 'Web Requests' },
+  { href: '/notifications', icon: 'notifications', label: 'Notifications' },
+];
+
+const CONFIG_ITEMS = [
+  { href: '/settings/rooms', icon: 'meeting_room', label: 'Rooms & Floors' },
+  { href: '/settings/conference', icon: 'groups', label: 'Conference' },
+  { href: '/settings/services', icon: 'spa', label: 'Services' },
+  { href: '/settings/menu', icon: 'restaurant_menu', label: 'Menu Items' },
+];
+
+function NavItem({ href, icon, label, active }: { href: string; icon: string; label: string; active: boolean }) {
+  return (
+    <Link
+      href={href}
+      className={`group flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-200 ${active
+        ? 'bg-white/[0.08] text-white border-l-2 border-gold pl-[10px]'
+        : 'text-white/40 border-l-2 border-transparent hover:bg-white/[0.04] hover:text-white/70'
+      }`}
+    >
+      <span className={`material-icons-outlined text-[18px] flex-shrink-0 ${active ? 'text-gold' : 'text-white/40 group-hover:text-white/60'}`}>
+        {icon}
+      </span>
+      <span className="font-medium tracking-wide">{label}</span>
+    </Link>
+  );
+}
+
+function NavSection({ label, items, isActive }: { label: string; items: typeof NAV_ITEMS; isActive: (p: string) => boolean }) {
+  return (
+    <>
+      <div className="pt-5 pb-1.5 px-3">
+        <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/20">{label}</span>
+      </div>
+      {items.map(item => (
+        <NavItem key={item.href} {...item} active={isActive(item.href)} />
+      ))}
+    </>
+  );
+}
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const { isSidebarOpen, closeSidebar, toggleSidebar } = useUI();
 
   useEffect(() => {
-    fetch('/api/auth/me')
-      .then(res => res.json())
-      .then(data => {
-        if (data.user) {
-          setUser(data.user);
-        }
-      });
+    fetch('/api/auth/me').then(r => r.json()).then(d => { if (d.user) setUser(d.user); });
   }, []);
 
-  // Close sidebar on navigation (mobile)
-  useEffect(() => {
-    closeSidebar();
-  }, [pathname]);
+  useEffect(() => { closeSidebar(); }, [pathname]);
 
   if (pathname === '/login') return null;
 
@@ -39,119 +86,72 @@ export default function Sidebar() {
     return false;
   };
 
-  const activeClass = "bg-primary/10 text-primary font-medium shadow-sm";
-  const inactiveClass = "text-slate-600 hover:bg-slate-100";
-
   return (
     <>
-      {/* Mobile Toggle - Restored as per user request */}
+      {/* Mobile hamburger */}
       <button
         onClick={toggleSidebar}
-        className="lg:hidden fixed top-4 left-4 z-[60] p-2 bg-white border border-slate-200 rounded-lg shadow-sm hover:bg-slate-50 transition-colors"
+        className="lg:hidden fixed top-4 left-4 z-[60] p-2 rounded-lg bg-[#111111] border border-white/[0.08] hover:bg-white/[0.06] transition-all shadow-surface"
       >
-        <span className="material-icons-outlined text-slate-600">{isSidebarOpen ? 'close' : 'menu'}</span>
+        <span className="material-icons-outlined text-white/60 text-[20px]">
+          {isSidebarOpen ? 'close' : 'menu'}
+        </span>
       </button>
 
       {/* Backdrop */}
       {isSidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-[50] lg:hidden"
-          onClick={closeSidebar}
-        />
+        <div className="fixed inset-0 bg-black/80 z-[50] lg:hidden backdrop-blur-sm" onClick={closeSidebar} />
       )}
 
-      <aside className={`fixed left-0 top-0 h-full w-64 bg-white border-r border-slate-200 z-50 flex flex-col transition-transform duration-300 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="p-6">
-          <div className="flex items-center gap-3">
-            <Image alt="Casa Hotel Logo" width={40} height={40} className="h-10 w-10 object-contain" src="/logo.png" />
+      {/* Sidebar */}
+      <aside
+        className={`fixed left-0 top-0 h-full w-64 z-50 flex flex-col transition-transform duration-300 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        style={{ background: '#0a0a0a', borderRight: '1px solid rgba(255,255,255,0.05)' }}
+      >
+        {/* Brand */}
+        <div className="px-4 py-5 border-b" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
+          <div className="flex items-center gap-3 px-1">
+            <div className="w-9 h-9 rounded-lg bg-gold/10 flex items-center justify-center ring-1 ring-gold/20 overflow-hidden flex-shrink-0">
+              <Image alt="Casa Hotel" width={28} height={28} className="object-contain" src="/logo.png" />
+            </div>
             <div>
-              <h1 className="font-bold text-xl tracking-tight text-slate-800">Casa Hotel</h1>
-              <p className="text-[10px] uppercase tracking-widest text-secondary font-black">Management System</p>
+              <p className="text-sm font-bold text-gold tracking-tight leading-none">Casa Hotel</p>
+              <p className="text-[9px] text-white/30 font-medium tracking-widest uppercase mt-0.5">Management</p>
             </div>
           </div>
         </div>
-        <nav className="flex-1 mt-4 px-4 space-y-1 overflow-y-auto scrollbar-hide">
-          <Link href="/" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive('/') ? activeClass : inactiveClass}`}>
-            <span className="material-icons-outlined">dashboard</span>
-            Dashboard
-          </Link>
-          <Link href="/bookings" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive('/bookings') ? activeClass : inactiveClass}`}>
-            <span className="material-icons-outlined">book_online</span>
-            Guest Registration
-          </Link>
-          <Link href="/calendar" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive('/calendar') ? activeClass : inactiveClass}`}>
-            <span className="material-icons-outlined">calendar_month</span>
-            Occupancy Calendar
-          </Link>
-          <Link href="/room-status" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive('/room-status') ? activeClass : inactiveClass}`}>
-            <span className="material-icons-outlined">hotel</span>
-            Room Status
-          </Link>
-          <Link href="/events" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive('/events') ? activeClass : inactiveClass}`}>
-            <span className="material-icons-outlined">event</span>
-            Events
-          </Link>
-          <div className="pt-4 pb-2">
-            <p className="px-4 text-[10px] font-bold uppercase tracking-widest text-slate-300">Operations</p>
-          </div>
-          <Link href="/pos/restaurant" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive('/pos/restaurant') ? activeClass : inactiveClass}`}>
-            <span className="material-icons-outlined">restaurant</span>
-            Restaurant POS
-          </Link>
-          <Link href="/checkout" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive('/checkout') ? activeClass : inactiveClass}`}>
-            <span className="material-icons-outlined">receipt_long</span>
-            Checkout
-          </Link>
-          <Link href="/invoices" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive('/invoices') ? activeClass : inactiveClass}`}>
-            <span className="material-icons-outlined">folder_shared</span>
-            Invoices
-          </Link>
-          <div className="pt-4 pb-2">
-            <p className="px-4 text-[10px] font-bold uppercase tracking-widest text-slate-300">Admin</p>
-          </div>
-          <Link href="/reports" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive('/reports') ? activeClass : inactiveClass}`}>
-            <span className="material-icons-outlined">assessment</span>
-            Reports
-          </Link>
 
-          <Link href="/inquiries" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive('/inquiries') ? activeClass : inactiveClass}`}>
-            <span className="material-icons-outlined">inbox</span>
-            Web Requests
-          </Link>
-          <Link href="/notifications" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive('/notifications') ? activeClass : inactiveClass}`}>
-            <span className="material-icons-outlined">notifications</span>
-            Notifications
-          </Link>
-
-          <div className="pt-4 pb-2">
-            <p className="px-4 text-[10px] font-bold uppercase tracking-widest text-slate-300">Configuration</p>
-          </div>
-          <Link href="/settings/rooms" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive('/settings/rooms') ? activeClass : inactiveClass}`}>
-            <span className="material-icons-outlined">meeting_room</span>
-            Rooms & Floors
-          </Link>
-          <Link href="/settings/conference" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive('/settings/conference') ? activeClass : inactiveClass}`}>
-            <span className="material-icons-outlined">groups</span>
-            Conference
-          </Link>
-          <Link href="/settings/services" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive('/settings/services') ? activeClass : inactiveClass}`}>
-            <span className="material-icons-outlined">spa</span>
-            Services
-          </Link>
-          <Link href="/settings/menu" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive('/settings/menu') ? activeClass : inactiveClass}`}>
-            <span className="material-icons-outlined">restaurant_menu</span>
-            Menu Items
-          </Link>
+        {/* Navigation */}
+        <nav className="flex-1 px-2 py-3 overflow-y-auto scrollbar-hide space-y-0.5">
+          {NAV_ITEMS.map(item => (
+            <NavItem key={item.href} {...item} active={isActive(item.href)} />
+          ))}
+          <NavSection label="Operations" items={OPS_ITEMS} isActive={isActive} />
+          <NavSection label="Admin" items={ADMIN_ITEMS} isActive={isActive} />
+          <NavSection label="Configuration" items={CONFIG_ITEMS} isActive={isActive} />
         </nav>
-        <div className="p-6 border-t border-slate-100">
-          <Link href="/profile" className="flex items-center gap-3 mb-4 cursor-pointer group" title="View Profile">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white font-bold overflow-hidden shadow-lg shadow-primary/20">
-              {user ? user.name.split(' ').map((n: string) => n[0]).join('').toUpperCase().substring(0, 2) : '...'}
+
+        {/* User footer */}
+        <div className="p-3 border-t" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
+          <Link href="/profile"
+            className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/[0.04] transition-all group cursor-pointer"
+          >
+            <div className="w-8 h-8 rounded-lg bg-gold flex items-center justify-center text-[#000] font-bold text-xs flex-shrink-0 shadow-gold-sm">
+              {user?.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase().substring(0, 2) ?? '..'}
             </div>
-            <div>
-              <p className="text-sm font-black text-slate-700 group-hover:text-primary transition-colors italic uppercase tracking-tighter">{user?.name || 'Loading...'}</p>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{user?.role || ''}</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold text-white/80 truncate group-hover:text-white transition-colors">
+                {user?.name ?? 'Loading...'}
+              </p>
+              <p className="text-[9px] text-white/25 uppercase tracking-widest truncate">{user?.role ?? ''}</p>
             </div>
+            <button
+              onClick={(e) => { e.preventDefault(); handleLogout(); }}
+              className="text-white/20 hover:text-red-400 transition-colors flex-shrink-0 p-1 rounded"
+              title="Sign out"
+            >
+              <span className="material-icons-outlined text-[16px]">logout</span>
+            </button>
           </Link>
         </div>
       </aside>
