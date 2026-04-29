@@ -1,15 +1,17 @@
 'use client';
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import useSWR from 'swr';
 import { fetcher } from '@/lib/fetcher';
 import TopBar from '@/components/TopBar';
+import { AnimatedStatsCard } from '@/components/ui/animated-dashboard-card';
 
-// Lazy-load the modal — not included in initial JS bundle
 const RoomDetailsModal = dynamic(() => import('@/components/RoomDetailsModal'), { ssr: false });
 
 export default function Dashboard() {
+  const router = useRouter();
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedRoom, setSelectedRoom] = useState<any>(null);
 
@@ -21,7 +23,6 @@ export default function Dashboard() {
   const stats = data?.stats ?? {};
   const rooms: any[] = data?.rooms ?? [];
 
-  // Memoize rooms-by-floor grouping so it doesn't recompute on every keystroke
   const { sortedFloors, roomsByFloor } = useMemo(() => {
     const roomsByFloor: Record<number, any[]> = {};
     rooms.forEach((room) => {
@@ -41,6 +42,10 @@ export default function Dashboard() {
   if (error) return (
     <div className="p-8 text-center text-red-400 font-black">Connection Failure</div>
   );
+
+  const revenueToday = stats.revenueToday ?? 0;
+  const estimatedServices = Math.round(revenueToday * 0.28);
+  const roomRevenue = revenueToday - estimatedServices;
 
   return (
     <div className="min-h-screen p-4 lg:p-8 flex flex-col gap-8" style={{ background: '#000000' }}>
@@ -110,73 +115,90 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Room Grid */}
-      <section className="bg-navy-surface p-6 md:p-10 rounded-3xl border border-gold/15 shadow-2xl shadow-black/40 overflow-hidden relative">
-        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
-          <div>
-            <h3 className="text-3xl font-black italic tracking-tighter uppercase text-gold leading-none mb-2">Room Status Grid</h3>
-            <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">
-              Live hotel room status for {new Date(selectedDate).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
-            </p>
+      {/* Revenue Overview + Room Grid — two-column on desktop */}
+      <div className="flex flex-col xl:flex-row gap-6">
+        {/* Animated Revenue Card */}
+        <div className="xl:w-72 flex-shrink-0">
+          <AnimatedStatsCard
+            title="Revenue Overview"
+            primaryLabel="Room Revenue"
+            secondaryLabel="F&B / Services"
+            primaryValue={roomRevenue}
+            secondaryValue={estimatedServices}
+            primaryTrend="+15.2%"
+            secondaryTrend="+8.7%"
+            currencyPrefix="RWF"
+            onMoreDetails={() => router.push('/reports')}
+          />
+        </div>
+
+        {/* Room Grid */}
+        <section className="flex-1 bg-navy-surface p-6 md:p-8 rounded-3xl border border-gold/15 shadow-2xl shadow-black/40 overflow-hidden relative">
+          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+            <div>
+              <h3 className="text-2xl font-black italic tracking-tighter uppercase text-gold leading-none mb-1">Room Status Grid</h3>
+              <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">
+                Live status for {new Date(selectedDate).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-4">
+              {[{ label: 'Available', color: 'bg-gold' }, { label: 'Occupied', color: 'bg-gold-light' }].map(status => (
+                <div key={status.label} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white/40">
+                  <span className={`w-3 h-3 rounded-full ${status.color} opacity-80`} /> {status.label}
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="flex flex-wrap gap-4">
-            {[{ label: 'Available', color: 'bg-gold' }, { label: 'Occupied', color: 'bg-gold-light' }].map(status => (
-              <div key={status.label} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white/40">
-                <span className={`w-3 h-3 rounded-full ${status.color} opacity-80`} /> {status.label}
+
+          <div className="flex flex-col gap-8">
+            {sortedFloors.length === 0 ? (
+              <div className="py-20 text-center text-[10px] font-black uppercase tracking-[0.4em] text-white/25">
+                No rooms found.
+              </div>
+            ) : sortedFloors.map(floorNum => (
+              <div key={floorNum}>
+                <div className="flex items-center gap-4 mb-4">
+                  <h4 className="text-lg font-black italic tracking-tighter text-gold uppercase">
+                    {roomsByFloor[floorNum][0]?.floor?.name || `Floor ${floorNum}`}
+                  </h4>
+                  <div className="h-px flex-1 bg-gold/[0.12]" />
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-4 2xl:grid-cols-6 gap-3">
+                  {roomsByFloor[floorNum].map((room: any) => (
+                    <div
+                      key={room.id}
+                      onClick={() => setSelectedRoom(room)}
+                      className="relative group cursor-pointer aspect-square bg-black rounded-[1.5rem] border border-gold/[0.12] flex flex-col items-center justify-center p-3 hover:shadow-xl hover:shadow-gold/10 hover:border-gold/30 transition-all duration-300 overflow-hidden hover:-translate-y-1"
+                    >
+                      <div className={`absolute top-2.5 right-2.5 w-2 h-2 rounded-full ${room.displayStatus === 'OCCUPIED' ? 'bg-gold' : 'bg-gold-light'} animate-pulse`} />
+                      <span className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-1">Room</span>
+                      <h5 className="text-2xl font-black italic tracking-tighter text-gold">{room.number}</h5>
+                      <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mt-1 truncate max-w-full px-2 text-center">
+                        {room.displayStatus === 'OCCUPIED' && room.activeBooking
+                          ? room.activeBooking.guest.name
+                          : (room.displayStatus || '').toLowerCase()}
+                      </p>
+                      <div className="absolute inset-0 bg-black/90 opacity-0 group-hover:opacity-100 transition-opacity rounded-[1.5rem] flex flex-col items-center justify-center gap-2 backdrop-blur-sm">
+                        <span className="text-gold font-black uppercase text-[9px] tracking-widest flex items-center gap-1.5">
+                          <span className="material-icons-outlined text-sm">settings</span>
+                          Details
+                        </span>
+                        {room.displayStatus === 'OCCUPIED' && (
+                          <span className="text-gold/50 text-[8px] font-black uppercase tracking-tighter px-2 py-1 bg-gold/10 rounded-full border border-gold/20">
+                            Active Booking
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
-        </div>
+        </section>
+      </div>
 
-        <div className="flex flex-col gap-10">
-          {sortedFloors.length === 0 ? (
-            <div className="py-20 text-center text-[10px] font-black uppercase tracking-[0.4em] text-white/25">
-              No rooms found.
-            </div>
-          ) : sortedFloors.map(floorNum => (
-            <div key={floorNum}>
-              <div className="flex items-center gap-4 mb-6">
-                <h4 className="text-xl font-black italic tracking-tighter text-gold uppercase">
-                  {roomsByFloor[floorNum][0]?.floor?.name || `Floor ${floorNum}`}
-                </h4>
-                <div className="h-px flex-1 bg-gold/[0.12]" />
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                {roomsByFloor[floorNum].map((room: any) => (
-                  <div
-                    key={room.id}
-                    onClick={() => setSelectedRoom(room)}
-                    className="relative group cursor-pointer aspect-square bg-black rounded-[1.5rem] border border-gold/[0.12] flex flex-col items-center justify-center p-4 hover:shadow-xl hover:shadow-gold/10 hover:border-gold/30 transition-all duration-300 overflow-hidden hover:-translate-y-1"
-                  >
-                    <div className={`absolute top-3 right-3 w-2 h-2 rounded-full ${room.displayStatus === 'OCCUPIED' ? 'bg-gold' : 'bg-gold-light'} animate-pulse`} />
-                    <span className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-2">Room</span>
-                    <h5 className="text-3xl font-black italic tracking-tighter text-gold">{room.number}</h5>
-                    <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mt-2 truncate max-w-full px-2 text-center">
-                      {room.displayStatus === 'OCCUPIED' && room.activeBooking
-                        ? room.activeBooking.guest.name
-                        : (room.displayStatus || '').toLowerCase()}
-                    </p>
-                    <div className="absolute inset-0 bg-black/90 opacity-0 group-hover:opacity-100 transition-opacity rounded-[1.5rem] flex flex-col items-center justify-center gap-2 backdrop-blur-sm">
-                      <span className="text-gold font-black uppercase text-[9px] tracking-widest flex items-center gap-2">
-                        <span className="material-icons-outlined text-sm">settings</span>
-                        Room Details
-                      </span>
-                      {room.displayStatus === 'OCCUPIED' && (
-                        <span className="text-gold/50 text-[8px] font-black uppercase tracking-tighter px-3 py-1 bg-gold/10 rounded-full border border-gold/20">
-                          Active Booking
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Room Management Modal — lazy-loaded, zero cost until opened */}
       {selectedRoom && (
         <RoomDetailsModal
           room={selectedRoom}

@@ -13,6 +13,16 @@
   --surface-alt: #161616;
   --border-subtle: rgba(255, 255, 255, 0.06);
   --border: rgba(255, 255, 255, 0.1);
+
+  /* Login component variables — mapped to the gold/black theme */
+  --color-bg: #000000;
+  --color-surface: #0a0a0a;
+  --color-muted-surface: #111111;
+  --color-border: rgba(212, 175, 55, 0.25);
+  --color-text-secondary: rgba(255, 255, 255, 0.35);
+  --color-text-primary: #D4AF37;
+  --color-heading: #ffffff;
+  --color-bg-2: #D4AF37;
 }
 
 @layer base {

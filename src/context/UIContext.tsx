@@ -3,22 +3,26 @@ import React, { createContext, useContext, useState } from 'react';
 
 interface UIContextType {
     isSidebarOpen: boolean;
+    isSidebarCollapsed: boolean;
     toggleSidebar: () => void;
     closeSidebar: () => void;
     openSidebar: () => void;
+    toggleSidebarCollapse: () => void;
 }
 
 const UIContext = createContext<UIContextType | undefined>(undefined);
 
 export function UIProvider({ children }: { children: React.ReactNode }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
     const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
     const closeSidebar = () => setIsSidebarOpen(false);
     const openSidebar = () => setIsSidebarOpen(true);
+    const toggleSidebarCollapse = () => setIsSidebarCollapsed(prev => !prev);
 
     return (
-        <UIContext.Provider value={{ isSidebarOpen, toggleSidebar, closeSidebar, openSidebar }}>
+        <UIContext.Provider value={{ isSidebarOpen, isSidebarCollapsed, toggleSidebar, closeSidebar, openSidebar, toggleSidebarCollapse }}>
             {children}
         </UIContext.Provider>
     );

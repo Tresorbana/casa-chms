@@ -65,7 +65,7 @@ function NavSection({ label, items, isActive }: { label: string; items: typeof N
 export default function Sidebar() {
   const pathname = usePathname();
   const [user, setUser] = useState<any>(null);
-  const { isSidebarOpen, closeSidebar, toggleSidebar } = useUI();
+  const { isSidebarOpen, isSidebarCollapsed, closeSidebar, toggleSidebar, toggleSidebarCollapse } = useUI();
 
   useEffect(() => {
     fetch('/api/auth/me').then(r => r.json()).then(d => { if (d.user) setUser(d.user); });
@@ -98,14 +98,27 @@ export default function Sidebar() {
         </span>
       </button>
 
-      {/* Backdrop */}
+      {/* Desktop re-open button — only shown when sidebar is collapsed */}
+      {isSidebarCollapsed && (
+        <button
+          onClick={toggleSidebarCollapse}
+          className="hidden lg:flex fixed left-4 top-4 z-[60] p-2 items-center justify-center rounded-lg bg-[#111111] border border-white/[0.08] hover:bg-gold/10 hover:border-gold/30 transition-all shadow-surface group"
+          title="Expand sidebar"
+        >
+          <span className="material-icons-outlined text-white/40 group-hover:text-gold text-[20px] transition-colors">menu_open</span>
+        </button>
+      )}
+
+      {/* Mobile backdrop */}
       {isSidebarOpen && (
         <div className="fixed inset-0 bg-black/80 z-[50] lg:hidden backdrop-blur-sm" onClick={closeSidebar} />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 h-full w-64 z-50 flex flex-col transition-transform duration-300 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        className={`fixed left-0 top-0 h-full w-64 z-50 flex flex-col transition-transform duration-300
+          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+          ${isSidebarCollapsed ? 'lg:-translate-x-full' : 'lg:translate-x-0'}`}
         style={{ background: '#0a0a0a', borderRight: '1px solid rgba(255,255,255,0.05)' }}
       >
         {/* Brand */}
@@ -114,10 +127,18 @@ export default function Sidebar() {
             <div className="w-9 h-9 rounded-lg bg-gold/10 flex items-center justify-center ring-1 ring-gold/20 overflow-hidden flex-shrink-0">
               <Image alt="Casa Hotel" width={28} height={28} className="object-contain" src="/logo.png" />
             </div>
-            <div>
+            <div className="flex-1 min-w-0">
               <p className="text-sm font-bold text-gold tracking-tight leading-none">Casa Hotel</p>
               <p className="text-[9px] text-white/30 font-medium tracking-widest uppercase mt-0.5">Management</p>
             </div>
+            {/* Desktop collapse toggle */}
+            <button
+              onClick={toggleSidebarCollapse}
+              className="hidden lg:flex flex-shrink-0 p-1.5 rounded-lg text-white/25 hover:text-gold hover:bg-gold/10 transition-all"
+              title="Collapse sidebar"
+            >
+              <span className="material-icons-outlined text-[18px]">chevron_left</span>
+            </button>
           </div>
         </div>
 
