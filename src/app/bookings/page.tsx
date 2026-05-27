@@ -1,10 +1,12 @@
 'use client';
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import useSWR from 'swr';
-import { fetcher } from '@/lib/fetcher';
+import { toast } from 'sonner';
 import TopBar from '@/components/TopBar';
 import { countries } from '@/lib/countries';
+
+const inputClass = "w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:border-ring outline-none transition-all";
+const labelClass = "text-xs font-medium text-muted-foreground";
 
 function BookingsContent() {
   const router = useRouter();
@@ -12,41 +14,20 @@ function BookingsContent() {
   const roomNumberParam = searchParams.get('roomNumber');
 
   const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    idNumber: '',
-    nationality: '',
-    address: '',
-    checkIn: '',
-    checkOut: '',
-    roomType: '',
-    roomNumber: roomNumberParam || '',
-    adults: 1,
-    children: 0,
-    specialRequests: ''
+    name: '', phone: '', email: '', idNumber: '', nationality: '',
+    address: '', checkIn: '', checkOut: '', roomType: '',
+    roomNumber: roomNumberParam || '', adults: 1, children: 0, specialRequests: ''
   });
-
   const [estimatedTotal, setEstimatedTotal] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (formData.checkIn && formData.checkOut && formData.roomType) {
       const start = new Date(formData.checkIn);
       const end = new Date(formData.checkOut);
       const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-
-      const rates: any = {
-        standard: 45000,
-        double: 75000,
-        suite: 120000,
-        family: 150000
-      };
-
-      if (days > 0) {
-        setEstimatedTotal(days * (rates[formData.roomType] || 0));
-      } else {
-        setEstimatedTotal(0);
-      }
+      const rates: any = { standard: 45000, double: 75000, suite: 120000, family: 150000 };
+      setEstimatedTotal(days > 0 ? days * (rates[formData.roomType] || 0) : 0);
     }
   }, [formData.checkIn, formData.checkOut, formData.roomType]);
 
@@ -57,82 +38,71 @@ function BookingsContent() {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       const res = await fetch('/api/bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          guestName: formData.name,
-          guestEmail: formData.email,
-          guestPhone: formData.phone,
-          roomNumber: formData.roomNumber,
-          checkIn: formData.checkIn,
-          checkOut: formData.checkOut,
-          nationality: formData.nationality,
-          totalAmount: estimatedTotal
+          guestName: formData.name, guestEmail: formData.email,
+          guestPhone: formData.phone, roomNumber: formData.roomNumber,
+          checkIn: formData.checkIn, checkOut: formData.checkOut,
+          nationality: formData.nationality, totalAmount: estimatedTotal
         })
       });
-
       if (res.ok) {
-        alert('Booking created successfully! Command updated.');
+        toast.success('Booking created successfully');
         router.push('/');
       } else {
         const error = await res.json();
-        alert('Error: ' + error.error);
+        toast.error(error.error || 'Failed to create booking');
       }
-    } catch (err) {
-      alert('Failed to submit booking');
+    } catch {
+      toast.error('Failed to submit booking');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const inputClass = "w-full bg-[#0a0a0a] border border-gold/20 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/25 focus:ring-2 focus:ring-gold/30 focus:border-gold/50 outline-none transition-all";
-  const labelClass = "text-[10px] font-black text-gold/50 uppercase tracking-widest";
-
   return (
-    <div className="flex-1 min-h-screen relative p-4 lg:p-8" style={{ background: '#000000' }}>
-      <TopBar
-        title="Bookings & Assignment"
-        description="Manage guest bookings and room assignments."
-      />
+    <div className="min-h-screen bg-background p-4 lg:p-8">
+      <TopBar title="Guest Registration" description="Create a new booking and assign a room." />
 
-      <form onSubmit={handleSubmit} className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Guest Profile Card */}
+      <form onSubmit={handleSubmit} className="max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Guest Profile */}
           <div className="lg:col-span-7">
-            <div className="bg-navy-surface rounded-[2rem] shadow-xl border border-gold/15 overflow-hidden relative">
-              <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
-              <div className="p-8 border-b border-gold/[0.1] flex items-center justify-between bg-black/20">
+            <div className="bg-card border border-border rounded-xl overflow-hidden">
+              <div className="px-6 py-4 border-b border-border flex items-center gap-3">
+                <span className="material-icons-outlined text-muted-foreground text-[20px]">person_add</span>
                 <div>
-                  <h2 className="text-xl font-black italic tracking-tighter uppercase text-gold">Guest Entity Profile</h2>
-                  <p className="text-[10px] font-black text-white/35 uppercase tracking-widest">Biometric & Contact Matrix</p>
+                  <h2 className="text-sm font-semibold text-foreground">Guest Information</h2>
+                  <p className="text-xs text-muted-foreground">Contact and identity details</p>
                 </div>
-                <span className="material-icons-outlined text-gold/50">person_add</span>
               </div>
-              <div className="p-6 md:p-10">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className={labelClass}>Full Legal Name</label>
-                    <input className={inputClass} placeholder="e.g. John Doe" type="text" name="name" value={formData.name} onChange={handleChange} required />
+              <div className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className={labelClass}>Full Name</label>
+                    <input className={inputClass} placeholder="John Doe" type="text" name="name" value={formData.name} onChange={handleChange} required />
                   </div>
-                  <div className="space-y-2">
-                    <label className={labelClass}>Signal Number</label>
-                    <input className={inputClass} placeholder="+1 (555) 000-0000" type="tel" name="phone" value={formData.phone} onChange={handleChange} required />
+                  <div className="space-y-1.5">
+                    <label className={labelClass}>Phone Number</label>
+                    <input className={inputClass} placeholder="+250 788 000 000" type="tel" name="phone" value={formData.phone} onChange={handleChange} required />
                   </div>
-                  <div className="space-y-2">
-                    <label className={labelClass}>Electronic Mail</label>
-                    <input className={inputClass} placeholder="john.doe@example.com" type="email" name="email" value={formData.email} onChange={handleChange} required />
+                  <div className="space-y-1.5">
+                    <label className={labelClass}>Email Address</label>
+                    <input className={inputClass} placeholder="guest@example.com" type="email" name="email" value={formData.email} onChange={handleChange} required />
                   </div>
-                  <div className="space-y-2">
-                    <label className={labelClass}>Identity Certificate</label>
+                  <div className="space-y-1.5">
+                    <label className={labelClass}>ID / Passport Number</label>
                     <input className={inputClass} placeholder="A12345678" type="text" name="idNumber" value={formData.idNumber} onChange={handleChange} />
                   </div>
-                  <div className="space-y-2 md:col-span-2">
-                    <label className={labelClass}>Nationality Origin</label>
+                  <div className="space-y-1.5 md:col-span-2">
+                    <label className={labelClass}>Nationality</label>
                     <select className={inputClass} name="nationality" value={formData.nationality} onChange={handleChange}>
-                      <option value="">Select Origin...</option>
-                      {countries.map(c => (
-                        <option key={c} value={c}>{c}</option>
-                      ))}
+                      <option value="">Select country...</option>
+                      {countries.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
                   </div>
                 </div>
@@ -140,52 +110,57 @@ function BookingsContent() {
             </div>
           </div>
 
-          {/* Allocation Card */}
-          <div className="lg:col-span-5 space-y-8">
-            <div className="bg-navy-surface rounded-[2rem] shadow-xl border border-gold/15 overflow-hidden relative">
-              <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
-              <div className="p-8 border-b border-gold/[0.1] flex items-center justify-between bg-black/20">
+          {/* Booking Details */}
+          <div className="lg:col-span-5">
+            <div className="bg-card border border-border rounded-xl overflow-hidden">
+              <div className="px-6 py-4 border-b border-border flex items-center gap-3">
+                <span className="material-icons-outlined text-muted-foreground text-[20px]">event</span>
                 <div>
-                  <h2 className="text-xl font-black italic tracking-tighter uppercase text-gold">Allocation Specs</h2>
-                  <p className="text-[10px] font-black text-white/35 uppercase tracking-widest">Temporal & Spatial Parameters</p>
+                  <h2 className="text-sm font-semibold text-foreground">Booking Details</h2>
+                  <p className="text-xs text-muted-foreground">Dates and room assignment</p>
                 </div>
-                <span className="material-icons-outlined text-gold/50">event</span>
               </div>
-              <div className="p-6 md:p-10 space-y-6">
+              <div className="p-6 space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className={labelClass}>Start Cycle</label>
+                  <div className="space-y-1.5">
+                    <label className={labelClass}>Check In</label>
                     <input className={inputClass} type="date" name="checkIn" value={formData.checkIn} onChange={handleChange} required />
                   </div>
-                  <div className="space-y-2">
-                    <label className={labelClass}>End Cycle</label>
+                  <div className="space-y-1.5">
+                    <label className={labelClass}>Check Out</label>
                     <input className={inputClass} type="date" name="checkOut" value={formData.checkOut} onChange={handleChange} required />
                   </div>
                 </div>
-
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <label className={labelClass}>Room Type</label>
                   <select className={inputClass} name="roomType" value={formData.roomType} onChange={handleChange} required>
-                    <option value="">Select Category...</option>
-                    <option value="standard">Standard Single (RWF 45,000/night)</option>
-                    <option value="double">Deluxe Double (RWF 75,000/night)</option>
-                    <option value="suite">Executive Suite (RWF 120,000/night)</option>
-                    <option value="family">Family Room (RWF 150,000/night)</option>
+                    <option value="">Select type...</option>
+                    <option value="standard">Standard Single — RWF 45,000/night</option>
+                    <option value="double">Deluxe Double — RWF 75,000/night</option>
+                    <option value="suite">Executive Suite — RWF 120,000/night</option>
+                    <option value="family">Family Room — RWF 150,000/night</option>
                   </select>
                 </div>
-
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <label className={labelClass}>Room Number</label>
                   <input className={inputClass} placeholder="e.g. 101" type="text" name="roomNumber" value={formData.roomNumber} onChange={handleChange} required />
                 </div>
 
-                <div className="pt-6 border-t border-gold/[0.1]">
-                  <div className="flex justify-between items-center mb-6">
-                    <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Estimated Yield</span>
-                    <span className="text-2xl font-black text-gold italic tracking-tighter">RWF {estimatedTotal.toLocaleString()}</span>
+                <div className="pt-4 border-t border-border">
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="text-xs text-muted-foreground">Estimated Total</span>
+                    <span className="text-xl font-semibold text-foreground">RWF {estimatedTotal.toLocaleString()}</span>
                   </div>
-                  <button className="w-full bg-gold text-black font-black uppercase text-[10px] tracking-[0.2em] py-4 rounded-2xl hover:bg-gold-light shadow-xl shadow-gold/20 transition-all transform hover:scale-[1.02]" type="submit">
-                    Confirm Booking
+                  <button
+                    className="w-full bg-primary text-primary-foreground text-sm font-medium py-2.5 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                    type="submit"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <><span className="material-icons-outlined text-[18px] animate-spin">refresh</span> Creating...</>
+                    ) : (
+                      <><span className="material-icons-outlined text-[18px]">check</span> Confirm Booking</>
+                    )}
                   </button>
                 </div>
               </div>
@@ -199,7 +174,7 @@ function BookingsContent() {
 
 export default function Bookings() {
   return (
-    <Suspense fallback={<div className="p-20 text-center text-[10px] font-black uppercase tracking-[0.3em] text-gold/40 italic">Initializing Registration Matrix...</div>}>
+    <Suspense fallback={<div className="p-20 text-center text-sm text-muted-foreground">Loading...</div>}>
       <BookingsContent />
     </Suspense>
   );
