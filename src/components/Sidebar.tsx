@@ -1,7 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useUI } from '@/context/UIContext';
 
@@ -33,50 +32,47 @@ const CONFIG_ITEMS = [
 ];
 
 function NavItem({
-  href, icon, label, active,
-}: { href: string; icon: string; label: string; active: boolean }) {
+  href, icon, label, active, collapsed,
+}: { href: string; icon: string; label: string; active: boolean; collapsed: boolean }) {
   return (
     <Link
       href={href}
-      className={`group flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 ${
+      title={collapsed ? label : undefined}
+      className={`group flex items-center gap-3 rounded-lg transition-all duration-150 ${
+        collapsed ? 'px-0 py-2.5 justify-center' : 'px-3 py-2'
+      } ${
         active
           ? 'bg-primary text-primary-foreground'
           : 'text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground'
       }`}
     >
       <span
-        className={`material-symbols-outlined text-[18px] flex-shrink-0 ${
-          active ? 'text-primary-foreground' : 'text-sidebar-foreground/40 group-hover:text-sidebar-foreground/70'
-        }`}
+        className={`material-symbols-outlined flex-shrink-0 ${
+          collapsed ? 'text-[22px]' : 'text-[20px]'
+        } ${active ? 'text-primary-foreground' : 'text-sidebar-foreground/50 group-hover:text-sidebar-foreground'}`}
       >
         {icon}
       </span>
-      <span className="truncate">{label}</span>
+      {!collapsed && <span className="truncate text-sm">{label}</span>}
     </Link>
   );
 }
 
-function NavSection({
-  label, items, isActive,
-}: { label: string; items: typeof NAV_ITEMS; isActive: (p: string) => boolean }) {
+function SectionLabel({ label, collapsed }: { label: string; collapsed: boolean }) {
+  if (collapsed) {
+    return <div className="my-2 h-px bg-sidebar-border mx-2" />;
+  }
   return (
-    <>
-      <div className="pt-5 pb-1 px-3">
-        <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-          {label}
-        </span>
-      </div>
-      {items.map(item => (
-        <NavItem key={item.href} {...item} active={isActive(item.href)} />
-      ))}
-    </>
+    <div className="pt-5 pb-1 px-3">
+      <span className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</span>
+    </div>
   );
 }
 
 export default function Sidebar() {
   const pathname = usePathname();
   const [user, setUser] = useState<any>(null);
-  const { isSidebarOpen, isSidebarCollapsed, closeSidebar, toggleSidebar, toggleSidebarCollapse } = useUI();
+  const { isSidebarOpen, isSidebarCollapsed, closeSidebar, toggleSidebarCollapse } = useUI();
 
   useEffect(() => {
     fetch('/api/auth/me').then(r => r.json()).then(d => { if (d.user) setUser(d.user); });
@@ -101,30 +97,12 @@ export default function Sidebar() {
     ? user.name.split(' ').map((n: string) => n[0]).join('').toUpperCase().substring(0, 2)
     : '..';
 
+  // On mobile: slide in/out. On desktop: full (w-64) or icon rail (w-14).
+  const desktopWidth = isSidebarCollapsed ? 'lg:w-14' : 'lg:w-64';
+  const mobileTranslate = isSidebarOpen ? 'translate-x-0' : '-translate-x-full';
+
   return (
     <>
-      {/* Mobile hamburger */}
-      <button
-        onClick={toggleSidebar}
-        className="lg:hidden fixed top-4 left-4 z-[60] p-2 rounded-lg bg-background border border-border hover:bg-accent transition-all shadow-sm"
-        aria-label="Toggle menu"
-      >
-        <span className="material-symbols-outlined text-foreground/60 text-[20px]">
-          {isSidebarOpen ? 'close' : 'menu'}
-        </span>
-      </button>
-
-      {/* Desktop re-open button — only shown when sidebar is collapsed */}
-      {isSidebarCollapsed && (
-        <button
-          onClick={toggleSidebarCollapse}
-          className="hidden lg:flex fixed left-4 top-4 z-[60] p-2 items-center justify-center rounded-lg bg-background border border-border hover:bg-accent transition-all shadow-sm"
-          title="Expand sidebar"
-        >
-          <span className="material-symbols-outlined text-foreground/50 text-[20px]">menu_open</span>
-        </button>
-      )}
-
       {/* Mobile backdrop */}
       {isSidebarOpen && (
         <div
@@ -135,66 +113,109 @@ export default function Sidebar() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 h-full w-64 z-50 flex flex-col bg-sidebar border-r border-sidebar-border transition-transform duration-300
-          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-          ${isSidebarCollapsed ? 'lg:-translate-x-full' : 'lg:translate-x-0'}`}
+        className={`fixed left-0 top-0 h-full z-50 flex flex-col bg-sidebar border-r border-sidebar-border
+          transition-all duration-300 overflow-hidden
+          w-64 ${desktopWidth}
+          ${mobileTranslate} lg:translate-x-0`}
       >
         {/* Brand */}
-        <div className="px-4 py-4 border-b border-sidebar-border">
-          <div className="flex items-center gap-3 px-1">
-            <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center ring-1 ring-primary/20 overflow-hidden flex-shrink-0">
-              <Image alt="Casa Hotel" width={28} height={28} className="object-contain" src="/logo.png" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-primary tracking-tight leading-none">Casa Hotel</p>
-              <p className="text-[10px] text-muted-foreground font-medium tracking-widest uppercase mt-0.5">Management</p>
-            </div>
-            {/* Desktop collapse toggle */}
+        <div className={`border-b border-sidebar-border flex-shrink-0 ${isSidebarCollapsed ? 'px-0 py-4 items-center justify-center flex' : 'px-4 py-4'}`}>
+          {isSidebarCollapsed ? (
+            /* Collapsed: just the toggle button as the brand area */
             <button
               onClick={toggleSidebarCollapse}
-              className="hidden lg:flex flex-shrink-0 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-all"
-              title="Collapse sidebar"
+              className="flex items-center justify-center w-9 h-9 rounded-lg hover:bg-sidebar-accent transition-all"
+              title="Expand sidebar"
             >
-              <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+              <span className="material-symbols-outlined text-[22px] text-sidebar-foreground/50">menu_open</span>
             </button>
-          </div>
+          ) : (
+            <div className="flex items-center gap-3 px-1">
+              {/* Text logo mark */}
+              <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
+                <span className="text-primary-foreground text-xs font-semibold tracking-tight">HMS</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground leading-none">Hotel Management</p>
+                <p className="text-[10px] text-muted-foreground tracking-wider uppercase mt-0.5">System</p>
+              </div>
+              <button
+                onClick={toggleSidebarCollapse}
+                className="hidden lg:flex flex-shrink-0 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-all"
+                title="Collapse sidebar"
+              >
+                <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-2 py-3 overflow-y-auto scrollbar-hide space-y-0.5">
+        <nav className={`flex-1 py-3 overflow-y-auto scrollbar-hide space-y-0.5 ${isSidebarCollapsed ? 'px-1' : 'px-2'}`}>
           {NAV_ITEMS.map(item => (
-            <NavItem key={item.href} {...item} active={isActive(item.href)} />
+            <NavItem key={item.href} {...item} active={isActive(item.href)} collapsed={isSidebarCollapsed} />
           ))}
-          <NavSection label="Operations" items={OPS_ITEMS} isActive={isActive} />
-          <NavSection label="Admin"      items={ADMIN_ITEMS} isActive={isActive} />
-          <NavSection label="Configuration" items={CONFIG_ITEMS} isActive={isActive} />
+
+          <SectionLabel label="Operations" collapsed={isSidebarCollapsed} />
+          {OPS_ITEMS.map(item => (
+            <NavItem key={item.href} {...item} active={isActive(item.href)} collapsed={isSidebarCollapsed} />
+          ))}
+
+          <SectionLabel label="Admin" collapsed={isSidebarCollapsed} />
+          {ADMIN_ITEMS.map(item => (
+            <NavItem key={item.href} {...item} active={isActive(item.href)} collapsed={isSidebarCollapsed} />
+          ))}
+
+          <SectionLabel label="Config" collapsed={isSidebarCollapsed} />
+          {CONFIG_ITEMS.map(item => (
+            <NavItem key={item.href} {...item} active={isActive(item.href)} collapsed={isSidebarCollapsed} />
+          ))}
         </nav>
 
         {/* User footer */}
-        <div className="p-3 border-t border-sidebar-border">
-          <Link
-            href="/profile"
-            className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-sidebar-accent transition-all group cursor-pointer"
-          >
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold text-xs flex-shrink-0">
-              {initials}
+        <div className={`border-t border-sidebar-border flex-shrink-0 ${isSidebarCollapsed ? 'p-1' : 'p-3'}`}>
+          {isSidebarCollapsed ? (
+            <div className="flex flex-col items-center gap-2 py-1">
+              <Link
+                href="/profile"
+                title={user?.name ?? 'Profile'}
+                className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center text-primary-foreground text-xs font-medium hover:opacity-80 transition-opacity"
+              >
+                {initials}
+              </Link>
+              <button
+                onClick={handleLogout}
+                title="Sign out"
+                className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
+              >
+                <span className="material-symbols-outlined text-[18px]">logout</span>
+              </button>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-sidebar-foreground truncate group-hover:text-foreground transition-colors">
-                {user?.name ?? 'Loading...'}
-              </p>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-widest truncate">
-                {user?.role ?? ''}
-              </p>
-            </div>
-            <button
-              onClick={(e) => { e.preventDefault(); handleLogout(); }}
-              className="text-muted-foreground hover:text-destructive transition-colors flex-shrink-0 p-1 rounded"
-              title="Sign out"
+          ) : (
+            <Link
+              href="/profile"
+              className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-sidebar-accent transition-all group cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[16px]">logout</span>
-            </button>
-          </Link>
+              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground text-xs font-medium flex-shrink-0">
+                {initials}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-medium text-sidebar-foreground truncate">
+                  {user?.name ?? 'Loading...'}
+                </p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-widest truncate">
+                  {user?.role ?? ''}
+                </p>
+              </div>
+              <button
+                onClick={(e) => { e.preventDefault(); handleLogout(); }}
+                className="text-muted-foreground hover:text-destructive transition-colors flex-shrink-0 p-1 rounded"
+                title="Sign out"
+              >
+                <span className="material-symbols-outlined text-[16px]">logout</span>
+              </button>
+            </Link>
+          )}
         </div>
       </aside>
     </>

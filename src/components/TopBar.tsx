@@ -81,8 +81,8 @@ export default function TopBar({ title, description, actions }: TopBarProps) {
   return (
     <div className="py-5 mb-6 flex flex-col gap-4 md:flex-row md:items-end justify-between border-b border-border">
       {/* Page heading */}
-      <div className="pl-14 lg:pl-0">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground leading-none mb-1">{title}</h1>
+      <div>
+        <h1 className="text-xl font-medium tracking-tight text-foreground leading-none mb-1">{title}</h1>
         {description && (
           <p className="text-sm text-muted-foreground">{description}</p>
         )}

@@ -15,7 +15,11 @@ function AppShell({ children }: { children: React.ReactNode }) {
       className={
         isLoginPage
           ? 'min-h-screen w-full'
-          : `min-h-screen transition-all duration-300 w-full pb-20 lg:pb-0 ${isSidebarCollapsed ? 'lg:pl-0' : 'lg:pl-64'}`
+          // Mobile: no left padding (sidebar slides over content)
+          // Desktop: 56px (icon rail) when collapsed, 256px (full) when expanded
+          : `min-h-screen transition-all duration-300 w-full pb-20 lg:pb-0 ${
+              isSidebarCollapsed ? 'lg:pl-14' : 'lg:pl-64'
+            }`
       }
     >
       {children}

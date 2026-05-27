@@ -3,9 +3,17 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useUI } from '@/context/UIContext';
 
+const NAV = [
+  { href: '/',              icon: 'dashboard',      label: 'Home' },
+  { href: '/bookings',      icon: 'book_online',    label: 'Bookings' },
+  { href: '/pos/restaurant',icon: 'restaurant',     label: 'POS', fab: true },
+  { href: '/calendar',      icon: 'calendar_month', label: 'Calendar' },
+  { href: '/notifications', icon: 'notifications',  label: 'Alerts' },
+];
+
 export default function MobileBottomNav() {
   const pathname = usePathname();
-  const { toggleSidebar, isSidebarOpen } = useUI();
+  const { toggleSidebar } = useUI();
 
   if (pathname === '/login') return null;
 
@@ -15,63 +23,64 @@ export default function MobileBottomNav() {
     return false;
   };
 
-  const activeClass = 'text-primary';
-  const inactiveClass = 'text-muted-foreground';
-
   return (
-    <div
-      className="fixed bottom-0 left-0 right-0 lg:hidden z-50 bg-background border-t border-border"
+    <nav
+      className="fixed bottom-0 left-0 right-0 lg:hidden z-50 bg-background/95 backdrop-blur-md border-t border-border"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
-      <div className="flex justify-around items-center h-16">
-        <Link
-          href="/"
-          className={`flex flex-col items-center gap-1 w-full h-full justify-center transition-colors ${isActive('/') ? activeClass : inactiveClass}`}
-        >
-          <span className="material-symbols-outlined text-2xl">dashboard</span>
-          <span className="text-[9px] font-semibold tracking-wide">Home</span>
-        </Link>
+      <div className="flex items-end justify-around h-16 px-1">
+        {NAV.map(item => {
+          const active = isActive(item.href);
 
-        <Link
-          href="/calendar"
-          className={`flex flex-col items-center gap-1 w-full h-full justify-center transition-colors ${isActive('/calendar') ? activeClass : inactiveClass}`}
-        >
-          <span className="material-symbols-outlined text-2xl">calendar_month</span>
-          <span className="text-[9px] font-semibold tracking-wide">Calendar</span>
-        </Link>
+          if (item.fab) {
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="flex flex-col items-center gap-1 flex-1 h-full justify-center"
+              >
+                <div
+                  className={`w-12 h-12 rounded-2xl flex items-center justify-center -mt-5 shadow-lg transition-all ${
+                    active
+                      ? 'bg-primary text-primary-foreground shadow-primary/30'
+                      : 'bg-foreground text-background shadow-foreground/20'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-[22px]">{item.icon}</span>
+                </div>
+                <span className={`text-[9px] tracking-wide ${active ? 'text-primary' : 'text-muted-foreground'}`}>
+                  {item.label}
+                </span>
+              </Link>
+            );
+          }
 
-        <Link
-          href="/pos/restaurant"
-          className={`flex flex-col items-center gap-1 w-full h-full justify-center transition-colors ${isActive('/pos/restaurant') ? activeClass : inactiveClass}`}
-        >
-          <div
-            className={`w-10 h-10 rounded-full flex items-center justify-center -mt-6 border-2 shadow-md transition-all ${
-              isActive('/pos/restaurant')
-                ? 'bg-primary text-primary-foreground border-primary'
-                : 'bg-muted border-border text-muted-foreground'
-            }`}
-          >
-            <span className="material-symbols-outlined text-xl">restaurant</span>
-          </div>
-          <span className="text-[9px] font-semibold tracking-wide">POS</span>
-        </Link>
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`flex flex-col items-center gap-1 flex-1 h-full justify-center transition-colors ${
+                active ? 'text-primary' : 'text-muted-foreground'
+              }`}
+            >
+              <span className={`material-symbols-outlined transition-all ${active ? 'text-[24px]' : 'text-[22px]'}`}>
+                {item.icon}
+              </span>
+              <span className="text-[9px] tracking-wide">{item.label}</span>
+              {active && <span className="absolute bottom-0 w-4 h-0.5 bg-primary rounded-full" />}
+            </Link>
+          );
+        })}
 
-        <Link
-          href="/events"
-          className={`flex flex-col items-center gap-1 w-full h-full justify-center transition-colors ${isActive('/events') ? activeClass : inactiveClass}`}
-        >
-          <span className="material-symbols-outlined text-2xl">event</span>
-          <span className="text-[9px] font-semibold tracking-wide">Events</span>
-        </Link>
-
+        {/* More — opens full sidebar */}
         <button
           onClick={toggleSidebar}
-          className={`flex flex-col items-center gap-1 w-full h-full justify-center transition-colors ${isSidebarOpen ? activeClass : inactiveClass}`}
+          className="flex flex-col items-center gap-1 flex-1 h-full justify-center text-muted-foreground hover:text-foreground transition-colors"
         >
-          <span className="material-symbols-outlined text-2xl">menu</span>
-          <span className="text-[9px] font-semibold tracking-wide">Menu</span>
+          <span className="material-symbols-outlined text-[22px]">grid_view</span>
+          <span className="text-[9px] tracking-wide">More</span>
         </button>
       </div>
-    </div>
+    </nav>
   );
 }
