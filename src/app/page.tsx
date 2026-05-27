@@ -257,7 +257,7 @@ export default function Dashboard() {
 
       {/* Footer */}
       <div className="flex justify-between items-center text-[11px] text-muted-foreground pt-2 border-t border-border">
-        <p>© 2024  Hotel Management System</p>
+        <p>© 2026  Hotel Management System</p>
         <div className="flex gap-6">
           <a className="hover:text-foreground transition-colors" href="#">Status</a>
           <a className="hover:text-foreground transition-colors" href="#">Support</a>
