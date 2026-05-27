@@ -1,65 +1,69 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: ["class"],
   content: [
     "./src/**/*.{js,ts,jsx,tsx,mdx}",
   ],
-  darkMode: false,
   theme: {
     extend: {
       colors: {
-        primary: "#D4AF37",
-        secondary: "#F0C040",
-        accent: "#D4AF37",
-        neutral: "#111111",
-        highlight: "#F0C040",
-        "olive-leaf": "#D4AF37",
-        "black-forest": "#000000",
-        "cornsilk": "#111111",
-        "light-caramel": "#F0C040",
-        "copper": "#D4AF37",
-        "background-light": "#000000",
-        "background-dark": "#000000",
-        "surface": "#111111",
-        "surface-alt": "#161616",
-        "surface-high": "#1c1c1c",
-        "gold": "#D4AF37",
-        "gold-light": "#F0C040",
-        // Legacy aliases kept for compatibility
-        "navy-surface": "#111111",
-        "navy-lighter": "#161616",
+        border: "var(--border)",
+        input: "var(--input)",
+        ring: "var(--ring)",
+        background: "var(--background)",
+        foreground: "var(--foreground)",
+        primary: {
+          DEFAULT: "var(--primary)",
+          foreground: "var(--primary-foreground)",
+        },
+        secondary: {
+          DEFAULT: "var(--secondary)",
+          foreground: "var(--secondary-foreground)",
+        },
+        destructive: {
+          DEFAULT: "var(--destructive)",
+          foreground: "var(--destructive-foreground)",
+        },
+        muted: {
+          DEFAULT: "var(--muted)",
+          foreground: "var(--muted-foreground)",
+        },
+        accent: {
+          DEFAULT: "var(--accent)",
+          foreground: "var(--accent-foreground)",
+        },
+        popover: {
+          DEFAULT: "var(--popover)",
+          foreground: "var(--popover-foreground)",
+        },
+        card: {
+          DEFAULT: "var(--card)",
+          foreground: "var(--card-foreground)",
+        },
+      },
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ["Outfit", "sans-serif"],
-        display: ["Outfit", "sans-serif"],
-        body: ["Outfit", "sans-serif"],
-      },
-      animation: {
-        'shimmer': 'shimmer 2s linear infinite',
-        'fade-in': 'fadeIn 0.2s ease-out',
-        'slide-up': 'slideUp 0.3s ease-out',
+        sans: ["var(--font-sans)", "Outfit", "sans-serif"],
       },
       keyframes: {
-        shimmer: {
-          '0%': { backgroundPosition: '-200% 0' },
-          '100%': { backgroundPosition: '200% 0' },
+        "accordion-down": {
+          from: { height: 0 },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
-        fadeIn: {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' },
-        },
-        slideUp: {
-          '0%': { opacity: '0', transform: 'translateY(8px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: 0 },
         },
       },
-      boxShadow: {
-        'gold-sm': '0 0 15px rgba(212,175,55,0.15)',
-        'gold': '0 0 25px rgba(212,175,55,0.2)',
-        'gold-lg': '0 0 40px rgba(212,175,55,0.25)',
-        'surface': '0 1px 3px rgba(0,0,0,0.5), 0 8px 32px rgba(0,0,0,0.3)',
-        'surface-lg': '0 4px 6px rgba(0,0,0,0.6), 0 20px 60px rgba(0,0,0,0.4)',
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
       },
     },
   },
-  plugins: [],
+  plugins: [require("tailwindcss-animate")],
 }

@@ -1,1 +1,0 @@
-(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[3505],{2825:(e,n,r)=>{Promise.resolve().then(r.bind(r,5064))},5064:(e,n,r)=>{"use strict";r.r(n),r.d(n,{default:()=>i});var s=r(5155);function i(){return(0,s.jsx)("div",{children:"Routing is working!"})}}},e=>{var n=n=>e(e.s=n);e.O(0,[8441,1517,7358],()=>n(2825)),_N_E=e.O()}]);
