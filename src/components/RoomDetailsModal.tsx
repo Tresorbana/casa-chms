@@ -51,7 +51,7 @@ export default function RoomDetailsModal({ room, onClose, onUpdate }: RoomDetail
                         <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Room Details</p>
                     </div>
                     <button onClick={onClose} className="text-white/30 hover:text-gold transition-colors p-1 rounded-lg hover:bg-gold/10">
-                        <span className="material-icons-outlined">close</span>
+                        <span className="material-symbols-outlined">close</span>
                     </button>
                 </div>
 
@@ -126,7 +126,7 @@ export default function RoomDetailsModal({ room, onClose, onUpdate }: RoomDetail
                             <div className="space-y-6">
                                 <div className="flex items-center gap-4">
                                     <div className="w-12 h-12 bg-gold/10 rounded-2xl flex items-center justify-center text-gold border border-gold/20">
-                                        <span className="material-icons-outlined">person</span>
+                                        <span className="material-symbols-outlined">person</span>
                                     </div>
                                     <div>
                                         <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Guest Name</p>
@@ -146,14 +146,14 @@ export default function RoomDetailsModal({ room, onClose, onUpdate }: RoomDetail
                                         href={`/invoice/${activeBooking.id}`}
                                         className="flex-1 bg-white/5 border border-gold/20 text-white/70 font-black uppercase text-[9px] tracking-widest py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-gold/10 hover:text-gold transition-all"
                                     >
-                                        <span className="material-icons-outlined text-sm">receipt_long</span>
+                                        <span className="material-symbols-outlined text-sm">receipt_long</span>
                                         Billing
                                     </Link>
                                     <Link
                                         href={`/checkout?roomId=${room.id}`}
                                         className="flex-1 bg-gold text-black font-black uppercase text-[9px] tracking-widest py-3 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-gold/20 hover:bg-gold-light transition-all"
                                     >
-                                        <span className="material-icons-outlined text-sm">logout</span>
+                                        <span className="material-symbols-outlined text-sm">logout</span>
                                         Checkout
                                     </Link>
                                 </div>
@@ -161,7 +161,7 @@ export default function RoomDetailsModal({ room, onClose, onUpdate }: RoomDetail
                         ) : (
                             <div className="py-10 text-center space-y-4">
                                 <div className="w-16 h-16 bg-gold/5 rounded-full flex items-center justify-center mx-auto border border-dashed border-gold/20">
-                                    <span className="material-icons-outlined text-gold/30 text-2xl">event_available</span>
+                                    <span className="material-symbols-outlined text-gold/30 text-2xl">event_available</span>
                                 </div>
                                 <div>
                                     <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Room is Vacant</p>
@@ -169,7 +169,7 @@ export default function RoomDetailsModal({ room, onClose, onUpdate }: RoomDetail
                                         href={`/bookings?roomNumber=${room.number}`}
                                         className="mt-4 inline-flex items-center gap-2 text-gold font-black uppercase text-[10px] tracking-widest hover:underline"
                                     >
-                                        <span className="material-icons-outlined text-sm">add_circle</span>
+                                        <span className="material-symbols-outlined text-sm">add_circle</span>
                                         Book Now
                                     </Link>
                                 </div>

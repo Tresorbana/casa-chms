@@ -97,16 +97,17 @@
   }
 }
 
-/* Material Icons */
+/* Material Symbols Outlined — variable font, pinned to weight 200 for a clean thin look */
+.material-symbols-outlined,
+.material-symbols-outlined,
 .material-icons,
-.material-icons-outlined,
-.material-icons-round,
 .material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
   font-weight: normal;
   font-style: normal;
   font-size: 24px;
-  display: inline-block;
   line-height: 1;
+  display: inline-block;
   text-transform: none;
   letter-spacing: normal;
   word-wrap: normal;
@@ -115,13 +116,10 @@
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   -moz-osx-font-smoothing: grayscale;
-  font-feature-settings: 'liga';
+  /* Variable font axes: optical size 20, weight 200, no fill, no grade */
+  font-variation-settings: 'opsz' 20, 'wght' 200, 'FILL' 0, 'GRAD' 0;
+  user-select: none;
 }
-
-.material-icons { font-family: 'Material Icons'; }
-.material-icons-outlined { font-family: 'Material Icons Outlined'; }
-.material-icons-round { font-family: 'Material Icons Round'; }
-.material-symbols-outlined { font-family: 'Material Symbols Outlined'; }
 
 /* Scrollbar hide utility */
 .scrollbar-hide::-webkit-scrollbar { display: none; }

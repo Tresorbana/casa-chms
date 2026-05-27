@@ -68,7 +68,7 @@ export default function RoomTimeline() {
                             </div>
                           ) : (
                             <div className="w-full h-7 flex items-center justify-center rounded-lg border border-dashed border-border">
-                              <span className="material-icons-outlined text-muted-foreground/30 text-sm">add</span>
+                              <span className="material-symbols-outlined text-muted-foreground/30 text-sm">add</span>
                             </div>
                           )}
                         </div>
@@ -79,7 +79,7 @@ export default function RoomTimeline() {
               ))}
               {(!rooms || rooms.length === 0) && (
                 <div className="py-16 text-center text-muted-foreground">
-                  <span className="material-icons-outlined text-3xl block mb-2 opacity-40">hotel</span>
+                  <span className="material-symbols-outlined text-3xl block mb-2 opacity-40">hotel</span>
                   <p className="text-sm">No rooms found</p>
                 </div>
               )}

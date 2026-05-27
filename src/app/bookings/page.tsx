@@ -74,7 +74,7 @@ function BookingsContent() {
           <div className="lg:col-span-7">
             <div className="bg-card border border-border rounded-xl overflow-hidden">
               <div className="px-6 py-4 border-b border-border flex items-center gap-3">
-                <span className="material-icons-outlined text-muted-foreground text-[20px]">person_add</span>
+                <span className="material-symbols-outlined text-muted-foreground text-[20px]">person_add</span>
                 <div>
                   <h2 className="text-sm font-semibold text-foreground">Guest Information</h2>
                   <p className="text-xs text-muted-foreground">Contact and identity details</p>
@@ -114,7 +114,7 @@ function BookingsContent() {
           <div className="lg:col-span-5">
             <div className="bg-card border border-border rounded-xl overflow-hidden">
               <div className="px-6 py-4 border-b border-border flex items-center gap-3">
-                <span className="material-icons-outlined text-muted-foreground text-[20px]">event</span>
+                <span className="material-symbols-outlined text-muted-foreground text-[20px]">event</span>
                 <div>
                   <h2 className="text-sm font-semibold text-foreground">Booking Details</h2>
                   <p className="text-xs text-muted-foreground">Dates and room assignment</p>
@@ -157,9 +157,9 @@ function BookingsContent() {
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
-                      <><span className="material-icons-outlined text-[18px] animate-spin">refresh</span> Creating...</>
+                      <><span className="material-symbols-outlined text-[18px] animate-spin">refresh</span> Creating...</>
                     ) : (
-                      <><span className="material-icons-outlined text-[18px]">check</span> Confirm Booking</>
+                      <><span className="material-symbols-outlined text-[18px]">check</span> Confirm Booking</>
                     )}
                   </button>
                 </div>

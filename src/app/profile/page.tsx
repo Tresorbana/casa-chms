@@ -14,7 +14,7 @@ export default function Profile() {
   if (isLoading) return (
     <div className="min-h-screen bg-background flex items-center justify-center">
       <div className="text-center text-muted-foreground">
-        <span className="material-icons-outlined text-3xl block mb-2 animate-spin">refresh</span>
+        <span className="material-symbols-outlined text-3xl block mb-2 animate-spin">refresh</span>
         <p className="text-sm">Loading profile...</p>
       </div>
     </div>
@@ -56,14 +56,14 @@ export default function Profile() {
                 onClick={() => setIsEditing(!isEditing)}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border border-border hover:bg-accent text-foreground transition-colors"
               >
-                <span className="material-icons-outlined text-[16px]">{isEditing ? 'save' : 'edit'}</span>
+                <span className="material-symbols-outlined text-[16px]">{isEditing ? 'save' : 'edit'}</span>
                 {isEditing ? 'Save' : 'Edit'}
               </button>
               <button
                 onClick={handleLogout}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-destructive border border-destructive/20 hover:bg-destructive/10 transition-colors"
               >
-                <span className="material-icons-outlined text-[16px]">logout</span>
+                <span className="material-symbols-outlined text-[16px]">logout</span>
                 Sign Out
               </button>
             </div>
@@ -74,7 +74,7 @@ export default function Profile() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div className="bg-card border border-border rounded-xl p-5">
             <div className="flex items-center gap-2 mb-4">
-              <span className="material-icons-outlined text-muted-foreground text-[18px]">person</span>
+              <span className="material-symbols-outlined text-muted-foreground text-[18px]">person</span>
               <h3 className="text-sm font-semibold text-foreground">Identity</h3>
             </div>
             <div className="space-y-4">
@@ -105,7 +105,7 @@ export default function Profile() {
 
           <div className="bg-card border border-border rounded-xl p-5">
             <div className="flex items-center gap-2 mb-4">
-              <span className="material-icons-outlined text-muted-foreground text-[18px]">shield</span>
+              <span className="material-symbols-outlined text-muted-foreground text-[18px]">shield</span>
               <h3 className="text-sm font-semibold text-foreground">Security</h3>
             </div>
             <div className="space-y-4">
@@ -122,7 +122,7 @@ export default function Profile() {
                   onClick={() => toast.info('Password reset is managed by your administrator')}
                   className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-muted-foreground border border-border hover:bg-accent transition-colors"
                 >
-                  <span className="material-icons-outlined text-[14px]">key</span>
+                  <span className="material-symbols-outlined text-[14px]">key</span>
                   Change Password
                 </button>
               </div>

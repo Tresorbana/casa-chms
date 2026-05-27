@@ -28,7 +28,7 @@ export default function MobileBottomNav() {
           href="/"
           className={`flex flex-col items-center gap-1 w-full h-full justify-center transition-colors ${isActive('/') ? activeClass : inactiveClass}`}
         >
-          <span className="material-icons-outlined text-2xl">dashboard</span>
+          <span className="material-symbols-outlined text-2xl">dashboard</span>
           <span className="text-[9px] font-semibold tracking-wide">Home</span>
         </Link>
 
@@ -36,7 +36,7 @@ export default function MobileBottomNav() {
           href="/calendar"
           className={`flex flex-col items-center gap-1 w-full h-full justify-center transition-colors ${isActive('/calendar') ? activeClass : inactiveClass}`}
         >
-          <span className="material-icons-outlined text-2xl">calendar_month</span>
+          <span className="material-symbols-outlined text-2xl">calendar_month</span>
           <span className="text-[9px] font-semibold tracking-wide">Calendar</span>
         </Link>
 
@@ -51,7 +51,7 @@ export default function MobileBottomNav() {
                 : 'bg-muted border-border text-muted-foreground'
             }`}
           >
-            <span className="material-icons-outlined text-xl">restaurant</span>
+            <span className="material-symbols-outlined text-xl">restaurant</span>
           </div>
           <span className="text-[9px] font-semibold tracking-wide">POS</span>
         </Link>
@@ -60,7 +60,7 @@ export default function MobileBottomNav() {
           href="/events"
           className={`flex flex-col items-center gap-1 w-full h-full justify-center transition-colors ${isActive('/events') ? activeClass : inactiveClass}`}
         >
-          <span className="material-icons-outlined text-2xl">event</span>
+          <span className="material-symbols-outlined text-2xl">event</span>
           <span className="text-[9px] font-semibold tracking-wide">Events</span>
         </Link>
 
@@ -68,7 +68,7 @@ export default function MobileBottomNav() {
           onClick={toggleSidebar}
           className={`flex flex-col items-center gap-1 w-full h-full justify-center transition-colors ${isSidebarOpen ? activeClass : inactiveClass}`}
         >
-          <span className="material-icons-outlined text-2xl">menu</span>
+          <span className="material-symbols-outlined text-2xl">menu</span>
           <span className="text-[9px] font-semibold tracking-wide">Menu</span>
         </button>
       </div>

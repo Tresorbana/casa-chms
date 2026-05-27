@@ -61,7 +61,7 @@ export default function Inventory() {
             onClick={() => setIsModalOpen(true)}
             className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
           >
-            <span className="material-icons-outlined text-[18px]">add</span>
+            <span className="material-symbols-outlined text-[18px]">add</span>
             Add Item
           </button>
         }
@@ -74,7 +74,7 @@ export default function Inventory() {
             <div className="p-5 border-b border-border flex justify-between items-center">
               <h3 className="text-sm font-semibold text-foreground">Add Inventory Item</h3>
               <button onClick={() => setIsModalOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors">
-                <span className="material-icons-outlined text-[20px]">close</span>
+                <span className="material-symbols-outlined text-[20px]">close</span>
               </button>
             </div>
             <form onSubmit={handleAddItem} className="p-5 space-y-4">
@@ -136,7 +136,7 @@ export default function Inventory() {
         <div className="p-5 border-b border-border flex justify-between items-center">
           <h3 className="text-sm font-semibold text-foreground">Item List</h3>
           <div className="relative">
-            <span className="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-[16px]">search</span>
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-[16px]">search</span>
             <input
               className="pl-9 pr-4 py-2 bg-muted border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-ring w-52"
               placeholder="Filter items..."
@@ -176,7 +176,7 @@ export default function Inventory() {
                     </td>
                     <td className="px-5 py-4 text-right">
                       <button className="p-1.5 hover:bg-accent rounded-lg transition-colors text-muted-foreground hover:text-foreground">
-                        <span className="material-icons-outlined text-[18px]">edit</span>
+                        <span className="material-symbols-outlined text-[18px]">edit</span>
                       </button>
                     </td>
                   </tr>

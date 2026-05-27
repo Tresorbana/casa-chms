@@ -61,7 +61,7 @@ export default function MenuSettings() {
             onClick={() => setIsModalOpen(true)}
             className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
           >
-            <span className="material-icons-outlined text-[18px]">add</span>
+            <span className="material-symbols-outlined text-[18px]">add</span>
             Add Item
           </button>
         }
@@ -82,7 +82,7 @@ export default function MenuSettings() {
                 <tr><td colSpan={5} className="p-8 text-center text-muted-foreground text-sm">Loading menu items...</td></tr>
               ) : safeItems.length === 0 ? (
                 <tr><td colSpan={5} className="p-12 text-center">
-                  <span className="material-icons-outlined text-3xl text-muted-foreground/30 block mb-2">restaurant_menu</span>
+                  <span className="material-symbols-outlined text-3xl text-muted-foreground/30 block mb-2">restaurant_menu</span>
                   <p className="text-sm text-muted-foreground">No menu items found</p>
                 </td></tr>
               ) : safeItems.map((item: any) => (
@@ -106,7 +106,7 @@ export default function MenuSettings() {
                   </td>
                   <td className="px-5 py-4 text-right">
                     <button onClick={() => handleDelete(item.id)} className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors">
-                      <span className="material-icons-outlined text-[18px]">delete</span>
+                      <span className="material-symbols-outlined text-[18px]">delete</span>
                     </button>
                   </td>
                 </tr>
@@ -122,7 +122,7 @@ export default function MenuSettings() {
             <div className="p-5 border-b border-border flex justify-between items-center">
               <h2 className="text-sm font-semibold text-foreground">Add Menu Item</h2>
               <button onClick={() => setIsModalOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors">
-                <span className="material-icons-outlined text-[20px]">close</span>
+                <span className="material-symbols-outlined text-[20px]">close</span>
               </button>
             </div>
             <form onSubmit={handleCreate} className="p-5 space-y-4">

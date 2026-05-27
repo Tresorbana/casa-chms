@@ -75,7 +75,7 @@ export default function PosRestaurant() {
               className="lg:hidden relative p-2 rounded-lg bg-primary text-primary-foreground"
               onClick={() => setIsCartOpen(!isCartOpen)}
             >
-              <span className="material-icons-outlined text-[20px]">shopping_cart</span>
+              <span className="material-symbols-outlined text-[20px]">shopping_cart</span>
               {cart.length > 0 && (
                 <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[9px] font-bold w-5 h-5 flex items-center justify-center rounded-full">
                   {cart.length}
@@ -87,7 +87,7 @@ export default function PosRestaurant() {
 
         {/* Search */}
         <div className="relative mb-4">
-          <span className="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-[18px]">search</span>
+          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-[18px]">search</span>
           <input
             className="w-full pl-9 pr-4 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-ring"
             placeholder="Search menu items..."
@@ -126,7 +126,7 @@ export default function PosRestaurant() {
               className="group flex flex-col bg-card border border-border rounded-xl overflow-hidden text-left transition-all hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30"
             >
               <div className="h-24 w-full flex items-center justify-center bg-muted/50 group-hover:bg-muted transition-colors">
-                <span className="material-icons-outlined text-3xl text-muted-foreground/40">restaurant_menu</span>
+                <span className="material-symbols-outlined text-3xl text-muted-foreground/40">restaurant_menu</span>
               </div>
               <div className="p-3">
                 <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">{item.category}</p>
@@ -134,14 +134,14 @@ export default function PosRestaurant() {
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-foreground">RWF {item.price.toLocaleString()}</span>
                   <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center group-hover:bg-primary transition-all">
-                    <span className="material-icons-outlined text-[14px] text-primary group-hover:text-primary-foreground">add</span>
+                    <span className="material-symbols-outlined text-[14px] text-primary group-hover:text-primary-foreground">add</span>
                   </div>
                 </div>
               </div>
             </button>
           )) : (
             <div className="col-span-full py-20 text-center text-muted-foreground">
-              <span className="material-icons-outlined text-4xl block mb-2 opacity-30">restaurant</span>
+              <span className="material-symbols-outlined text-4xl block mb-2 opacity-30">restaurant</span>
               <p className="text-sm">No menu items found</p>
             </div>
           )}
@@ -185,20 +185,20 @@ export default function PosRestaurant() {
         <div className="flex-1 overflow-y-auto p-5 space-y-3">
           {cart.length === 0 ? (
             <div className="text-center text-muted-foreground py-12 flex flex-col items-center gap-2">
-              <span className="material-icons-outlined text-3xl opacity-30">shopping_cart</span>
+              <span className="material-symbols-outlined text-3xl opacity-30">shopping_cart</span>
               <p className="text-sm">Cart is empty</p>
             </div>
           ) : cart.map((item, index) => (
             <div key={index} className="flex gap-3 items-center">
               <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 bg-muted">
-                <span className="material-icons-outlined text-muted-foreground text-[16px]">restaurant</span>
+                <span className="material-symbols-outlined text-muted-foreground text-[16px]">restaurant</span>
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground truncate">{item.name}</p>
                 <p className="text-xs text-muted-foreground">RWF {item.price.toLocaleString()}</p>
               </div>
               <button className="text-muted-foreground hover:text-destructive transition-colors" onClick={() => setCart(cart.filter((_, i) => i !== index))}>
-                <span className="material-icons-outlined text-[16px]">close</span>
+                <span className="material-symbols-outlined text-[16px]">close</span>
               </button>
             </div>
           ))}
@@ -214,7 +214,7 @@ export default function PosRestaurant() {
             disabled={isSubmitting || cart.length === 0}
             className="w-full bg-primary text-primary-foreground text-sm font-medium py-3 rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
           >
-            <span className="material-icons-outlined text-[18px]">{isSubmitting ? 'sync' : 'receipt_long'}</span>
+            <span className="material-symbols-outlined text-[18px]">{isSubmitting ? 'sync' : 'receipt_long'}</span>
             {isSubmitting ? 'Processing...' : 'Finalize Order'}
           </button>
         </div>

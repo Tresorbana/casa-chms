@@ -28,7 +28,7 @@ export default function ThemeToggle() {
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
       title={isDark ? 'Light mode' : 'Dark mode'}
     >
-      <span className="material-icons-outlined text-[20px]">
+      <span className="material-symbols-outlined text-[20px]">
         {isDark ? 'light_mode' : 'dark_mode'}
       </span>
     </button>

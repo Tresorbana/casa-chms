@@ -24,7 +24,7 @@ function StatCard({ label, value, icon }: { label: string; value: string | numbe
   return (
     <div className="bg-card border border-border rounded-xl p-5 flex items-center gap-4">
       <div className="p-2 bg-muted rounded-lg flex-shrink-0">
-        <span className="material-icons-outlined text-foreground/60 text-[22px]">{icon}</span>
+        <span className="material-symbols-outlined text-foreground/60 text-[22px]">{icon}</span>
       </div>
       <div>
         <p className="text-xs text-muted-foreground mb-0.5">{label}</p>
@@ -74,7 +74,7 @@ export default function Reports() {
             disabled={!data}
             className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
           >
-            <span className="material-icons-outlined text-[18px]">download</span>
+            <span className="material-symbols-outlined text-[18px]">download</span>
             Export Excel
           </button>
         }
@@ -127,12 +127,12 @@ export default function Reports() {
           <div className="p-6">
             {error ? (
               <div className="py-16 text-center text-destructive text-sm">
-                <span className="material-icons-outlined text-3xl block mb-2">error_outline</span>
+                <span className="material-symbols-outlined text-3xl block mb-2">error_outline</span>
                 Failed to load report data.
               </div>
             ) : isLoading ? (
               <div className="py-16 text-center text-muted-foreground text-sm">
-                <span className="material-icons-outlined text-3xl block mb-2 animate-spin">refresh</span>
+                <span className="material-symbols-outlined text-3xl block mb-2 animate-spin">refresh</span>
                 Generating report...
               </div>
             ) : (
@@ -241,7 +241,7 @@ export default function Reports() {
 
                 {!hasRecords && !hasBreakdown && !hasSources && (
                   <div className="text-center py-16 text-muted-foreground">
-                    <span className="material-icons-outlined text-3xl block mb-2 opacity-40">inbox</span>
+                    <span className="material-symbols-outlined text-3xl block mb-2 opacity-40">inbox</span>
                     <p className="text-sm">No records found for the selected date range</p>
                   </div>
                 )}

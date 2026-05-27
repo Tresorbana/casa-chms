@@ -56,7 +56,7 @@ export default function ConferenceSettings() {
             onClick={() => { setEditingRoom(null); setFormData({ name: '', capacity: '', pricePerHour: '' }); setIsAdding(true); }}
             className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
           >
-            <span className="material-icons-outlined text-[18px]">add</span>
+            <span className="material-symbols-outlined text-[18px]">add</span>
             Add Room
           </button>
         }
@@ -100,14 +100,14 @@ export default function ConferenceSettings() {
             <div key={room.id} className="bg-card border border-border rounded-xl p-5 hover:shadow-md transition-shadow">
               <div className="flex justify-between items-start mb-4">
                 <div className="p-2 bg-muted rounded-lg">
-                  <span className="material-icons-outlined text-muted-foreground text-[22px]">meeting_room</span>
+                  <span className="material-symbols-outlined text-muted-foreground text-[22px]">meeting_room</span>
                 </div>
                 <div className="flex gap-1">
                   <button onClick={() => startEdit(room)} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-all">
-                    <span className="material-icons-outlined text-[18px]">edit</span>
+                    <span className="material-symbols-outlined text-[18px]">edit</span>
                   </button>
                   <button onClick={() => handleDelete(room.id)} className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all">
-                    <span className="material-icons-outlined text-[18px]">delete</span>
+                    <span className="material-symbols-outlined text-[18px]">delete</span>
                   </button>
                 </div>
               </div>
@@ -126,7 +126,7 @@ export default function ConferenceSettings() {
           ))}
           {rooms.length === 0 && (
             <div className="col-span-full py-20 text-center border border-dashed border-border rounded-xl">
-              <span className="material-icons-outlined text-4xl text-muted-foreground/30 mb-3 block">meeting_room</span>
+              <span className="material-symbols-outlined text-4xl text-muted-foreground/30 mb-3 block">meeting_room</span>
               <p className="text-sm text-muted-foreground">No conference rooms yet</p>
             </div>
           )}

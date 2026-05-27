@@ -67,7 +67,7 @@ export default function RoomSettings() {
             onClick={() => setIsAddingFloor(true)}
             className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
           >
-            <span className="material-icons-outlined text-[18px]">add</span>
+            <span className="material-symbols-outlined text-[18px]">add</span>
             Add Floor
           </button>
         }
@@ -108,10 +108,10 @@ export default function RoomSettings() {
                 </div>
                 <div className="flex gap-1">
                   <button onClick={() => setAddingRoomToFloor(floor.id)} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-all" title="Add Room">
-                    <span className="material-icons-outlined text-[18px]">add_box</span>
+                    <span className="material-symbols-outlined text-[18px]">add_box</span>
                   </button>
                   <button onClick={() => handleDeleteFloor(floor.id)} className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all" title="Delete Floor">
-                    <span className="material-icons-outlined text-[18px]">delete</span>
+                    <span className="material-symbols-outlined text-[18px]">delete</span>
                   </button>
                 </div>
               </div>
@@ -144,7 +144,7 @@ export default function RoomSettings() {
                       onClick={() => handleDeleteRoom(room.id)}
                       className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
                     >
-                      <span className="material-icons-outlined text-[14px]">close</span>
+                      <span className="material-symbols-outlined text-[14px]">close</span>
                     </button>
                     <span className="text-[10px] text-muted-foreground uppercase tracking-wider block mb-0.5">{room.type}</span>
                     <span className="text-base font-semibold text-foreground block">{room.number}</span>
@@ -160,7 +160,7 @@ export default function RoomSettings() {
 
           {floors.length === 0 && (
             <div className="py-20 text-center border border-dashed border-border rounded-xl">
-              <span className="material-icons-outlined text-4xl text-muted-foreground/30 mb-3 block">layers</span>
+              <span className="material-symbols-outlined text-4xl text-muted-foreground/30 mb-3 block">layers</span>
               <p className="text-sm text-muted-foreground">No floors defined yet</p>
             </div>
           )}

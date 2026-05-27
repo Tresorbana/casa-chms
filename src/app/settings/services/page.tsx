@@ -44,7 +44,7 @@ export default function ServicesSettings() {
             onClick={() => setIsAdding(true)}
             className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
           >
-            <span className="material-icons-outlined text-[18px]">add</span>
+            <span className="material-symbols-outlined text-[18px]">add</span>
             Assign Service
           </button>
         }
@@ -56,7 +56,7 @@ export default function ServicesSettings() {
             <div className="p-5 border-b border-border flex justify-between items-center">
               <h3 className="text-sm font-semibold text-foreground">Assign Service</h3>
               <button onClick={() => setIsAdding(false)} className="text-muted-foreground hover:text-foreground transition-colors">
-                <span className="material-icons-outlined text-[20px]">close</span>
+                <span className="material-symbols-outlined text-[20px]">close</span>
               </button>
             </div>
             <div className="p-5 space-y-4">
@@ -121,10 +121,10 @@ export default function ServicesSettings() {
             <div key={service.id} className="bg-card border border-border rounded-xl p-5 hover:shadow-md transition-shadow">
               <div className="flex justify-between items-start mb-4">
                 <div className="p-2 bg-muted rounded-lg">
-                  <span className="material-icons-outlined text-muted-foreground text-[22px]">spa</span>
+                  <span className="material-symbols-outlined text-muted-foreground text-[22px]">spa</span>
                 </div>
                 <button onClick={() => handleDelete(service.id)} className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors">
-                  <span className="material-icons-outlined text-[18px]">delete</span>
+                  <span className="material-symbols-outlined text-[18px]">delete</span>
                 </button>
               </div>
               <h3 className="text-sm font-semibold text-foreground mb-1">{service.name}</h3>
@@ -133,7 +133,7 @@ export default function ServicesSettings() {
           ))}
           {services.length === 0 && (
             <div className="col-span-full py-20 text-center border border-dashed border-border rounded-xl">
-              <span className="material-icons-outlined text-4xl text-muted-foreground/30 mb-3 block">spa</span>
+              <span className="material-symbols-outlined text-4xl text-muted-foreground/30 mb-3 block">spa</span>
               <p className="text-sm text-muted-foreground">No services registered yet</p>
             </div>
           )}

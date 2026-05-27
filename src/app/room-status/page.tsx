@@ -101,7 +101,7 @@ export default function RoomStatus() {
 
       {!isLoading && filteredRooms.length === 0 && (
         <div className="text-center py-16 border border-dashed border-border rounded-xl">
-          <span className="material-icons-outlined text-3xl text-muted-foreground/40 mb-2 block">hotel</span>
+          <span className="material-symbols-outlined text-3xl text-muted-foreground/40 mb-2 block">hotel</span>
           <p className="text-sm text-muted-foreground">No rooms with this status</p>
         </div>
       )}

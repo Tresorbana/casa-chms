@@ -25,7 +25,7 @@ export default function CMSRequests() {
                 {stats.map((stat, i) => (
                     <div key={i} className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm flex items-center gap-4 group hover:shadow-xl transition-all">
                         <div className={`w-14 h-14 bg-primary/10 text-primary rounded-2xl flex items-center justify-center grayscale group-hover:grayscale-0 transition-all`}>
-                            <span className="material-icons-outlined text-2xl">{stat.icon}</span>
+                            <span className="material-symbols-outlined text-2xl">{stat.icon}</span>
                         </div>
                         <div>
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{stat.label}</p>
@@ -72,7 +72,7 @@ export default function CMSRequests() {
                                                 href={`mailto:${req.email}?subject=Regarding your inquiry: ${req.subject || 'Booking Request'}`}
                                                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-xl transition-all shadow-lg active:scale-95 flex items-center gap-1"
                                             >
-                                                <span className="material-icons-outlined text-sm">email</span> Email
+                                                <span className="material-symbols-outlined text-sm">email</span> Email
                                             </a>
                                             <button className="px-6 py-2 bg-slate-900 hover:bg-primary text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-xl transition-all shadow-lg active:scale-95">
                                                 Process Inquiry

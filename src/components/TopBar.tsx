@@ -94,7 +94,7 @@ export default function TopBar({ title, description, actions }: TopBarProps) {
 
         {/* Search */}
         <div className="relative hidden sm:block">
-          <span className="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-[18px]">
+          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-[18px]">
             search
           </span>
           <input
@@ -115,7 +115,7 @@ export default function TopBar({ title, description, actions }: TopBarProps) {
             }`}
             aria-label="Notifications"
           >
-            <span className="material-icons-outlined text-[20px]">notifications</span>
+            <span className="material-symbols-outlined text-[20px]">notifications</span>
             {unreadCount > 0 && (
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full border-2 border-background" />
             )}
@@ -149,7 +149,7 @@ export default function TopBar({ title, description, actions }: TopBarProps) {
                 <div className="max-h-72 overflow-y-auto">
                   {previewNotifications.length === 0 ? (
                     <div className="py-8 text-center text-muted-foreground text-sm">
-                      <span className="material-icons-outlined block text-2xl mb-2 opacity-40">
+                      <span className="material-symbols-outlined block text-2xl mb-2 opacity-40">
                         notifications_none
                       </span>
                       No notifications
@@ -164,7 +164,7 @@ export default function TopBar({ title, description, actions }: TopBarProps) {
                         }`}
                       >
                         <div className={`p-1.5 rounded-lg flex-shrink-0 ${colorFor(n.type)}`}>
-                          <span className="material-icons-outlined text-[14px]">{iconFor(n.type)}</span>
+                          <span className="material-symbols-outlined text-[14px]">{iconFor(n.type)}</span>
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className={`text-xs font-medium truncate ${n.isRead ? 'text-muted-foreground' : 'text-foreground'}`}>

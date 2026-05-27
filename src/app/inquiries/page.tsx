@@ -89,13 +89,13 @@ function InquiryCard({ inq }: { inq: any }) {
             href={`mailto:${inq.email}?subject=Re: ${inq.subject || 'Your Inquiry'}`}
             className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground border border-border px-3 py-1.5 rounded-lg hover:bg-accent transition-colors"
           >
-            <span className="material-icons-outlined text-[14px]">email</span> Email
+            <span className="material-symbols-outlined text-[14px]">email</span> Email
           </a>
           <button
             onClick={() => setIsReplying(!isReplying)}
             className="inline-flex items-center gap-1.5 text-xs font-medium bg-primary text-primary-foreground px-3 py-1.5 rounded-lg hover:bg-primary/90 transition-colors"
           >
-            <span className="material-icons-outlined text-[14px]">reply</span>
+            <span className="material-symbols-outlined text-[14px]">reply</span>
             {inq.response ? 'Update Reply' : 'Reply'}
           </button>
         </div>
@@ -163,7 +163,7 @@ export default function InquiriesPage() {
           {filtered.map((inq: any) => <InquiryCard key={inq.id} inq={inq} />)}
           {filtered.length === 0 && (
             <div className="text-center py-16 border border-dashed border-border rounded-xl">
-              <span className="material-icons-outlined text-4xl text-muted-foreground/30 mb-3 block">inbox</span>
+              <span className="material-symbols-outlined text-4xl text-muted-foreground/30 mb-3 block">inbox</span>
               <p className="text-sm text-muted-foreground">No inquiries found</p>
             </div>
           )}

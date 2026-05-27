@@ -51,7 +51,7 @@ export default function Settings() {
             onClick={() => setIsModalOpen(true)}
             className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
           >
-            <span className="material-icons-outlined text-[18px]">person_add</span>
+            <span className="material-symbols-outlined text-[18px]">person_add</span>
             Create User
           </button>
         }
@@ -86,7 +86,7 @@ export default function Settings() {
                         Active
                       </span>
                       <button className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors">
-                        <span className="material-icons-outlined text-[18px]">settings</span>
+                        <span className="material-symbols-outlined text-[18px]">settings</span>
                       </button>
                     </div>
                   </div>
@@ -157,7 +157,7 @@ export default function Settings() {
               ].map(item => (
                 <div key={item.label} className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
-                    <span className="material-icons-outlined text-muted-foreground text-[16px]">{item.icon}</span>
+                    <span className="material-symbols-outlined text-muted-foreground text-[16px]">{item.icon}</span>
                   </div>
                   <p className="text-xs text-muted-foreground">{item.label}</p>
                 </div>
@@ -174,7 +174,7 @@ export default function Settings() {
             <div className="p-5 border-b border-border flex justify-between items-center">
               <h2 className="text-sm font-semibold text-foreground">Create Staff Account</h2>
               <button onClick={() => setIsModalOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors">
-                <span className="material-icons-outlined text-[20px]">close</span>
+                <span className="material-symbols-outlined text-[20px]">close</span>
               </button>
             </div>
             <form onSubmit={handleCreateUser} className="p-5 space-y-4">

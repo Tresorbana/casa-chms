@@ -24,7 +24,7 @@ export default function InvoicesList() {
         description="Guest invoices and billing records."
         actions={
           <div className="relative">
-            <span className="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-[18px]">search</span>
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-[18px]">search</span>
             <input
               type="search"
               placeholder="Search invoices..."
@@ -72,7 +72,7 @@ export default function InvoicesList() {
                         href={`/invoice/${inv.id}`}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors"
                       >
-                        <span className="material-icons-outlined text-[14px]">visibility</span>
+                        <span className="material-symbols-outlined text-[14px]">visibility</span>
                         View
                       </Link>
                     </td>

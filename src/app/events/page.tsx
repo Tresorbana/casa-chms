@@ -26,7 +26,7 @@ export default function Events() {
             onClick={() => setIsModalOpen(true)}
             className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
           >
-            <span className="material-icons-outlined text-[18px]">add</span>
+            <span className="material-symbols-outlined text-[18px]">add</span>
             Book Event
           </button>
         }
@@ -64,7 +64,7 @@ export default function Events() {
                 onClick={() => setIsModalOpen(true)}
                 className="w-full mt-4 py-2 border border-border rounded-lg text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors flex items-center justify-center gap-2"
               >
-                <span className="material-icons-outlined text-[16px]">event</span>
+                <span className="material-symbols-outlined text-[16px]">event</span>
                 Book Venue
               </button>
             </div>
@@ -72,7 +72,7 @@ export default function Events() {
         ))}
         {!isLoadingVenues && venues.length === 0 && (
           <div className="col-span-full py-16 text-center text-muted-foreground border border-dashed border-border rounded-xl">
-            <span className="material-icons-outlined text-3xl block mb-2 opacity-40">meeting_room</span>
+            <span className="material-symbols-outlined text-3xl block mb-2 opacity-40">meeting_room</span>
             <p className="text-sm">No conference rooms configured</p>
           </div>
         )}
@@ -87,7 +87,7 @@ export default function Events() {
         <div className="p-6">
           {schedule.length === 0 ? (
             <div className="text-center py-10 text-muted-foreground">
-              <span className="material-icons-outlined text-3xl block mb-2 opacity-40">event_note</span>
+              <span className="material-symbols-outlined text-3xl block mb-2 opacity-40">event_note</span>
               <p className="text-sm">No scheduled events</p>
             </div>
           ) : (
@@ -95,7 +95,7 @@ export default function Events() {
               {schedule.map((b: any) => (
                 <div key={b.id} className="flex items-center gap-4 p-4 bg-muted/40 rounded-lg border border-border">
                   <div className="p-2 bg-background border border-border rounded-lg flex-shrink-0">
-                    <span className="material-icons-outlined text-muted-foreground text-[18px]">event</span>
+                    <span className="material-symbols-outlined text-muted-foreground text-[18px]">event</span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground truncate">{b.guestName}</p>

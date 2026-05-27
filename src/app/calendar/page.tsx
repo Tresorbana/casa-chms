@@ -94,18 +94,18 @@ export default function OccupancyCalendar() {
               onClick={() => setIsConferenceModalOpen(true)}
               className="inline-flex items-center gap-2 border border-border bg-background text-foreground text-sm font-medium px-4 py-2 rounded-lg hover:bg-accent transition-colors"
             >
-              <span className="material-icons-outlined text-[18px]">event</span>
+              <span className="material-symbols-outlined text-[18px]">event</span>
               Book Event
             </button>
             <div className="flex items-center gap-1 border border-border rounded-lg overflow-hidden">
               <button onClick={() => setCurrentDate(new Date(currentYear, currentMonth - 1, 1))} className="p-2 hover:bg-accent transition-colors text-muted-foreground hover:text-foreground">
-                <span className="material-icons-outlined text-[20px]">chevron_left</span>
+                <span className="material-symbols-outlined text-[20px]">chevron_left</span>
               </button>
               <span className="px-4 text-sm font-medium text-foreground min-w-[150px] text-center">
                 {MONTH_NAMES[currentMonth]} {currentYear}
               </span>
               <button onClick={() => setCurrentDate(new Date(currentYear, currentMonth + 1, 1))} className="p-2 hover:bg-accent transition-colors text-muted-foreground hover:text-foreground">
-                <span className="material-icons-outlined text-[20px]">chevron_right</span>
+                <span className="material-symbols-outlined text-[20px]">chevron_right</span>
               </button>
             </div>
           </div>
@@ -130,7 +130,7 @@ export default function OccupancyCalendar() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-card border border-border rounded-xl p-5 flex items-center gap-4">
           <div className="p-2 bg-muted rounded-lg">
-            <span className="material-icons-outlined text-foreground/60 text-[22px]">event_available</span>
+            <span className="material-symbols-outlined text-foreground/60 text-[22px]">event_available</span>
           </div>
           <div>
             <p className="text-xs text-muted-foreground">Total Bookings</p>

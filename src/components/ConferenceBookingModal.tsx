@@ -53,14 +53,14 @@ export default function ConferenceBookingModal({ onClose, onSuccess, initialDate
                         <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] mt-0.5">Reserve a venue for your event</p>
                     </div>
                     <button onClick={onClose} className="w-9 h-9 rounded-xl flex items-center justify-center text-white/30 hover:text-white hover:bg-white/[0.06] transition-all">
-                        <span className="material-icons-outlined text-[18px]">close</span>
+                        <span className="material-symbols-outlined text-[18px]">close</span>
                     </button>
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-8 space-y-4">
                     {error && (
                         <div className="p-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-red-400 flex items-center gap-2" style={{ background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)' }}>
-                            <span className="material-icons-outlined text-sm">error_outline</span>
+                            <span className="material-symbols-outlined text-sm">error_outline</span>
                             {error}
                         </div>
                     )}

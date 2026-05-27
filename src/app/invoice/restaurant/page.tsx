@@ -42,7 +42,7 @@ function RestaurantInvoiceContent() {
   if (!apiInvoice) return (
     <div className="min-h-screen flex items-center justify-center bg-black">
       <div className="text-center">
-        <span className="material-icons-outlined text-5xl text-red-300 block mb-4">receipt_long</span>
+        <span className="material-symbols-outlined text-5xl text-red-300 block mb-4">receipt_long</span>
         <p className="font-bold text-red-500 text-xl">Invoice not found</p>
         <button onClick={() => router.back()} className="mt-4 text-primary text-sm font-bold hover:underline">← Go back</button>
       </div>
@@ -68,7 +68,7 @@ function RestaurantInvoiceContent() {
       {/* Toolbar */}
       <div className="no-print sticky top-0 z-50 px-6 py-3 flex items-center justify-between gap-4" style={{ background: '#111111', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
         <button onClick={() => router.back()} className="flex items-center gap-2 text-sm font-bold text-white/50 hover:text-white transition-colors">
-          <span className="material-icons-outlined text-base">arrow_back</span>
+          <span className="material-symbols-outlined text-base">arrow_back</span>
           Back to POS
         </button>
         <div className="flex items-center gap-3">
@@ -76,7 +76,7 @@ function RestaurantInvoiceContent() {
             {apiInvoice.status}
           </span>
           <button onClick={() => window.print()} className="flex items-center gap-2 bg-gold text-black px-5 py-2 rounded-xl text-sm font-bold hover:bg-gold-light transition-all shadow-gold-sm">
-            <span className="material-icons-outlined text-base">picture_as_pdf</span>
+            <span className="material-symbols-outlined text-base">picture_as_pdf</span>
             Print / PDF
           </button>
         </div>

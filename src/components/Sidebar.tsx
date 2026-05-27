@@ -45,7 +45,7 @@ function NavItem({
       }`}
     >
       <span
-        className={`material-icons-outlined text-[18px] flex-shrink-0 ${
+        className={`material-symbols-outlined text-[18px] flex-shrink-0 ${
           active ? 'text-primary-foreground' : 'text-sidebar-foreground/40 group-hover:text-sidebar-foreground/70'
         }`}
       >
@@ -109,7 +109,7 @@ export default function Sidebar() {
         className="lg:hidden fixed top-4 left-4 z-[60] p-2 rounded-lg bg-background border border-border hover:bg-accent transition-all shadow-sm"
         aria-label="Toggle menu"
       >
-        <span className="material-icons-outlined text-foreground/60 text-[20px]">
+        <span className="material-symbols-outlined text-foreground/60 text-[20px]">
           {isSidebarOpen ? 'close' : 'menu'}
         </span>
       </button>
@@ -121,7 +121,7 @@ export default function Sidebar() {
           className="hidden lg:flex fixed left-4 top-4 z-[60] p-2 items-center justify-center rounded-lg bg-background border border-border hover:bg-accent transition-all shadow-sm"
           title="Expand sidebar"
         >
-          <span className="material-icons-outlined text-foreground/50 text-[20px]">menu_open</span>
+          <span className="material-symbols-outlined text-foreground/50 text-[20px]">menu_open</span>
         </button>
       )}
 
@@ -155,7 +155,7 @@ export default function Sidebar() {
               className="hidden lg:flex flex-shrink-0 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-all"
               title="Collapse sidebar"
             >
-              <span className="material-icons-outlined text-[18px]">chevron_left</span>
+              <span className="material-symbols-outlined text-[18px]">chevron_left</span>
             </button>
           </div>
         </div>
@@ -192,7 +192,7 @@ export default function Sidebar() {
               className="text-muted-foreground hover:text-destructive transition-colors flex-shrink-0 p-1 rounded"
               title="Sign out"
             >
-              <span className="material-icons-outlined text-[16px]">logout</span>
+              <span className="material-symbols-outlined text-[16px]">logout</span>
             </button>
           </Link>
         </div>

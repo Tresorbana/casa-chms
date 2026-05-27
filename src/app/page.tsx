@@ -24,7 +24,7 @@ function StatCard({
     <div className="bg-card border border-border rounded-xl p-6 flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <div className="p-2 bg-muted rounded-lg">
-          <span className="material-icons-outlined text-foreground/70 text-[22px]">{icon}</span>
+          <span className="material-symbols-outlined text-foreground/70 text-[22px]">{icon}</span>
         </div>
       </div>
       <div>
@@ -67,7 +67,7 @@ export default function Dashboard() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center gap-3 text-muted-foreground">
-          <span className="material-icons-outlined text-4xl animate-spin">refresh</span>
+          <span className="material-symbols-outlined text-4xl animate-spin">refresh</span>
           <p className="text-sm font-medium">Loading dashboard...</p>
         </div>
       </div>
@@ -78,7 +78,7 @@ export default function Dashboard() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center gap-3 text-destructive">
-          <span className="material-icons-outlined text-4xl">error_outline</span>
+          <span className="material-symbols-outlined text-4xl">error_outline</span>
           <p className="text-sm font-medium">Failed to load dashboard</p>
           <button
             onClick={() => mutate()}
@@ -103,7 +103,7 @@ export default function Dashboard() {
         actions={
           <div className="flex items-center gap-3">
             <div className="relative">
-              <span className="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-[18px]">
+              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-[18px]">
                 calendar_today
               </span>
               <input
@@ -117,7 +117,7 @@ export default function Dashboard() {
               href="/bookings"
               className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
             >
-              <span className="material-icons-outlined text-[18px]">add</span>
+              <span className="material-symbols-outlined text-[18px]">add</span>
               New Reservation
             </Link>
           </div>
@@ -164,7 +164,7 @@ export default function Dashboard() {
             className="text-xs font-medium text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
           >
             Full report
-            <span className="material-icons-outlined text-[14px]">arrow_forward</span>
+            <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
           </button>
         </div>
         <div className="flex gap-6 mb-3">
@@ -214,7 +214,7 @@ export default function Dashboard() {
         <div className="flex flex-col gap-8">
           {sortedFloors.length === 0 ? (
             <div className="py-16 text-center text-muted-foreground text-sm">
-              <span className="material-icons-outlined block text-3xl mb-2 opacity-40">hotel</span>
+              <span className="material-symbols-outlined block text-3xl mb-2 opacity-40">hotel</span>
               No rooms found
             </div>
           ) : (

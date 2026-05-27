@@ -57,7 +57,7 @@ export default function NotificationsPage() {
               onClick={markAllRead}
               className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
             >
-              <span className="material-icons-outlined text-[18px]">done_all</span>
+              <span className="material-symbols-outlined text-[18px]">done_all</span>
               Mark All Read
             </button>
           ) : undefined
@@ -69,7 +69,7 @@ export default function NotificationsPage() {
           <div className="py-16 text-center text-muted-foreground text-sm">Loading notifications...</div>
         ) : notifications.length === 0 ? (
           <div className="py-16 text-center text-muted-foreground">
-            <span className="material-icons-outlined text-4xl block mb-3 opacity-30">notifications_none</span>
+            <span className="material-symbols-outlined text-4xl block mb-3 opacity-30">notifications_none</span>
             <p className="text-sm font-medium">All caught up!</p>
             <p className="text-xs mt-1">No notifications at the moment.</p>
           </div>
@@ -94,7 +94,7 @@ export default function NotificationsPage() {
                   <span className="absolute top-4 right-4 w-2 h-2 bg-primary rounded-full" />
                 )}
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${colorFor(notif.type)}`}>
-                  <span className="material-icons-outlined text-[18px]">{iconFor(notif.type)}</span>
+                  <span className="material-symbols-outlined text-[18px]">{iconFor(notif.type)}</span>
                 </div>
                 <div className="flex-1 min-w-0 pr-4">
                   <p className={`text-sm leading-snug ${notif.isRead ? 'text-muted-foreground' : 'text-foreground font-medium'}`}>

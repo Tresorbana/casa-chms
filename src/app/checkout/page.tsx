@@ -49,7 +49,7 @@ function CheckoutContent() {
     return (
       <div className="flex-1 min-h-screen p-8 text-center flex flex-col items-center justify-center gap-4" style={{ background: '#000000' }}>
         <div className="w-20 h-20 bg-red-500/10 text-red-400 rounded-[2rem] flex items-center justify-center border border-red-500/20">
-          <span className="material-icons-outlined text-4xl">warning</span>
+          <span className="material-symbols-outlined text-4xl">warning</span>
         </div>
         <h1 className="text-2xl font-black text-gold">No Active Checkout Found</h1>
         <p className="text-white/40">Please select a room from the dashboard to proceed with checkout.</p>
@@ -73,7 +73,7 @@ function CheckoutContent() {
             </div>
             <div className="flex gap-3">
               <button className="flex items-center gap-2 px-6 py-2 border border-gold/20 bg-navy-surface rounded-xl hover:bg-gold/10 font-black text-[10px] uppercase tracking-widest text-white/60 hover:text-gold transition-all" onClick={() => { window.print() }}>
-                <span className="material-icons-outlined text-lg">print</span> Print PDF
+                <span className="material-symbols-outlined text-lg">print</span> Print PDF
               </button>
             </div>
           </div>
@@ -156,7 +156,7 @@ function CheckoutContent() {
             <div className="p-10 mt-6 bg-black/20 border-t border-gold/[0.1] flex flex-col md:flex-row justify-between items-center gap-8">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-gold/10 text-gold rounded-2xl flex items-center justify-center border border-gold/20">
-                  <span className="material-icons-outlined">verified_user</span>
+                  <span className="material-symbols-outlined">verified_user</span>
                 </div>
                 <p className="text-[10px] font-black text-white/35 uppercase tracking-widest leading-relaxed">System-generated folio.<br />Authorized for immediate settlement.</p>
               </div>
@@ -178,7 +178,7 @@ function CheckoutContent() {
                 disabled={isSubmitting}
                 className="flex-[2] flex items-center justify-center gap-3 px-10 py-4 bg-gold text-black font-black text-[10px] uppercase tracking-widest rounded-2xl shadow-xl shadow-gold/25 hover:bg-gold-light transition-all transform hover:scale-[1.01] disabled:opacity-50"
               >
-                <span className="material-icons-outlined text-base">task_alt</span>
+                <span className="material-symbols-outlined text-base">task_alt</span>
                 {isSubmitting ? 'Processing Settlement...' : 'Finalize & Close Folio'}
               </button>
             </div>

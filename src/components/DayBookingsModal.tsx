@@ -34,14 +34,14 @@ export default function DayBookingsModal({ date, bookings, onClose }: DayBooking
                         </p>
                     </div>
                     <button onClick={onClose} className="w-9 h-9 rounded-xl flex items-center justify-center text-white/30 hover:text-white hover:bg-white/[0.06] transition-all">
-                        <span className="material-icons-outlined text-[18px]">close</span>
+                        <span className="material-symbols-outlined text-[18px]">close</span>
                     </button>
                 </div>
 
                 <div className="p-6 max-h-[60vh] overflow-y-auto space-y-3">
                     {bookings.length === 0 ? (
                         <div className="py-12 text-center">
-                            <span className="material-icons-outlined text-4xl text-white/15 block mb-3">event_busy</span>
+                            <span className="material-symbols-outlined text-4xl text-white/15 block mb-3">event_busy</span>
                             <p className="text-[10px] font-black text-white/25 uppercase tracking-widest">No bookings for this date</p>
                         </div>
                     ) : bookings.map((booking) => (
@@ -66,7 +66,7 @@ export default function DayBookingsModal({ date, bookings, onClose }: DayBooking
                             </div>
                             <div className="flex items-center gap-5 mt-3 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
                                 <div className="flex items-center gap-1.5 text-[9px] font-black text-white/30 uppercase tracking-widest">
-                                    <span className="material-icons-outlined text-[14px]">calendar_today</span>
+                                    <span className="material-symbols-outlined text-[14px]">calendar_today</span>
                                     {new Date(booking.checkIn).toLocaleDateString()} — {new Date(booking.checkOut).toLocaleDateString()}
                                 </div>
                                 <div className="flex items-center gap-1.5">

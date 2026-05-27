@@ -36,7 +36,7 @@ export default function InvoicePage() {
     if (!invoice) return (
         <div className="min-h-screen flex items-center justify-center bg-black">
             <div className="text-center">
-                <span className="material-icons-outlined text-5xl text-red-400/50 block mb-4">receipt_long</span>
+                <span className="material-symbols-outlined text-5xl text-red-400/50 block mb-4">receipt_long</span>
                 <p className="font-bold text-red-400 text-xl">Invoice not found</p>
                 <button onClick={() => router.back()} className="mt-4 text-gold text-sm font-bold hover:underline">← Go back</button>
             </div>
@@ -63,7 +63,7 @@ export default function InvoicePage() {
             {/* Toolbar */}
             <div className="no-print sticky top-0 z-50 px-6 py-3 flex items-center justify-between gap-4" style={{ background: '#111111', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
                 <button onClick={() => router.back()} className="flex items-center gap-2 text-sm font-bold text-white/50 hover:text-white transition-colors">
-                    <span className="material-icons-outlined text-base">arrow_back</span>
+                    <span className="material-symbols-outlined text-base">arrow_back</span>
                     Back
                 </button>
                 <div className="flex items-center gap-3">
@@ -71,7 +71,7 @@ export default function InvoicePage() {
                         {invoice.status}
                     </span>
                     <button onClick={() => window.print()} className="flex items-center gap-2 bg-gold text-black px-5 py-2 rounded-xl text-sm font-bold hover:bg-gold-light transition-all shadow-gold-sm">
-                        <span className="material-icons-outlined text-base">print</span>
+                        <span className="material-symbols-outlined text-base">print</span>
                         Print / PDF
                     </button>
                 </div>
@@ -215,8 +215,8 @@ export default function InvoicePage() {
                     <div className="bg-primary/5 border-t border-primary/10 px-14 py-6 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-slate-400 font-medium">
                         <span>{HOTEL.name} — {HOTEL.city}</span>
                         <div className="flex gap-6">
-                            <span className="flex items-center gap-1.5"><span className="material-icons-outlined text-sm text-primary/60">call</span>{HOTEL.phone}</span>
-                            <span className="flex items-center gap-1.5"><span className="material-icons-outlined text-sm text-primary/60">language</span>{HOTEL.website}</span>
+                            <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-sm text-primary/60">call</span>{HOTEL.phone}</span>
+                            <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-sm text-primary/60">language</span>{HOTEL.website}</span>
                         </div>
                     </div>
                 </div>
