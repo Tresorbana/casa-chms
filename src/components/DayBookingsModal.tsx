@@ -80,7 +80,7 @@ export default function DayBookingsModal({ date, bookings, onClose }: DayBooking
 
                 <div className="px-8 py-4 flex justify-between items-center" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', background: 'rgba(0,0,0,0.2)' }}>
                     <p className="text-sm font-black text-white/50">{bookings.length} {bookings.length === 1 ? 'Booking' : 'Bookings'}</p>
-                    <p className="text-[9px] font-black text-white/20 uppercase tracking-widest">Casa Hotel v3.0</p>
+                    <p className="text-[9px] font-black text-white/20 uppercase tracking-widest"> Hotel v3.0</p>
                 </div>
             </div>
         </div>

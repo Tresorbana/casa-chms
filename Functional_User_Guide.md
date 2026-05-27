@@ -1,6 +1,6 @@
-# Casa CHMS: Functional User Guide
+#  CHMS: Functional User Guide
 
-This document outlines all the user-facing features of the Casa Hotel Management System. It is designed to provide a clear understanding of the application's capabilities from an operational perspective.
+This document outlines all the user-facing features of the  Hotel Management System. It is designed to provide a clear understanding of the application's capabilities from an operational perspective.
 
 ---
 

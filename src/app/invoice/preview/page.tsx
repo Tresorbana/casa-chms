@@ -7,7 +7,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 const HOTEL = {
-  name: 'Casa Hotel',
+  name: ' Hotel',
   address: 'KG 11 Ave, Kiyovu · Kigali, Rwanda',
   phone: '+250 788 000 000',
   website: 'www.casahotel.rw',
@@ -82,7 +82,7 @@ function PreviewContent() {
           {/* Hotel Header */}
           <div className="flex flex-col items-center pt-10 pb-6 px-10 border-b border-slate-100">
             <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 mb-4 overflow-hidden">
-              <Image src="/logo.png" alt="Casa Hotel" width={52} height={52} className="object-contain" onError={(e: any) => { e.currentTarget.style.display = 'none'; }} />
+              <Image src="/logo.png" alt=" Hotel" width={52} height={52} className="object-contain" onError={(e: any) => { e.currentTarget.style.display = 'none'; }} />
             </div>
             <h1 className="text-xl font-black text-slate-900 uppercase tracking-tight">{HOTEL.name}</h1>
             <p className="text-xs text-slate-400 font-medium mt-1 text-center">{HOTEL.address}</p>

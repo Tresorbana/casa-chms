@@ -6,7 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 const HOTEL = {
-    name: 'Casa Hotel',
+    name: ' Hotel',
     tagline: 'Hospitality & Excellence',
     address: 'KG 11 Ave, Kiyovu',
     city: 'Kigali, Rwanda',
@@ -90,7 +90,7 @@ export default function InvoicePage() {
                             {/* Hotel identity */}
                             <div className="flex items-start gap-4">
                                 <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 flex-shrink-0 overflow-hidden">
-                                    <Image src="/logo.png" alt="Casa Hotel Logo" width={56} height={56} className="object-contain" onError={(e: any) => { e.currentTarget.style.display = 'none'; }} />
+                                    <Image src="/logo.png" alt=" Hotel Logo" width={56} height={56} className="object-contain" onError={(e: any) => { e.currentTarget.style.display = 'none'; }} />
                                     {/* Fallback initials if logo fails */}
                                     <span className="text-white font-black text-xl hidden">CH</span>
                                 </div>

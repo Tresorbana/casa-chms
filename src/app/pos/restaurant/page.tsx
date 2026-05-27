@@ -69,7 +69,7 @@ export default function PosRestaurant() {
       <main className="flex-1 flex flex-col p-4 lg:p-8 min-h-screen">
         <TopBar
           title="Restaurant POS"
-          description="Point of Sale for Casa Hotel Restaurant & Bar."
+          description="Point of Sale for  Hotel Restaurant & Bar."
           actions={
             <button
               className="lg:hidden relative p-2 rounded-lg bg-primary text-primary-foreground"

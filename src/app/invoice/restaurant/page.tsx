@@ -6,7 +6,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 const HOTEL = {
-  name: 'Casa Hotel',
+  name: ' Hotel',
   tagline: 'Restaurant & Dining',
   address: 'KG 11 Ave, Kiyovu · Kigali, Rwanda',
   phone: '+250 788 000 000',
@@ -91,7 +91,7 @@ function RestaurantInvoiceContent() {
           {/* Receipt-style header */}
           <div className="flex flex-col items-center pt-10 pb-8 px-10 border-b border-slate-100">
             <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 mb-4 overflow-hidden">
-              <Image src="/logo.png" alt="Casa Hotel Logo" width={52} height={52} className="object-contain" onError={(e: any) => { e.currentTarget.style.display = 'none'; }} />
+              <Image src="/logo.png" alt=" Hotel Logo" width={52} height={52} className="object-contain" onError={(e: any) => { e.currentTarget.style.display = 'none'; }} />
             </div>
             <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">{HOTEL.name}</h1>
             <p className="text-xs font-bold text-primary/60 uppercase tracking-widest mt-1">{HOTEL.tagline}</p>
@@ -166,7 +166,7 @@ function RestaurantInvoiceContent() {
 
           {/* Thank you footer */}
           <div className="bg-slate-50 border-t border-slate-100 px-10 py-8 text-center">
-            <p className="text-xs font-black text-slate-400 uppercase tracking-[0.3em] mb-1">Thank you for dining at Casa Hotel</p>
+            <p className="text-xs font-black text-slate-400 uppercase tracking-[0.3em] mb-1">Thank you for dining at  Hotel</p>
             <p className="text-xs text-slate-300 font-medium">{HOTEL.website} · {HOTEL.phone}</p>
           </div>
 
