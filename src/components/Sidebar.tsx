@@ -6,54 +6,65 @@ import { usePathname } from 'next/navigation';
 import { useUI } from '@/context/UIContext';
 
 const NAV_ITEMS = [
-  { href: '/', icon: 'dashboard', label: 'Dashboard' },
-  { href: '/bookings', icon: 'book_online', label: 'Guest Registration' },
-  { href: '/calendar', icon: 'calendar_month', label: 'Occupancy Calendar' },
-  { href: '/room-status', icon: 'hotel', label: 'Room Status' },
-  { href: '/events', icon: 'event', label: 'Events' },
+  { href: '/',              icon: 'dashboard',       label: 'Dashboard' },
+  { href: '/bookings',      icon: 'book_online',     label: 'Guest Registration' },
+  { href: '/calendar',      icon: 'calendar_month',  label: 'Occupancy Calendar' },
+  { href: '/room-status',   icon: 'hotel',           label: 'Room Status' },
+  { href: '/events',        icon: 'event',           label: 'Events' },
 ];
 
 const OPS_ITEMS = [
-  { href: '/pos/restaurant', icon: 'restaurant', label: 'Restaurant POS' },
-  { href: '/checkout', icon: 'receipt_long', label: 'Checkout' },
-  { href: '/invoices', icon: 'folder_shared', label: 'Invoices' },
+  { href: '/pos/restaurant', icon: 'restaurant',    label: 'Restaurant POS' },
+  { href: '/checkout',       icon: 'receipt_long',  label: 'Checkout' },
+  { href: '/invoices',       icon: 'folder_shared', label: 'Invoices' },
 ];
 
 const ADMIN_ITEMS = [
-  { href: '/reports', icon: 'assessment', label: 'Reports' },
-  { href: '/inquiries', icon: 'inbox', label: 'Web Requests' },
-  { href: '/notifications', icon: 'notifications', label: 'Notifications' },
+  { href: '/reports',       icon: 'assessment',     label: 'Reports' },
+  { href: '/inquiries',     icon: 'inbox',          label: 'Web Requests' },
+  { href: '/notifications', icon: 'notifications',  label: 'Notifications' },
 ];
 
 const CONFIG_ITEMS = [
-  { href: '/settings/rooms', icon: 'meeting_room', label: 'Rooms & Floors' },
-  { href: '/settings/conference', icon: 'groups', label: 'Conference' },
-  { href: '/settings/services', icon: 'spa', label: 'Services' },
-  { href: '/settings/menu', icon: 'restaurant_menu', label: 'Menu Items' },
+  { href: '/settings/rooms',      icon: 'meeting_room',    label: 'Rooms & Floors' },
+  { href: '/settings/conference', icon: 'groups',          label: 'Conference' },
+  { href: '/settings/services',   icon: 'spa',             label: 'Services' },
+  { href: '/settings/menu',       icon: 'restaurant_menu', label: 'Menu Items' },
 ];
 
-function NavItem({ href, icon, label, active }: { href: string; icon: string; label: string; active: boolean }) {
+function NavItem({
+  href, icon, label, active,
+}: { href: string; icon: string; label: string; active: boolean }) {
   return (
     <Link
       href={href}
-      className={`group flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-200 ${active
-        ? 'bg-white/[0.08] text-white border-l-2 border-gold pl-[10px]'
-        : 'text-white/40 border-l-2 border-transparent hover:bg-white/[0.04] hover:text-white/70'
+      className={`group flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 ${
+        active
+          ? 'bg-primary text-primary-foreground'
+          : 'text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground'
       }`}
     >
-      <span className={`material-icons-outlined text-[18px] flex-shrink-0 ${active ? 'text-gold' : 'text-white/40 group-hover:text-white/60'}`}>
+      <span
+        className={`material-icons-outlined text-[18px] flex-shrink-0 ${
+          active ? 'text-primary-foreground' : 'text-sidebar-foreground/40 group-hover:text-sidebar-foreground/70'
+        }`}
+      >
         {icon}
       </span>
-      <span className="font-medium tracking-wide">{label}</span>
+      <span className="truncate">{label}</span>
     </Link>
   );
 }
 
-function NavSection({ label, items, isActive }: { label: string; items: typeof NAV_ITEMS; isActive: (p: string) => boolean }) {
+function NavSection({
+  label, items, isActive,
+}: { label: string; items: typeof NAV_ITEMS; isActive: (p: string) => boolean }) {
   return (
     <>
-      <div className="pt-5 pb-1.5 px-3">
-        <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/20">{label}</span>
+      <div className="pt-5 pb-1 px-3">
+        <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          {label}
+        </span>
       </div>
       {items.map(item => (
         <NavItem key={item.href} {...item} active={isActive(item.href)} />
@@ -86,14 +97,19 @@ export default function Sidebar() {
     return false;
   };
 
+  const initials = user?.name
+    ? user.name.split(' ').map((n: string) => n[0]).join('').toUpperCase().substring(0, 2)
+    : '..';
+
   return (
     <>
       {/* Mobile hamburger */}
       <button
         onClick={toggleSidebar}
-        className="lg:hidden fixed top-4 left-4 z-[60] p-2 rounded-lg bg-[#111111] border border-white/[0.08] hover:bg-white/[0.06] transition-all shadow-surface"
+        className="lg:hidden fixed top-4 left-4 z-[60] p-2 rounded-lg bg-background border border-border hover:bg-accent transition-all shadow-sm"
+        aria-label="Toggle menu"
       >
-        <span className="material-icons-outlined text-white/60 text-[20px]">
+        <span className="material-icons-outlined text-foreground/60 text-[20px]">
           {isSidebarOpen ? 'close' : 'menu'}
         </span>
       </button>
@@ -102,39 +118,41 @@ export default function Sidebar() {
       {isSidebarCollapsed && (
         <button
           onClick={toggleSidebarCollapse}
-          className="hidden lg:flex fixed left-4 top-4 z-[60] p-2 items-center justify-center rounded-lg bg-[#111111] border border-white/[0.08] hover:bg-gold/10 hover:border-gold/30 transition-all shadow-surface group"
+          className="hidden lg:flex fixed left-4 top-4 z-[60] p-2 items-center justify-center rounded-lg bg-background border border-border hover:bg-accent transition-all shadow-sm"
           title="Expand sidebar"
         >
-          <span className="material-icons-outlined text-white/40 group-hover:text-gold text-[20px] transition-colors">menu_open</span>
+          <span className="material-icons-outlined text-foreground/50 text-[20px]">menu_open</span>
         </button>
       )}
 
       {/* Mobile backdrop */}
       {isSidebarOpen && (
-        <div className="fixed inset-0 bg-black/80 z-[50] lg:hidden backdrop-blur-sm" onClick={closeSidebar} />
+        <div
+          className="fixed inset-0 bg-foreground/20 z-[50] lg:hidden backdrop-blur-sm"
+          onClick={closeSidebar}
+        />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 h-full w-64 z-50 flex flex-col transition-transform duration-300
+        className={`fixed left-0 top-0 h-full w-64 z-50 flex flex-col bg-sidebar border-r border-sidebar-border transition-transform duration-300
           ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
           ${isSidebarCollapsed ? 'lg:-translate-x-full' : 'lg:translate-x-0'}`}
-        style={{ background: '#0a0a0a', borderRight: '1px solid rgba(255,255,255,0.05)' }}
       >
         {/* Brand */}
-        <div className="px-4 py-5 border-b" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
+        <div className="px-4 py-4 border-b border-sidebar-border">
           <div className="flex items-center gap-3 px-1">
-            <div className="w-9 h-9 rounded-lg bg-gold/10 flex items-center justify-center ring-1 ring-gold/20 overflow-hidden flex-shrink-0">
+            <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center ring-1 ring-primary/20 overflow-hidden flex-shrink-0">
               <Image alt="Casa Hotel" width={28} height={28} className="object-contain" src="/logo.png" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-gold tracking-tight leading-none">Casa Hotel</p>
-              <p className="text-[9px] text-white/30 font-medium tracking-widest uppercase mt-0.5">Management</p>
+              <p className="text-sm font-bold text-primary tracking-tight leading-none">Casa Hotel</p>
+              <p className="text-[10px] text-muted-foreground font-medium tracking-widest uppercase mt-0.5">Management</p>
             </div>
             {/* Desktop collapse toggle */}
             <button
               onClick={toggleSidebarCollapse}
-              className="hidden lg:flex flex-shrink-0 p-1.5 rounded-lg text-white/25 hover:text-gold hover:bg-gold/10 transition-all"
+              className="hidden lg:flex flex-shrink-0 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-all"
               title="Collapse sidebar"
             >
               <span className="material-icons-outlined text-[18px]">chevron_left</span>
@@ -148,27 +166,30 @@ export default function Sidebar() {
             <NavItem key={item.href} {...item} active={isActive(item.href)} />
           ))}
           <NavSection label="Operations" items={OPS_ITEMS} isActive={isActive} />
-          <NavSection label="Admin" items={ADMIN_ITEMS} isActive={isActive} />
+          <NavSection label="Admin"      items={ADMIN_ITEMS} isActive={isActive} />
           <NavSection label="Configuration" items={CONFIG_ITEMS} isActive={isActive} />
         </nav>
 
         {/* User footer */}
-        <div className="p-3 border-t" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
-          <Link href="/profile"
-            className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/[0.04] transition-all group cursor-pointer"
+        <div className="p-3 border-t border-sidebar-border">
+          <Link
+            href="/profile"
+            className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-sidebar-accent transition-all group cursor-pointer"
           >
-            <div className="w-8 h-8 rounded-lg bg-gold flex items-center justify-center text-[#000] font-bold text-xs flex-shrink-0 shadow-gold-sm">
-              {user?.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase().substring(0, 2) ?? '..'}
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold text-xs flex-shrink-0">
+              {initials}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-white/80 truncate group-hover:text-white transition-colors">
+              <p className="text-xs font-semibold text-sidebar-foreground truncate group-hover:text-foreground transition-colors">
                 {user?.name ?? 'Loading...'}
               </p>
-              <p className="text-[9px] text-white/25 uppercase tracking-widest truncate">{user?.role ?? ''}</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest truncate">
+                {user?.role ?? ''}
+              </p>
             </div>
             <button
               onClick={(e) => { e.preventDefault(); handleLogout(); }}
-              className="text-white/20 hover:text-red-400 transition-colors flex-shrink-0 p-1 rounded"
+              className="text-muted-foreground hover:text-destructive transition-colors flex-shrink-0 p-1 rounded"
               title="Sign out"
             >
               <span className="material-icons-outlined text-[16px]">logout</span>

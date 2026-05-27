@@ -4,11 +4,37 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import useSWR from 'swr';
+import { toast } from 'sonner';
 import { fetcher } from '@/lib/fetcher';
 import TopBar from '@/components/TopBar';
-import { AnimatedStatsCard } from '@/components/ui/animated-dashboard-card';
 
 const RoomDetailsModal = dynamic(() => import('@/components/RoomDetailsModal'), { ssr: false });
+
+const STATUS_CONFIG: Record<string, { label: string; dot: string; bg: string; text: string }> = {
+  OCCUPIED:    { label: 'Occupied',    dot: 'bg-blue-500',   bg: 'bg-blue-50',   text: 'text-blue-700' },
+  AVAILABLE:   { label: 'Available',   dot: 'bg-emerald-500',bg: 'bg-emerald-50',text: 'text-emerald-700' },
+  MAINTENANCE: { label: 'Maintenance', dot: 'bg-amber-500',  bg: 'bg-amber-50',  text: 'text-amber-700' },
+  CHECKOUT:    { label: 'Checkout',    dot: 'bg-orange-500', bg: 'bg-orange-50', text: 'text-orange-700' },
+};
+
+function StatCard({
+  icon, label, value, sub,
+}: { icon: string; label: string; value: string; sub?: string }) {
+  return (
+    <div className="bg-card border border-border rounded-xl p-6 flex flex-col gap-4">
+      <div className="flex items-center justify-between">
+        <div className="p-2 bg-muted rounded-lg">
+          <span className="material-icons-outlined text-foreground/70 text-[22px]">{icon}</span>
+        </div>
+      </div>
+      <div>
+        <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-1">{label}</p>
+        <p className="text-2xl font-bold text-foreground">{value}</p>
+        {sub && <p className="text-xs text-muted-foreground mt-1">{sub}</p>}
+      </div>
+    </div>
+  );
+}
 
 export default function Dashboard() {
   const router = useRouter();
@@ -17,7 +43,10 @@ export default function Dashboard() {
 
   const { data, error, isLoading, mutate } = useSWR(
     `/api/dashboard?date=${selectedDate}`,
-    fetcher
+    fetcher,
+    {
+      onError: () => toast.error('Failed to load dashboard data'),
+    }
   );
 
   const stats = data?.stats ?? {};
@@ -34,42 +63,61 @@ export default function Dashboard() {
     return { sortedFloors, roomsByFloor };
   }, [rooms]);
 
-  if (isLoading || !data) return (
-    <div className="p-8 text-center text-[10px] font-black uppercase tracking-[0.3em] text-gold/40">
-      Loading System Data...
-    </div>
-  );
-  if (error) return (
-    <div className="p-8 text-center text-red-400 font-black">Connection Failure</div>
-  );
+  if (isLoading || !data) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3 text-muted-foreground">
+          <span className="material-icons-outlined text-4xl animate-spin">refresh</span>
+          <p className="text-sm font-medium">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3 text-destructive">
+          <span className="material-icons-outlined text-4xl">error_outline</span>
+          <p className="text-sm font-medium">Failed to load dashboard</p>
+          <button
+            onClick={() => mutate()}
+            className="text-xs text-muted-foreground hover:text-foreground underline"
+          >
+            Try again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const revenueToday = stats.revenueToday ?? 0;
   const estimatedServices = Math.round(revenueToday * 0.28);
   const roomRevenue = revenueToday - estimatedServices;
 
   return (
-    <div className="min-h-screen p-4 lg:p-8 flex flex-col gap-8" style={{ background: '#000000' }}>
+    <div className="min-h-screen bg-background p-4 lg:p-8 flex flex-col gap-6">
       <TopBar
-        title="Management Dashboard"
-        description="Real-time hotel occupancy and revenue status."
+        title="Dashboard"
+        description="Real-time hotel occupancy and revenue overview."
         actions={
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-            <div className="relative group">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-hover:text-gold transition-colors">
-                <span className="material-icons-outlined text-sm">calendar_today</span>
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <span className="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-[18px]">
+                calendar_today
               </span>
               <input
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="w-full sm:w-auto bg-navy-surface border border-gold/20 rounded-2xl pl-12 pr-6 py-2.5 text-[11px] font-black uppercase tracking-widest text-white outline-none focus:ring-2 focus:ring-gold/30 focus:border-gold/40 shadow-sm hover:border-gold/35 transition-all cursor-pointer"
+                className="pl-9 pr-4 py-2 rounded-lg text-sm bg-muted border border-border text-foreground outline-none focus:ring-2 focus:ring-ring transition-all cursor-pointer"
               />
             </div>
             <Link
               href="/bookings"
-              className="bg-gold text-black font-black uppercase text-[10px] tracking-[0.2em] px-8 py-3 rounded-2xl flex items-center justify-center gap-3 shadow-lg shadow-gold/20 hover:bg-gold-light hover:scale-[1.05] transition-all"
+              className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
             >
-              <span className="material-icons-outlined text-sm">add</span>
+              <span className="material-icons-outlined text-[18px]">add</span>
               New Reservation
             </Link>
           </div>
@@ -77,126 +125,143 @@ export default function Dashboard() {
       />
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-navy-surface p-8 rounded-[2rem] border border-gold/15 shadow-xl shadow-black/30 relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-0.5 h-full bg-gradient-to-b from-gold/60 to-transparent" />
-          <div className="flex justify-between items-start mb-6">
-            <div className="p-3 bg-gold/10 text-gold rounded-2xl ring-1 ring-gold/20">
-              <span className="material-icons-outlined text-2xl">bed</span>
-            </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-element">
+        <StatCard
+          icon="bed"
+          label="Occupancy Rate"
+          value={`${(stats.occupancyRate || 0).toFixed(1)}%`}
+          sub={`${stats.occupiedRooms ?? 0} of ${stats.totalRooms ?? 0} rooms`}
+        />
+        <StatCard
+          icon="payments"
+          label="Revenue Today"
+          value={`RWF ${(revenueToday).toLocaleString()}`}
+          sub="Room + F&B combined"
+        />
+        <StatCard
+          icon="restaurant"
+          label="F&B Revenue"
+          value={`RWF ${estimatedServices.toLocaleString()}`}
+          sub="Estimated services"
+        />
+        <StatCard
+          icon="pending_actions"
+          label="Active Bookings"
+          value={String(stats.pendingReservations || 0)}
+          sub="Confirmed reservations"
+        />
+      </div>
+
+      {/* Revenue split */}
+      <div className="bg-card border border-border rounded-xl p-6 animate-element animate-delay-100">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-sm font-semibold text-foreground">Revenue Breakdown</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">Room vs F&B split for today</p>
           </div>
-          <h3 className="text-white/40 text-[10px] font-black uppercase tracking-widest mb-1">Target Occupancy</h3>
-          <p className="text-4xl font-black italic tracking-tighter uppercase text-white">{(stats.occupancyRate || 0).toFixed(1)}%</p>
-          <div className="w-full bg-white/[0.06] h-1.5 mt-6 rounded-full overflow-hidden">
-            <div className="bg-gold h-full rounded-full transition-all duration-1000" style={{ width: `${stats.occupancyRate || 0}%` }} />
+          <button
+            onClick={() => router.push('/reports')}
+            className="text-xs font-medium text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+          >
+            Full report
+            <span className="material-icons-outlined text-[14px]">arrow_forward</span>
+          </button>
+        </div>
+        <div className="flex gap-6 mb-3">
+          <div>
+            <p className="text-xs text-muted-foreground mb-0.5">Room Revenue</p>
+            <p className="text-lg font-bold text-foreground">RWF {roomRevenue.toLocaleString()}</p>
+          </div>
+          <div className="w-px bg-border" />
+          <div>
+            <p className="text-xs text-muted-foreground mb-0.5">F&B / Services</p>
+            <p className="text-lg font-bold text-foreground">RWF {estimatedServices.toLocaleString()}</p>
           </div>
         </div>
-
-        <div className="bg-navy-surface p-8 rounded-[2rem] border border-gold/15 shadow-xl shadow-black/30 relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-0.5 h-full bg-gradient-to-b from-gold/60 to-transparent" />
-          <div className="flex justify-between items-start mb-6">
-            <div className="p-3 bg-gold/10 text-gold rounded-2xl ring-1 ring-gold/20">
-              <span className="material-icons-outlined text-2xl">payments</span>
-            </div>
-          </div>
-          <h3 className="text-white/40 text-[10px] font-black uppercase tracking-widest mb-1">Revenue Performance</h3>
-          <p className="text-3xl font-black italic tracking-tighter uppercase text-white">RWF {(stats.revenueToday || 0).toLocaleString()}</p>
+        {/* Progress bar */}
+        <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-primary rounded-full transition-all duration-700"
+            style={{ width: revenueToday > 0 ? `${(roomRevenue / revenueToday) * 100}%` : '0%' }}
+          />
         </div>
-
-        <div className="bg-navy-surface p-8 rounded-[2rem] border border-gold/15 shadow-xl shadow-black/30 relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-0.5 h-full bg-gradient-to-b from-gold/60 to-transparent" />
-          <div className="flex justify-between items-start mb-6">
-            <div className="p-3 bg-gold/10 text-gold rounded-2xl ring-1 ring-gold/20">
-              <span className="material-icons-outlined text-2xl">pending_actions</span>
-            </div>
-          </div>
-          <h3 className="text-white/40 text-[10px] font-black uppercase tracking-widest mb-1">Bookings</h3>
-          <p className="text-4xl font-black italic tracking-tighter uppercase text-white">{stats.pendingReservations || 0}</p>
+        <div className="flex justify-between mt-1.5 text-[10px] text-muted-foreground">
+          <span>Room {revenueToday > 0 ? Math.round((roomRevenue / revenueToday) * 100) : 0}%</span>
+          <span>F&B {revenueToday > 0 ? Math.round((estimatedServices / revenueToday) * 100) : 0}%</span>
         </div>
       </div>
 
-      {/* Revenue Overview + Room Grid — two-column on desktop */}
-      <div className="flex flex-col xl:flex-row gap-6">
-        {/* Animated Revenue Card */}
-        <div className="xl:w-72 flex-shrink-0">
-          <AnimatedStatsCard
-            title="Revenue Overview"
-            primaryLabel="Room Revenue"
-            secondaryLabel="F&B / Services"
-            primaryValue={roomRevenue}
-            secondaryValue={estimatedServices}
-            primaryTrend="+15.2%"
-            secondaryTrend="+8.7%"
-            currencyPrefix="RWF"
-            onMoreDetails={() => router.push('/reports')}
-          />
-        </div>
-
-        {/* Room Grid */}
-        <section className="flex-1 bg-navy-surface p-6 md:p-8 rounded-3xl border border-gold/15 shadow-2xl shadow-black/40 overflow-hidden relative">
-          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-            <div>
-              <h3 className="text-2xl font-black italic tracking-tighter uppercase text-gold leading-none mb-1">Room Status Grid</h3>
-              <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">
-                Live status for {new Date(selectedDate).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-4">
-              {[{ label: 'Available', color: 'bg-gold' }, { label: 'Occupied', color: 'bg-gold-light' }].map(status => (
-                <div key={status.label} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white/40">
-                  <span className={`w-3 h-3 rounded-full ${status.color} opacity-80`} /> {status.label}
-                </div>
-              ))}
-            </div>
+      {/* Room Status Grid */}
+      <section className="bg-card border border-border rounded-xl p-6 animate-element animate-delay-200">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div>
+            <h3 className="text-base font-semibold text-foreground">Room Status Grid</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {new Date(selectedDate).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+            </p>
           </div>
-
-          <div className="flex flex-col gap-8">
-            {sortedFloors.length === 0 ? (
-              <div className="py-20 text-center text-[10px] font-black uppercase tracking-[0.4em] text-white/25">
-                No rooms found.
-              </div>
-            ) : sortedFloors.map(floorNum => (
-              <div key={floorNum}>
-                <div className="flex items-center gap-4 mb-4">
-                  <h4 className="text-lg font-black italic tracking-tighter text-gold uppercase">
-                    {roomsByFloor[floorNum][0]?.floor?.name || `Floor ${floorNum}`}
-                  </h4>
-                  <div className="h-px flex-1 bg-gold/[0.12]" />
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-4 2xl:grid-cols-6 gap-3">
-                  {roomsByFloor[floorNum].map((room: any) => (
-                    <div
-                      key={room.id}
-                      onClick={() => setSelectedRoom(room)}
-                      className="relative group cursor-pointer aspect-square bg-black rounded-[1.5rem] border border-gold/[0.12] flex flex-col items-center justify-center p-3 hover:shadow-xl hover:shadow-gold/10 hover:border-gold/30 transition-all duration-300 overflow-hidden hover:-translate-y-1"
-                    >
-                      <div className={`absolute top-2.5 right-2.5 w-2 h-2 rounded-full ${room.displayStatus === 'OCCUPIED' ? 'bg-gold' : 'bg-gold-light'} animate-pulse`} />
-                      <span className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-1">Room</span>
-                      <h5 className="text-2xl font-black italic tracking-tighter text-gold">{room.number}</h5>
-                      <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mt-1 truncate max-w-full px-2 text-center">
-                        {room.displayStatus === 'OCCUPIED' && room.activeBooking
-                          ? room.activeBooking.guest.name
-                          : (room.displayStatus || '').toLowerCase()}
-                      </p>
-                      <div className="absolute inset-0 bg-black/90 opacity-0 group-hover:opacity-100 transition-opacity rounded-[1.5rem] flex flex-col items-center justify-center gap-2 backdrop-blur-sm">
-                        <span className="text-gold font-black uppercase text-[9px] tracking-widest flex items-center gap-1.5">
-                          <span className="material-icons-outlined text-sm">settings</span>
-                          Details
-                        </span>
-                        {room.displayStatus === 'OCCUPIED' && (
-                          <span className="text-gold/50 text-[8px] font-black uppercase tracking-tighter px-2 py-1 bg-gold/10 rounded-full border border-gold/20">
-                            Active Booking
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+          {/* Legend */}
+          <div className="flex flex-wrap gap-3">
+            {Object.entries(STATUS_CONFIG).map(([, cfg]) => (
+              <div key={cfg.label} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                <span className={`w-2 h-2 rounded-full ${cfg.dot}`} />
+                {cfg.label}
               </div>
             ))}
           </div>
-        </section>
+        </div>
+
+        <div className="flex flex-col gap-8">
+          {sortedFloors.length === 0 ? (
+            <div className="py-16 text-center text-muted-foreground text-sm">
+              <span className="material-icons-outlined block text-3xl mb-2 opacity-40">hotel</span>
+              No rooms found
+            </div>
+          ) : (
+            sortedFloors.map(floorNum => (
+              <div key={floorNum}>
+                <div className="flex items-center gap-3 mb-3">
+                  <h4 className="text-sm font-semibold text-foreground">
+                    {roomsByFloor[floorNum][0]?.floor?.name || `Floor ${floorNum}`}
+                  </h4>
+                  <div className="h-px flex-1 bg-border" />
+                  <span className="text-[11px] text-muted-foreground">
+                    {roomsByFloor[floorNum].length} rooms
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-2">
+                  {roomsByFloor[floorNum].map((room: any) => {
+                    const cfg = STATUS_CONFIG[room.displayStatus] ?? STATUS_CONFIG['AVAILABLE'];
+                    return (
+                      <button
+                        key={room.id}
+                        onClick={() => setSelectedRoom(room)}
+                        className={`group relative aspect-square rounded-xl border border-border flex flex-col items-center justify-center p-2 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer ${cfg.bg}`}
+                      >
+                        <span className={`w-2 h-2 rounded-full ${cfg.dot} mb-1.5`} />
+                        <p className="text-sm font-bold text-foreground">{room.number}</p>
+                        <p className={`text-[9px] font-medium uppercase tracking-wide mt-0.5 ${cfg.text}`}>
+                          {room.displayStatus === 'OCCUPIED' && room.activeBooking
+                            ? room.activeBooking.guest.name.split(' ')[0]
+                            : cfg.label}
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </section>
+
+      {/* Footer */}
+      <div className="flex justify-between items-center text-[11px] text-muted-foreground pt-2 border-t border-border">
+        <p>© 2024 Casa Hotel Management System</p>
+        <div className="flex gap-6">
+          <a className="hover:text-foreground transition-colors" href="#">Status</a>
+          <a className="hover:text-foreground transition-colors" href="#">Support</a>
+        </div>
       </div>
 
       {selectedRoom && (
@@ -206,14 +271,6 @@ export default function Dashboard() {
           onUpdate={() => mutate()}
         />
       )}
-
-      <div className="mt-4 flex justify-between items-center text-white/20 text-[10px] font-black uppercase tracking-widest">
-        <p>© 2024 Casa Hotel Management System v3.0</p>
-        <div className="flex gap-8">
-          <a className="hover:text-gold/60 transition-colors" href="#">Status</a>
-          <a className="hover:text-gold/60 transition-colors" href="#">Support</a>
-        </div>
-      </div>
     </div>
   );
 }
