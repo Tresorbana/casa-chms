@@ -1,5 +1,6 @@
 import './globals.css';
 import AppShellWrapper from '@/components/AppShellWrapper';
+import ThemeProvider from '@/components/ThemeProvider';
 import { Toaster } from 'sonner';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -21,6 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="bg-background text-foreground overflow-x-hidden antialiased">
+        <ThemeProvider />
         <AppShellWrapper>
           {children}
         </AppShellWrapper>

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import useSWR from 'swr';
 import { fetcher } from '@/lib/fetcher';
 import { toast } from 'sonner';
+import ThemeToggle from '@/components/ThemeToggle';
 
 interface TopBarProps {
   title: string;
@@ -195,6 +196,9 @@ export default function TopBar({ title, description, actions }: TopBarProps) {
 
         {/* Divider */}
         <div className="h-8 w-px bg-border hidden lg:block" />
+
+        {/* Theme toggle */}
+        <ThemeToggle />
 
         {/* User */}
         <Link href="/profile" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
