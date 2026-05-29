@@ -7,6 +7,8 @@ import TopBar from '@/components/TopBar';
 import Link from 'next/link';
 import { formatPaymentMethod, type PaymentMethodId } from '@/lib/payment-methods';
 import { MarkPaidDialog } from '@/components/invoice/MarkPaidDialog';
+import { ExportButton } from '@/components/ExportButton';
+import { exportWorkbook, sheetsFromReportData } from '@/lib/export-excel';
 
 type InvoiceRow = {
   id: string;
@@ -40,6 +42,17 @@ export default function InvoicesList() {
     return `/invoice/${inv.id}`;
   };
 
+  const handleExport = async () => {
+    try {
+      const data = await fetcher('/api/reports/detailed?type=INVOICES');
+      const sheets = sheetsFromReportData('Invoices', data as Record<string, unknown>);
+      exportWorkbook(sheets, `Invoices_${new Date().toISOString().split('T')[0]}`);
+      toast.success('Invoices exported');
+    } catch {
+      toast.error('Failed to export invoices');
+    }
+  };
+
   const handleMarkPaid = async (method: PaymentMethodId) => {
     if (!payDialogInvoice) return;
     const res = await fetch(`/api/invoices/${payDialogInvoice.id}`, {
@@ -61,16 +74,19 @@ export default function InvoicesList() {
         title="Invoices"
         description="Guest folios, Tedeum restaurant bills, and payment records."
         actions={
-          <div className="relative">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-[18px]">
-              search
-            </span>
-            <input
-              type="search"
-              placeholder="Search invoices..."
-              className="pl-9 pr-4 py-2 bg-muted border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-ring transition-all w-52"
-              onChange={(e) => setFilter(e.target.value)}
-            />
+          <div className="flex flex-wrap items-center gap-2">
+            <ExportButton onClick={handleExport} />
+            <div className="relative">
+              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-[18px]">
+                search
+              </span>
+              <input
+                type="search"
+                placeholder="Search invoices..."
+                className="pl-9 pr-4 py-2 bg-muted border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-ring transition-all w-52"
+                onChange={(e) => setFilter(e.target.value)}
+              />
+            </div>
           </div>
         }
       />

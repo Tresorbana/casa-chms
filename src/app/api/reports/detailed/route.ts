@@ -138,20 +138,153 @@ export async function GET(request: Request) {
                 };
                 break;
 
-            case 'RESTAURANT_ORDERS':
-                // Similar to SALES but focused on order count/volume
-                const orderCount = await prisma.invoice.count({
-                    where: {
-                        type: 'RESTAURANT',
-                        ...(dateFilter.createdAt ? { date: dateFilter.createdAt } : {})
-                    }
+            case 'RESTAURANT_ORDERS': {
+                const orderWhere = {
+                    type: 'RESTAURANT' as const,
+                    ...(dateFilter.createdAt ? { date: dateFilter.createdAt } : {}),
+                };
+                const orderCount = await prisma.invoice.count({ where: orderWhere });
+                const orderRecords = await prisma.invoice.findMany({
+                    where: orderWhere,
+                    orderBy: { date: 'desc' },
+                    include: { items: true },
                 });
                 data = {
                     totalOrders: orderCount,
-                    // Re-use sales records layout
-                    records: []
+                    records: orderRecords.map((inv) => ({
+                        id: inv.id,
+                        guestName: inv.guestName,
+                        details: inv.items.map((it) => `${it.description} x${it.quantity}`).join(', '),
+                        totalAmount: inv.amount,
+                        status: inv.status,
+                        paymentMethod: inv.paymentMethod,
+                        createdAt: inv.date,
+                    })),
                 };
                 break;
+            }
+
+            case 'INVENTORY': {
+                const inventoryItems = await prisma.inventoryItem.findMany({
+                    orderBy: { name: 'asc' },
+                });
+                const lowStock = inventoryItems.filter((i) => i.stock <= (i.minStock || 5)).length;
+                const stockValue = inventoryItems.reduce((s, i) => s + i.stock * i.price, 0);
+                data = {
+                    totalItems: inventoryItems.length,
+                    lowStockItems: lowStock,
+                    inventoryValue: stockValue,
+                    records: inventoryItems.map((i) => ({
+                        id: i.id,
+                        details: i.name,
+                        category: i.category,
+                        quantity: i.stock,
+                        unit: i.unit,
+                        totalAmount: i.stock * i.price,
+                        status: i.stock <= (i.minStock || 5) ? 'Low stock' : 'Good',
+                    })),
+                };
+                break;
+            }
+
+            case 'ROOMS_STATUS': {
+                const allRooms = await prisma.room.findMany({
+                    orderBy: { number: 'asc' },
+                    include: {
+                        floor: true,
+                        bookings: {
+                            where: { status: { in: ['CONFIRMED', 'CHECKED_IN'] } },
+                            include: { guest: true },
+                            take: 1,
+                        },
+                    },
+                });
+                const occupiedCount = allRooms.filter((r) => r.status === 'OCCUPIED').length;
+                data = {
+                    totalRooms: allRooms.length,
+                    occupied: occupiedCount,
+                    vacant: allRooms.length - occupiedCount,
+                    occupancyRate: allRooms.length ? (occupiedCount / allRooms.length) * 100 : 0,
+                    records: allRooms.map((r) => {
+                        const b = r.bookings[0];
+                        return {
+                            id: r.id,
+                            room: { type: r.type, number: r.number },
+                            details: b?.guest?.name || '—',
+                            totalAmount: r.price,
+                            status: r.status,
+                            createdAt: b?.checkIn || null,
+                        };
+                    }),
+                };
+                break;
+            }
+
+            case 'CONFERENCE': {
+                const confWhere =
+                    start && end
+                        ? {
+                              startTime: { lte: new Date(end) },
+                              endTime: { gte: new Date(start) },
+                          }
+                        : {};
+                const confBookings = await prisma.conferenceBooking.findMany({
+                    where: confWhere,
+                    orderBy: { startTime: 'desc' },
+                    include: { conferenceRoom: true },
+                });
+                const confRevenue = confBookings.reduce((s, c) => s + c.totalAmount, 0);
+                data = {
+                    totalBookings: confBookings.length,
+                    totalRevenue: confRevenue,
+                    records: confBookings.map((c) => ({
+                        id: c.id,
+                        details: `${c.guestName} — ${c.conferenceRoom.name}`,
+                        totalAmount: c.totalAmount,
+                        status: c.status,
+                        bookingType: c.bookingType,
+                        createdAt: c.startTime,
+                    })),
+                };
+                break;
+            }
+
+            case 'INVOICES': {
+                const invWhere = dateFilter.createdAt ? { date: dateFilter.createdAt } : {};
+                const allInv = await prisma.invoice.findMany({
+                    where: invWhere,
+                    orderBy: { date: 'desc' },
+                });
+                const paidTotal = allInv.filter((i) => i.status === 'PAID').reduce((s, i) => s + i.amount, 0);
+                data = {
+                    totalInvoices: allInv.length,
+                    paidInvoices: allInv.filter((i) => i.status === 'PAID').length,
+                    unpaidInvoices: allInv.filter((i) => i.status === 'UNPAID').length,
+                    totalRevenue: paidTotal,
+                    breakdown: await prisma.invoice.groupBy({
+                        by: ['type'],
+                        _count: { id: true },
+                        _sum: { amount: true },
+                        where: invWhere,
+                    }).then((rows) =>
+                        rows.map((r) => ({
+                            type: r.type,
+                            _count: r._count,
+                            revenue: r._sum.amount || 0,
+                        }))
+                    ),
+                    records: allInv.map((inv) => ({
+                        id: inv.id,
+                        details: inv.guestName,
+                        type: inv.type,
+                        totalAmount: inv.amount,
+                        status: inv.status,
+                        paymentMethod: inv.paymentMethod,
+                        createdAt: inv.date,
+                    })),
+                };
+                break;
+            }
 
             case 'EXTRA_SERVICES':
                 const serviceCharges = await prisma.serviceCharge.findMany({

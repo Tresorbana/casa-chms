@@ -4,6 +4,8 @@ import useSWR from 'swr';
 import { fetcher } from '@/lib/fetcher';
 import { toast } from 'sonner';
 import TopBar from '@/components/TopBar';
+import { ExportButton } from '@/components/ExportButton';
+import { exportToExcel, inventoryExportRows } from '@/lib/export-excel';
 
 export default function Inventory() {
   const { data: items, isLoading, mutate } = useSWR('/api/inventory', fetcher, {
@@ -68,6 +70,12 @@ export default function Inventory() {
     }
   };
 
+  const handleExport = () => {
+    const rows = inventoryExportRows(filteredItems.length > 0 ? filteredItems : items || []);
+    exportToExcel(rows, `Inventory_${new Date().toISOString().split('T')[0]}`, 'Inventory');
+    toast.success('Inventory exported');
+  };
+
   const inputClass = "w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring outline-none transition-all";
 
   return (
@@ -76,13 +84,16 @@ export default function Inventory() {
         title="Stock Management"
         description="Track supplies, adjust stock levels, and monitor low-stock alerts."
         actions={
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
-          >
-            <span className="material-symbols-outlined text-[18px]">add</span>
-            Add Item
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <ExportButton onClick={handleExport} disabled={!items?.length} />
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
+            >
+              <span className="material-symbols-outlined text-[18px]">add</span>
+              Add Item
+            </button>
+          </div>
         }
       />
 

@@ -5,6 +5,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import TopBar from '@/components/TopBar';
+import { ExportButton } from '@/components/ExportButton';
+import { exportWorkbook, sheetsFromReportData } from '@/lib/export-excel';
 
 export default function PosRestaurant() {
   const { data: menuItems, error } = useSWR('/api/pos/menu', fetcher);
@@ -63,6 +65,17 @@ export default function PosRestaurant() {
     }
   };
 
+  const handleExport = async () => {
+    try {
+      const data = await fetcher('/api/reports/detailed?type=RESTAURANT_SALES');
+      const sheets = sheetsFromReportData('Restaurant Sales', data as Record<string, unknown>);
+      exportWorkbook(sheets, `Restaurant_Sales_${new Date().toISOString().split('T')[0]}`);
+      toast.success('Restaurant report exported');
+    } catch {
+      toast.error('Failed to export restaurant report');
+    }
+  };
+
   const inputClass = "w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-ring transition-all";
 
   return (
@@ -73,17 +86,20 @@ export default function PosRestaurant() {
           title="Tedeum POS"
           description="Restaurant & bar orders at Tedeum (The Kamdine Hotel)."
           actions={
-            <button
-              className="lg:hidden relative p-2 rounded-lg bg-primary text-primary-foreground"
-              onClick={() => setIsCartOpen(!isCartOpen)}
-            >
-              <span className="material-symbols-outlined text-[20px]">shopping_cart</span>
-              {cart.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[9px] font-bold w-5 h-5 flex items-center justify-center rounded-full">
-                  {cart.length}
-                </span>
-              )}
-            </button>
+            <div className="flex items-center gap-2">
+              <ExportButton onClick={handleExport} label="Export sales" />
+              <button
+                className="lg:hidden relative p-2 rounded-lg bg-primary text-primary-foreground"
+                onClick={() => setIsCartOpen(!isCartOpen)}
+              >
+                <span className="material-symbols-outlined text-[20px]">shopping_cart</span>
+                {cart.length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[9px] font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                    {cart.length}
+                  </span>
+                )}
+              </button>
+            </div>
           }
         />
 

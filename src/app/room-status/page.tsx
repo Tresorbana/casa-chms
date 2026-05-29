@@ -4,6 +4,8 @@ import useSWR from 'swr';
 import { fetcher } from '@/lib/fetcher';
 import { toast } from 'sonner';
 import TopBar from '@/components/TopBar';
+import { ExportButton } from '@/components/ExportButton';
+import { exportToExcel, roomExportRows } from '@/lib/export-excel';
 
 const STATUS_CONFIG: Record<string, { dot: string; bg: string; text: string; border: string }> = {
   AVAILABLE: { dot: 'bg-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-950/30', text: 'text-emerald-700 dark:text-emerald-400', border: 'border-emerald-200 dark:border-emerald-800' },
@@ -27,9 +29,23 @@ export default function RoomStatus() {
   const visibleRooms = safeRooms.filter((r: any) => r.status === 'AVAILABLE' || r.status === 'OCCUPIED');
   const filteredRooms = visibleRooms.filter((r: any) => filter === 'ALL' || r.status === filter);
 
+  const handleExport = () => {
+    const source = filter === 'ALL' ? visibleRooms : filteredRooms;
+    exportToExcel(
+      roomExportRows(source),
+      `Rooms_${filter}_${new Date().toISOString().split('T')[0]}`,
+      'Rooms'
+    );
+    toast.success('Room status exported');
+  };
+
   return (
     <div className="min-h-screen bg-background p-4 lg:p-8 flex flex-col gap-6">
-      <TopBar title="Room Status" description="Real-time status of all hotel rooms." />
+      <TopBar
+        title="Room Status"
+        description="Real-time status of all hotel rooms."
+        actions={<ExportButton onClick={handleExport} disabled={!visibleRooms.length} />}
+      />
 
       {/* Summary strip */}
       <div className="grid grid-cols-3 gap-3">

@@ -4,11 +4,13 @@ import useSWR from 'swr';
 import { fetcher } from '@/lib/fetcher';
 import { toast } from 'sonner';
 import TopBar from '@/components/TopBar';
-import * as XLSX from 'xlsx';
+import { ExportButton } from '@/components/ExportButton';
+import { exportWorkbook, sheetsFromReportData, type ExportSheet } from '@/lib/export-excel';
 
 const REPORT_TYPES = [
   { id: 'OCCUPANCY',         label: 'Occupancy Report',              category: 'ROOMS' },
   { id: 'REVENUE_ROOMS',     label: 'Room Revenue',                  category: 'ROOMS' },
+  { id: 'ROOMS_STATUS',      label: 'Room Status List',              category: 'ROOMS' },
   { id: 'ADR',               label: 'Avg Daily Rate (ADR)',          category: 'ROOMS' },
   { id: 'REVPAR',            label: 'RevPAR',                        category: 'ROOMS' },
   { id: 'RESERVATIONS',      label: 'Reservations & Cancellations',  category: 'ROOMS' },
@@ -17,8 +19,13 @@ const REPORT_TYPES = [
   { id: 'RESTAURANT_SALES',  label: 'Restaurant Sales',              category: 'DINING' },
   { id: 'MENU_PERFORMANCE',  label: 'Menu Item Performance',         category: 'DINING' },
   { id: 'RESTAURANT_ORDERS', label: 'Order Report',                  category: 'DINING' },
+  { id: 'INVENTORY',         label: 'Inventory & Stock',             category: 'INVENTORY' },
+  { id: 'CONFERENCE',        label: 'Conference & Events',           category: 'EVENTS' },
+  { id: 'INVOICES',          label: 'All Invoices',                  category: 'FINANCE' },
   { id: 'EXTRA_SERVICES',    label: 'Extra Services Usage',          category: 'SERVICES' },
 ];
+
+const CATEGORIES = ['ROOMS', 'DINING', 'INVENTORY', 'EVENTS', 'FINANCE', 'SERVICES'] as const;
 
 function StatCard({ label, value, icon }: { label: string; value: string | number; icon: string }) {
   return (
@@ -39,6 +46,7 @@ const inputClass = "bg-background border border-border rounded-lg px-3 py-2 text
 export default function Reports() {
   const [selectedReport, setSelectedReport] = useState(REPORT_TYPES[0]);
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
+  const [exportingAll, setExportingAll] = useState(false);
 
   const { data, isLoading, error } = useSWR(
     `/api/reports/detailed?type=${selectedReport.id}&start=${dateRange.start}&end=${dateRange.end}`,
@@ -48,15 +56,119 @@ export default function Reports() {
 
   const handleExport = () => {
     if (!data) return;
-    const wb = XLSX.utils.book_new();
-    const exportData = Array.isArray(data.records) && data.records.length > 0 ? data.records
-      : Array.isArray(data.breakdown) && data.breakdown.length > 0 ? data.breakdown
-      : Array.isArray(data.sources) && data.sources.length > 0 ? data.sources
-      : [data];
-    const sheet = XLSX.utils.json_to_sheet(exportData);
-    XLSX.utils.book_append_sheet(wb, sheet, 'Report');
-    XLSX.writeFile(wb, `${selectedReport.label}_${new Date().toISOString().split('T')[0]}.xlsx`);
+    const sheets = sheetsFromReportData(selectedReport.label, data as Record<string, unknown>);
+    exportWorkbook(sheets, `${selectedReport.label}_${new Date().toISOString().split('T')[0]}`);
     toast.success('Report exported');
+  };
+
+  const handleExportAll = async () => {
+    setExportingAll(true);
+    try {
+      const qs = new URLSearchParams();
+      if (dateRange.start) qs.set('start', dateRange.start);
+      if (dateRange.end) qs.set('end', dateRange.end);
+      const res = await fetch(`/api/reports/export?${qs.toString()}`);
+      if (!res.ok) throw new Error('Export failed');
+      const bundle = await res.json();
+      const summaryRows = Object.entries(bundle.summary || {}).map(([Metric, Value]) => ({
+        Metric,
+        Value,
+      }));
+      const sheets: ExportSheet[] = [
+        { name: 'Summary', rows: summaryRows },
+        {
+          name: 'Rooms',
+          rows: (bundle.rooms || []).map((r: Record<string, unknown>) => ({
+            Room: r.number,
+            Type: r.type,
+            Status: r.status,
+            'Rate/night': r.price,
+            Floor: r.floor,
+            Guest: r.guest || '—',
+            'Check-in': r.checkIn ? new Date(r.checkIn as string).toLocaleDateString() : '—',
+            'Check-out': r.checkOut ? new Date(r.checkOut as string).toLocaleDateString() : '—',
+          })),
+        },
+        {
+          name: 'Inventory',
+          rows: (bundle.inventory || []).map((i: Record<string, unknown>) => ({
+            Item: i.name,
+            Category: i.category,
+            Stock: i.stock,
+            Unit: i.unit,
+            'Unit price': i.price,
+            Value: i.value,
+            Status: i.status,
+          })),
+        },
+        {
+          name: 'Restaurant',
+          rows: (bundle.restaurant || []).map((inv: Record<string, unknown>) => ({
+            'Invoice #': String(inv.id).slice(-8).toUpperCase(),
+            Guest: inv.guestName,
+            Amount: inv.amount,
+            Status: inv.status,
+            'Payment method': inv.paymentMethod || '—',
+            Items: inv.items,
+            Date: inv.date ? new Date(inv.date as string).toLocaleString() : '—',
+          })),
+        },
+        {
+          name: 'Bookings',
+          rows: (bundle.bookings || []).map((b: Record<string, unknown>) => ({
+            Guest: b.guest,
+            Room: b.room,
+            'Room type': b.roomType,
+            'Check-in': b.checkIn ? new Date(b.checkIn as string).toLocaleDateString() : '—',
+            'Check-out': b.checkOut ? new Date(b.checkOut as string).toLocaleDateString() : '—',
+            Amount: b.totalAmount,
+            Status: b.status,
+          })),
+        },
+        {
+          name: 'Conference',
+          rows: (bundle.conference || []).map((c: Record<string, unknown>) => ({
+            Guest: c.guestName,
+            Venue: c.venue,
+            Type: c.bookingType,
+            Start: c.startTime ? new Date(c.startTime as string).toLocaleString() : '—',
+            End: c.endTime ? new Date(c.endTime as string).toLocaleString() : '—',
+            Amount: c.totalAmount,
+            Status: c.status,
+          })),
+        },
+        {
+          name: 'Invoices',
+          rows: (bundle.allInvoices || []).map((inv: Record<string, unknown>) => ({
+            'Invoice #': String(inv.id).slice(-8).toUpperCase(),
+            Guest: inv.guestName,
+            Type: inv.type,
+            Amount: inv.amount,
+            Status: inv.status,
+            'Payment method': inv.paymentMethod || '—',
+            Date: inv.date ? new Date(inv.date as string).toLocaleString() : '—',
+          })),
+        },
+        {
+          name: 'Services',
+          rows: (bundle.services || []).map((s: Record<string, unknown>) => ({
+            Service: s.service,
+            Guest: s.guest,
+            Room: s.room,
+            Qty: s.quantity,
+            Amount: s.totalPrice,
+            Status: s.status,
+            Date: s.date ? new Date(s.date as string).toLocaleString() : '—',
+          })),
+        },
+      ];
+      exportWorkbook(sheets, `Full_Hotel_Report_${new Date().toISOString().split('T')[0]}`);
+      toast.success('Full report exported (all modules)');
+    } catch {
+      toast.error('Failed to export full report');
+    } finally {
+      setExportingAll(false);
+    }
   };
 
   const hasRecords = data?.records && Array.isArray(data.records) && data.records.length > 0;
@@ -69,21 +181,22 @@ export default function Reports() {
         title="Reports"
         description="Business and operational analytics."
         actions={
-          <button
-            onClick={handleExport}
-            disabled={!data}
-            className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
-          >
-            <span className="material-symbols-outlined text-[18px]">download</span>
-            Export Excel
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <ExportButton
+              onClick={handleExportAll}
+              disabled={exportingAll}
+              label={exportingAll ? 'Exporting…' : 'Export all'}
+              variant="outline"
+            />
+            <ExportButton onClick={handleExport} disabled={!data} variant="primary" />
+          </div>
         }
       />
 
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Sidebar */}
         <div className="w-full lg:w-56 flex-shrink-0 space-y-4">
-          {['ROOMS', 'DINING', 'SERVICES'].map(category => (
+          {CATEGORIES.map(category => (
             <div key={category}>
               <h3 className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest mb-2 px-2">{category}</h3>
               <div className="space-y-0.5">
@@ -165,6 +278,25 @@ export default function Reports() {
                   {selectedReport.id === 'BOOKING_SOURCE' && <StatCard label="Booking Channels" value={data?.sources?.length || 0} icon="source" />}
                   {selectedReport.id === 'MENU_PERFORMANCE' && <StatCard label="Menu Items Tracked" value={data?.records?.length || 0} icon="menu_book" />}
                   {selectedReport.id === 'RESTAURANT_ORDERS' && <StatCard label="Total Orders" value={data?.totalOrders || 0} icon="shopping_bag" />}
+                  {selectedReport.id === 'INVENTORY' && (<>
+                    <StatCard label="Total Items" value={data?.totalItems || 0} icon="inventory_2" />
+                    <StatCard label="Low Stock" value={data?.lowStockItems || 0} icon="warning" />
+                    <StatCard label="Stock Value" value={`RWF ${(data?.inventoryValue || 0).toLocaleString()}`} icon="payments" />
+                  </>)}
+                  {selectedReport.id === 'ROOMS_STATUS' && (<>
+                    <StatCard label="Occupancy Rate" value={`${(data?.occupancyRate || 0).toFixed(1)}%`} icon="pie_chart" />
+                    <StatCard label="Occupied" value={data?.occupied || 0} icon="bed" />
+                    <StatCard label="Vacant" value={data?.vacant || 0} icon="meeting_room" />
+                  </>)}
+                  {selectedReport.id === 'CONFERENCE' && (<>
+                    <StatCard label="Bookings" value={data?.totalBookings || 0} icon="event" />
+                    <StatCard label="Revenue" value={`RWF ${(data?.totalRevenue || 0).toLocaleString()}`} icon="payments" />
+                  </>)}
+                  {selectedReport.id === 'INVOICES' && (<>
+                    <StatCard label="Total Invoices" value={data?.totalInvoices || 0} icon="receipt_long" />
+                    <StatCard label="Paid" value={data?.paidInvoices || 0} icon="check_circle" />
+                    <StatCard label="Unpaid" value={data?.unpaidInvoices || 0} icon="pending" />
+                  </>)}
                 </div>
 
                 {/* Breakdown */}

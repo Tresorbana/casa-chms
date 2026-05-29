@@ -41,6 +41,11 @@ type CheckoutDetail = {
   };
 };
 
+type CheckoutListResponse = {
+  occupied: OccupiedRow[];
+  count?: number;
+};
+
 function OccupiedRoomsList({
   occupied,
   onSelect,
@@ -366,9 +371,13 @@ function CheckoutContent() {
   const listKey = '/api/checkout';
   const detailKey = roomId ? `/api/checkout?roomId=${roomId}` : null;
 
-  const { data: listData, isLoading: listLoading, mutate: mutateList } = useSWR(listKey, fetcher, {
-    revalidateOnFocus: true,
-  });
+  const { data: listData, isLoading: listLoading, mutate: mutateList } = useSWR<CheckoutListResponse>(
+    listKey,
+    fetcher,
+    {
+      revalidateOnFocus: true,
+    }
+  );
   const {
     data: detail,
     isLoading: detailLoading,

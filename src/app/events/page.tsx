@@ -5,6 +5,8 @@ import useSWR from 'swr';
 import { fetcher } from '@/lib/fetcher';
 import { toast } from 'sonner';
 import ConferenceBookingModal from '@/components/ConferenceBookingModal';
+import { ExportButton } from '@/components/ExportButton';
+import { exportToExcel, conferenceExportRows } from '@/lib/export-excel';
 
 export default function Events() {
   const { data: venuesData, isLoading: isLoadingVenues } = useSWR('/api/conference', fetcher, {
@@ -16,19 +18,31 @@ export default function Events() {
   const venues = Array.isArray(venuesData) ? venuesData : [];
   const schedule = Array.isArray(bookingsData) ? bookingsData : [];
 
+  const handleExport = () => {
+    exportToExcel(
+      conferenceExportRows(schedule),
+      `Conference_Events_${new Date().toISOString().split('T')[0]}`,
+      'Events'
+    );
+    toast.success('Events schedule exported');
+  };
+
   return (
     <div className="min-h-screen bg-background p-4 lg:p-8 flex flex-col gap-6">
       <TopBar
         title="Events"
         description="Conference rooms, bookings, and event schedule."
         actions={
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
-          >
-            <span className="material-symbols-outlined text-[18px]">add</span>
-            Book Event
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <ExportButton onClick={handleExport} disabled={!schedule.length} />
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
+            >
+              <span className="material-symbols-outlined text-[18px]">add</span>
+              Book Event
+            </button>
+          </div>
         }
       />
 

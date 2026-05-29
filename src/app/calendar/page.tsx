@@ -9,6 +9,19 @@ import ConferenceBookingModal from '@/components/ConferenceBookingModal';
 
 const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
+type CalendarBooking = {
+  id: string;
+  type?: string;
+  guestName: string;
+  roomNumber?: string;
+  checkIn: string;
+  checkOut: string;
+};
+
+type CalendarReportResponse = {
+  records?: CalendarBooking[];
+};
+
 export default function OccupancyCalendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -19,7 +32,7 @@ export default function OccupancyCalendar() {
   const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).toISOString();
   const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).toISOString();
 
-  const { data: reportData, isLoading } = useSWR(
+  const { data: reportData, isLoading } = useSWR<CalendarReportResponse>(
     `/api/reports?start=${startOfMonth}&end=${endOfMonth}`,
     fetcher,
     { onError: () => toast.error('Failed to load calendar data') }

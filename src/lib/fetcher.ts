@@ -1,4 +1,5 @@
-export const fetcher = async (url: string) => {
+/** JSON fetcher for SWR — explicit `any` return so useSWR data is not inferred as `{}`. */
+export const fetcher: (url: string) => Promise<any> = async (url) => {
   const res = await fetch(url);
   let data: unknown = {};
   try {
