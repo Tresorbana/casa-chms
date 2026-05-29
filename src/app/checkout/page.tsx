@@ -130,7 +130,26 @@ function CheckoutFolioView({
   onBack: () => void;
   onComplete: (invoiceId: string) => void;
 }) {
-  const { room, folio } = detail;
+  const room = detail?.room;
+  const folio = detail?.folio;
+
+  if (!room || !folio) {
+    return (
+      <div className="min-h-screen bg-background p-4 lg:p-8 flex flex-col gap-6">
+        <TopBar title="Checkout" description="Unable to load folio for this room." />
+        <div className="bg-card border border-border rounded-xl p-8 text-center">
+          <p className="text-sm text-muted-foreground mb-4">Folio data is incomplete. Try again or pick another room.</p>
+          <button
+            type="button"
+            onClick={onBack}
+            className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
+          >
+            View all occupied rooms
+          </button>
+        </div>
+      </div>
+    );
+  }
   const [showPayDialog, setShowPayDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const folioRef = `FOL-${new Date().getFullYear()}-${room.number}`;
@@ -350,10 +369,14 @@ function CheckoutContent() {
   const { data: listData, isLoading: listLoading, mutate: mutateList } = useSWR(listKey, fetcher, {
     revalidateOnFocus: true,
   });
-  const { data: detail, isLoading: detailLoading, error: detailError } = useSWR<CheckoutDetail>(
-    detailKey,
-    fetcher
-  );
+  const {
+    data: detail,
+    isLoading: detailLoading,
+    error: detailError,
+  } = useSWR<CheckoutDetail>(detailKey, fetcher, {
+    shouldRetryOnError: false,
+    revalidateOnFocus: false,
+  });
 
   const occupied: OccupiedRow[] = listData?.occupied ?? [];
 
@@ -379,12 +402,14 @@ function CheckoutContent() {
         </div>
       );
     }
-    if (detailError || !detail) {
+    if (detailError || !detail?.room || !detail?.folio) {
       return (
         <div className="min-h-screen bg-background p-4 lg:p-8 flex flex-col gap-6">
           <TopBar title="Checkout" description="This room has no active stay to settle." />
           <div className="bg-card border border-border rounded-xl p-8 text-center">
-            <p className="text-sm text-muted-foreground mb-4">Room not found or already checked out.</p>
+            <p className="text-sm text-muted-foreground mb-4">
+              {detailError?.message || 'Room not found or already checked out.'}
+            </p>
             <button
               type="button"
               onClick={handleBackToList}

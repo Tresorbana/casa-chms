@@ -162,11 +162,11 @@ export default function RoomDetailsModal({ room, onClose, onUpdate }: RoomDetail
 
                 <div className="flex gap-2 pt-2">
                   <Link
-                    href={`/invoice/${activeBooking.id}`}
+                    href={`/checkout?roomId=${room.id}`}
                     className="flex-1 px-3 py-2 border border-border rounded-lg text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors flex items-center justify-center gap-1.5"
                   >
                     <span className="material-symbols-outlined text-[16px]">receipt_long</span>
-                    Billing
+                    Folio / pay
                   </Link>
                   <Link
                     href={`/checkout?roomId=${room.id}`}
