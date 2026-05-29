@@ -25,3 +25,29 @@ export async function GET(
     return NextResponse.json({ error: 'Failed to fetch invoice' }, { status: 500 });
   }
 }
+
+export async function PATCH(
+  request: Request,
+  props: { params: Promise<{ id: string }> }
+) {
+  const params = await props.params;
+  try {
+    const id = params.id;
+    const body = await request.json();
+    const { status } = body;
+
+    if (!status || !['PAID', 'UNPAID'].includes(status)) {
+      return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
+    }
+
+    const invoice = await prisma.invoice.update({
+      where: { id },
+      data: { status },
+      include: { items: true, subInvoices: { include: { items: true } } },
+    });
+
+    return NextResponse.json(invoice);
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to update invoice' }, { status: 500 });
+  }
+}

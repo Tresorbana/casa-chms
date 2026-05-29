@@ -79,6 +79,7 @@ model ConferenceRoom {
   name         String
   capacity     Int
   pricePerHour Float
+  pricePerDay  Float               @default(0)
   bookings     ConferenceBooking[]
 }
 
@@ -89,6 +90,7 @@ model ConferenceBooking {
   guestContact     String?
   guestId          String?
   guestEmail       String?
+  bookingType      String         @default("HOURLY")
   startTime        DateTime
   endTime          DateTime
   totalAmount      Float

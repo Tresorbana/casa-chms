@@ -180,7 +180,7 @@ export default function Settings() {
             <form onSubmit={handleCreateUser} className="p-5 space-y-4">
               {[
                 { label: 'Full Name', key: 'name', type: 'text', placeholder: 'Enter full name' },
-                { label: 'Email Address', key: 'email', type: 'email', placeholder: 'staff@casahotel.rw' },
+                { label: 'Email Address', key: 'email', type: 'email', placeholder: 'staff@hotel.local' },
                 { label: 'Password', key: 'password', type: 'password', placeholder: '••••••••' },
               ].map(field => (
                 <div key={field.key}>

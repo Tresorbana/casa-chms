@@ -52,8 +52,11 @@ export default function Events() {
               </div>
               <div className="grid grid-cols-2 gap-3 pt-4 border-t border-border">
                 <div>
-                  <p className="text-[10px] text-muted-foreground mb-0.5">Rate</p>
-                  <p className="text-sm font-medium text-foreground">RWF {venue.pricePerHour?.toLocaleString()}/hr</p>
+                  <p className="text-[10px] text-muted-foreground mb-0.5">Daily rate</p>
+                  <p className="text-sm font-medium text-foreground">
+                    RWF {(venue.pricePerDay ?? 0).toLocaleString()}/day
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">RWF {venue.pricePerHour?.toLocaleString()}/hr</p>
                 </div>
                 <div>
                   <p className="text-[10px] text-muted-foreground mb-0.5">Capacity</p>
@@ -99,7 +102,10 @@ export default function Events() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground truncate">{b.guestName}</p>
-                    <p className="text-xs text-muted-foreground">{b.conferenceRoom?.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {b.conferenceRoom?.name}
+                      {b.bookingType === 'DAILY' ? ' · Full day' : ' · Hourly'}
+                    </p>
                   </div>
                   <div className="text-right flex-shrink-0">
                     <p className="text-xs font-medium text-foreground">

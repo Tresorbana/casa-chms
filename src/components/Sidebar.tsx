@@ -16,6 +16,7 @@ const OPS_ITEMS = [
   { href: '/pos/restaurant', icon: 'restaurant',    label: 'Restaurant POS' },
   { href: '/checkout',       icon: 'receipt_long',  label: 'Checkout' },
   { href: '/invoices',       icon: 'folder_shared', label: 'Invoices' },
+  { href: '/inventory',      icon: 'inventory_2',   label: 'Stock' },
 ];
 
 const ADMIN_ITEMS = [
@@ -133,7 +134,7 @@ export default function Sidebar() {
             <div className="flex items-center gap-3 px-1">
               {/* Text logo mark */}
               <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
-                <span className="text-primary-foreground text-xs font-semibold tracking-tight">HMS</span>
+                <span className="material-symbols-outlined text-primary-foreground text-[20px]">home</span>
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground leading-none">Hotel Management</p>

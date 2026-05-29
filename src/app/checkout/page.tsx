@@ -82,8 +82,10 @@ function CheckoutContent() {
             {/* Invoice header */}
             <div className="p-10 border-b border-gold/[0.1] flex flex-col md:flex-row justify-between items-start gap-8 bg-black/20">
               <div>
-                <img alt=" Hotel" className="h-12 w-auto mb-6 object-contain opacity-70" src="logo.png" />
-                <h2 className="text-2xl font-black text-gold tracking-tighter italic uppercase"> Hotel</h2>
+                <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center mb-6">
+                  <span className="material-symbols-outlined text-primary-foreground text-[28px]">home</span>
+                </div>
+                <h2 className="text-2xl font-black text-gold tracking-tighter italic uppercase">Hotel Management</h2>
                 <p className="text-[10px] font-bold text-white/35 uppercase tracking-widest mt-1">Hospitality Excellence</p>
               </div>
               <div className="text-right">

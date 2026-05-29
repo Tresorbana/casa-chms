@@ -66,7 +66,7 @@ export default function Login() {
     <div className="bg-background text-foreground h-screen w-full">
       <SignInPage
         title="Welcome to HMS"
-        description="Sign in to access the  Hotel Management System"
+        description="Sign in to access the Hotel Management System"
         heroImageSrc="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=2160&q=80"
         testimonials={sampleTestimonials}
         onSignIn={handleSignIn}

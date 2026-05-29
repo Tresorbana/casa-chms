@@ -26,14 +26,15 @@ export async function PUT(
     try {
         const id = params.id
         const body = await request.json()
-        const { name, capacity, pricePerHour } = body
+        const { name, capacity, pricePerHour, pricePerDay } = body
 
         const room = await prisma.conferenceRoom.update({
             where: { id },
             data: {
                 name,
                 capacity: capacity ? parseInt(capacity) : undefined,
-                pricePerHour: pricePerHour ? parseFloat(pricePerHour) : undefined
+                pricePerHour: pricePerHour !== undefined ? parseFloat(pricePerHour) : undefined,
+                pricePerDay: pricePerDay !== undefined ? parseFloat(pricePerDay) : undefined,
             }
         })
 

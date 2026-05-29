@@ -14,18 +14,23 @@ export default function ConferenceSettings() {
   const rooms = Array.isArray(roomsData) ? roomsData : [];
   const [isAdding, setIsAdding] = useState(false);
   const [editingRoom, setEditingRoom] = useState<any>(null);
-  const [formData, setFormData] = useState({ name: '', capacity: '', pricePerHour: '' });
+  const [formData, setFormData] = useState({ name: '', capacity: '', pricePerHour: '', pricePerDay: '' });
 
   const handleSave = async () => {
-    if (!formData.name || !formData.capacity || !formData.pricePerHour) return;
+    if (!formData.name || !formData.capacity || !formData.pricePerHour || !formData.pricePerDay) return;
     try {
       const method = editingRoom ? 'PUT' : 'POST';
       const url = editingRoom ? `/api/conference/${editingRoom.id}` : '/api/conference';
       await fetch(url, {
         method, headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: formData.name, capacity: parseInt(formData.capacity), pricePerHour: parseFloat(formData.pricePerHour) })
+        body: JSON.stringify({
+          name: formData.name,
+          capacity: parseInt(formData.capacity),
+          pricePerHour: parseFloat(formData.pricePerHour),
+          pricePerDay: parseFloat(formData.pricePerDay),
+        })
       });
-      setIsAdding(false); setEditingRoom(null); setFormData({ name: '', capacity: '', pricePerHour: '' });
+      setIsAdding(false); setEditingRoom(null); setFormData({ name: '', capacity: '', pricePerHour: '', pricePerDay: '' });
       mutate('/api/conference');
       toast.success(editingRoom ? 'Room updated' : 'Room added');
     } catch { toast.error('Failed to save room'); }
@@ -42,7 +47,12 @@ export default function ConferenceSettings() {
 
   const startEdit = (room: any) => {
     setEditingRoom(room);
-    setFormData({ name: room.name, capacity: room.capacity.toString(), pricePerHour: room.pricePerHour.toString() });
+    setFormData({
+      name: room.name,
+      capacity: room.capacity.toString(),
+      pricePerHour: room.pricePerHour.toString(),
+      pricePerDay: (room.pricePerDay ?? 0).toString(),
+    });
     setIsAdding(true);
   };
 
@@ -53,7 +63,7 @@ export default function ConferenceSettings() {
         description="Manage conference halls and meeting spaces."
         actions={
           <button
-            onClick={() => { setEditingRoom(null); setFormData({ name: '', capacity: '', pricePerHour: '' }); setIsAdding(true); }}
+            onClick={() => { setEditingRoom(null); setFormData({ name: '', capacity: '', pricePerHour: '', pricePerDay: '' }); setIsAdding(true); }}
             className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
           >
             <span className="material-symbols-outlined text-[18px]">add</span>
@@ -65,11 +75,12 @@ export default function ConferenceSettings() {
       {isAdding && (
         <div className="bg-card border border-border rounded-xl p-5">
           <h3 className="text-sm font-semibold text-foreground mb-4">{editingRoom ? 'Edit Conference Room' : 'New Conference Room'}</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
             {[
               { label: 'Room Name', key: 'name', type: 'text', placeholder: 'Grand Ballroom' },
               { label: 'Capacity (Pax)', key: 'capacity', type: 'number', placeholder: '100' },
               { label: 'Price per Hour (RWF)', key: 'pricePerHour', type: 'number', placeholder: '50000' },
+              { label: 'Price per Day (RWF)', key: 'pricePerDay', type: 'number', placeholder: '350000' },
             ].map(field => (
               <div key={field.key}>
                 <label className="text-xs font-medium text-muted-foreground block mb-1.5">{field.label}</label>
@@ -118,8 +129,12 @@ export default function ConferenceSettings() {
                   <span className="font-medium text-foreground">{room.capacity} pax</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Rate</span>
+                  <span className="text-muted-foreground">Hourly</span>
                   <span className="font-medium text-foreground">RWF {room.pricePerHour?.toLocaleString()}/hr</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Daily</span>
+                  <span className="font-medium text-foreground">RWF {(room.pricePerDay ?? 0).toLocaleString()}/day</span>
                 </div>
               </div>
             </div>

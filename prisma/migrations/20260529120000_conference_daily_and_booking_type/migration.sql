@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "ConferenceRoom" ADD COLUMN IF NOT EXISTS "pricePerDay" DOUBLE PRECISION NOT NULL DEFAULT 0;
+
+-- AlterTable
+ALTER TABLE "ConferenceBooking" ADD COLUMN IF NOT EXISTS "bookingType" TEXT NOT NULL DEFAULT 'HOURLY';

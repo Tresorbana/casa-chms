@@ -12,7 +12,8 @@ export default function Inventory() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [newItem, setNewItem] = useState({ name: '', category: 'Housekeeping', stock: '0', unit: 'pcs', price: '0' });
+  const [adjustingId, setAdjustingId] = useState<string | null>(null);
+  const [newItem, setNewItem] = useState({ name: '', category: 'Housekeeping', stock: '0', unit: 'pcs', price: '0', minStock: '10' });
 
   const filteredItems = items ? items.filter((item: any) =>
     item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -37,7 +38,7 @@ export default function Inventory() {
       if (res.ok) {
         mutate();
         setIsModalOpen(false);
-        setNewItem({ name: '', category: 'Housekeeping', stock: '0', unit: 'pcs', price: '0' });
+        setNewItem({ name: '', category: 'Housekeeping', stock: '0', unit: 'pcs', price: '0', minStock: '10' });
         toast.success('Item added successfully');
       } else {
         toast.error('Failed to add item');
@@ -49,13 +50,31 @@ export default function Inventory() {
     }
   };
 
+  const adjustStock = async (id: string, adjustment: number) => {
+    setAdjustingId(id);
+    try {
+      const res = await fetch(`/api/inventory/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adjustment }),
+      });
+      if (!res.ok) throw new Error('Failed');
+      mutate();
+      toast.success(adjustment > 0 ? 'Stock added' : 'Stock removed');
+    } catch {
+      toast.error('Failed to update stock');
+    } finally {
+      setAdjustingId(null);
+    }
+  };
+
   const inputClass = "w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring outline-none transition-all";
 
   return (
     <div className="min-h-screen bg-background p-4 lg:p-8 flex flex-col gap-6">
       <TopBar
-        title="Inventory"
-        description="Hotel supplies, linen, and housekeeping essentials."
+        title="Stock Management"
+        description="Track supplies, adjust stock levels, and monitor low-stock alerts."
         actions={
           <button
             onClick={() => setIsModalOpen(true)}
@@ -94,10 +113,14 @@ export default function Inventory() {
                   <input className={inputClass} placeholder="pcs, kg..." value={newItem.unit} onChange={e => setNewItem({ ...newItem, unit: e.target.value })} />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-3">
                 <div>
                   <label className="text-xs font-medium text-muted-foreground block mb-1.5">Initial Stock</label>
                   <input type="number" className={inputClass} value={newItem.stock} onChange={e => setNewItem({ ...newItem, stock: e.target.value })} />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground block mb-1.5">Min Stock Alert</label>
+                  <input type="number" className={inputClass} value={newItem.minStock} onChange={e => setNewItem({ ...newItem, minStock: e.target.value })} />
                 </div>
                 <div>
                   <label className="text-xs font-medium text-muted-foreground block mb-1.5">Unit Price (RWF)</label>
@@ -175,9 +198,35 @@ export default function Inventory() {
                       )}
                     </td>
                     <td className="px-5 py-4 text-right">
-                      <button className="p-1.5 hover:bg-accent rounded-lg transition-colors text-muted-foreground hover:text-foreground">
-                        <span className="material-symbols-outlined text-[18px]">edit</span>
-                      </button>
+                      <div className="inline-flex items-center gap-1">
+                        <button
+                          type="button"
+                          disabled={adjustingId === item.id}
+                          onClick={() => adjustStock(item.id, -1)}
+                          className="p-1.5 hover:bg-accent rounded-lg transition-colors text-muted-foreground hover:text-foreground disabled:opacity-50"
+                          title="Remove 1 unit"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">remove</span>
+                        </button>
+                        <button
+                          type="button"
+                          disabled={adjustingId === item.id}
+                          onClick={() => adjustStock(item.id, 1)}
+                          className="p-1.5 hover:bg-accent rounded-lg transition-colors text-muted-foreground hover:text-foreground disabled:opacity-50"
+                          title="Add 1 unit"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">add</span>
+                        </button>
+                        <button
+                          type="button"
+                          disabled={adjustingId === item.id}
+                          onClick={() => adjustStock(item.id, 10)}
+                          className="px-2 py-1.5 text-[10px] font-medium rounded-lg border border-border hover:bg-accent transition-colors disabled:opacity-50"
+                          title="Add 10 units"
+                        >
+                          +10
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

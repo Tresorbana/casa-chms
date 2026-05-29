@@ -1,61 +1,68 @@
 'use client';
-import React, { Suspense } from 'react';
+import React, { Suspense, useState } from 'react';
 import useSWR from 'swr';
 import { fetcher } from '@/lib/fetcher';
 import { useSearchParams, useRouter } from 'next/navigation';
-import Image from 'next/image';
-
-const HOTEL = {
-  name: ' Hotel',
-  tagline: 'Restaurant & Dining',
-  address: 'KG 11 Ave, Kiyovu · Kigali, Rwanda',
-  phone: '+250 788 000 000',
-  website: 'www.casahotel.rw',
-  tin: 'TIN: 123456789',
-};
+import { HOTEL_INFO } from '@/lib/hotel-info';
+import { HotelBrandMark } from '@/components/invoice/HotelBrandMark';
+import { InvoiceToolbar } from '@/components/invoice/InvoiceToolbar';
 
 function RestaurantInvoiceContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const invoiceId = searchParams.get('id');
+  const [status, setStatus] = useState<string | null>(null);
 
-  const { data: apiInvoice, isLoading } = useSWR(
+  const { data: apiInvoice, isLoading, mutate } = useSWR(
     invoiceId ? `/api/invoices/${invoiceId}` : null,
     fetcher
   );
 
-  if (!invoiceId) return (
-    <div className="min-h-screen flex items-center justify-center bg-black">
-      <p className="font-bold text-slate-400">No invoice ID specified.</p>
-    </div>
-  );
+  const displayStatus = status ?? apiInvoice?.status ?? 'UNPAID';
 
-  if (isLoading) return (
-    <div className="min-h-screen flex items-center justify-center bg-black">
-      <div className="text-center">
-        <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin mx-auto mb-4" />
-        <p className="font-bold text-slate-400 uppercase tracking-widest text-sm">Loading Invoice...</p>
+  if (!invoiceId) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <p className="text-sm text-muted-foreground">No invoice ID specified.</p>
       </div>
-    </div>
-  );
+    );
+  }
 
-  if (!apiInvoice) return (
-    <div className="min-h-screen flex items-center justify-center bg-black">
-      <div className="text-center">
-        <span className="material-symbols-outlined text-5xl text-red-300 block mb-4">receipt_long</span>
-        <p className="font-bold text-red-500 text-xl">Invoice not found</p>
-        <button onClick={() => router.back()} className="mt-4 text-primary text-sm font-bold hover:underline">← Go back</button>
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="w-10 h-10 rounded-full border-2 border-primary border-t-transparent animate-spin" />
       </div>
-    </div>
-  );
+    );
+  }
 
-  const subtotal = apiInvoice.items?.reduce((s: number, i: any) => s + i.price * i.quantity, 0) ?? apiInvoice.amount;
+  if (!apiInvoice) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <span className="material-symbols-outlined text-4xl text-muted-foreground/40 block mb-3">receipt_long</span>
+          <p className="text-sm font-medium text-foreground">Invoice not found</p>
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="mt-4 text-sm text-primary hover:underline"
+          >
+            Go back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const subtotal =
+    apiInvoice.items?.reduce((s: number, i: { price: number; quantity: number }) => s + i.price * i.quantity, 0) ??
+    apiInvoice.amount;
   const grandTotal = apiInvoice.amount;
   const invoiceRef = `INV-${apiInvoice.id.slice(-8).toUpperCase()}`;
   const invoiceDate = new Date(apiInvoice.date);
 
   return (
-    <div className="min-h-screen bg-black print:bg-white">
+    <div className="min-h-screen bg-background print:bg-white">
       <style>{`
         @media print {
           @page { margin: 10mm; size: A4; }
@@ -65,113 +72,104 @@ function RestaurantInvoiceContent() {
         }
       `}</style>
 
-      {/* Toolbar */}
-      <div className="no-print sticky top-0 z-50 px-6 py-3 flex items-center justify-between gap-4" style={{ background: '#111111', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-        <button onClick={() => router.back()} className="flex items-center gap-2 text-sm font-bold text-white/50 hover:text-white transition-colors">
-          <span className="material-symbols-outlined text-base">arrow_back</span>
-          Back to POS
-        </button>
-        <div className="flex items-center gap-3">
-          <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${apiInvoice.status === 'PAID' ? 'bg-emerald-400/10 text-emerald-400 border border-emerald-400/20' : 'bg-amber-400/10 text-amber-400 border border-amber-400/20'}`}>
-            {apiInvoice.status}
-          </span>
-          <button onClick={() => window.print()} className="flex items-center gap-2 bg-gold text-black px-5 py-2 rounded-xl text-sm font-bold hover:bg-gold-light transition-all shadow-gold-sm">
-            <span className="material-symbols-outlined text-base">picture_as_pdf</span>
-            Print / PDF
-          </button>
-        </div>
-      </div>
+      <InvoiceToolbar
+        invoiceId={apiInvoice.id}
+        status={displayStatus}
+        backLabel="Back to POS"
+        onStatusChange={(s) => {
+          setStatus(s);
+          mutate();
+        }}
+      />
 
-      {/* Invoice */}
-      <div className="p-6 md:p-10 flex justify-center">
-        <div className="inv-card bg-white w-full max-w-[720px] shadow-2xl shadow-slate-300/50 rounded-2xl overflow-hidden border border-slate-200">
-          {/* Top accent */}
-          <div className="h-2 bg-primary" />
+      <div className="p-4 lg:p-8 flex justify-center">
+        <div className="inv-card bg-card w-full max-w-[720px] shadow-sm rounded-xl overflow-hidden border border-border print:border-0">
+          <div className="h-1 bg-primary" />
 
-          {/* Receipt-style header */}
-          <div className="flex flex-col items-center pt-10 pb-8 px-10 border-b border-slate-100">
-            <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 mb-4 overflow-hidden">
-              <Image src="/logo.png" alt=" Hotel Logo" width={52} height={52} className="object-contain" onError={(e: any) => { e.currentTarget.style.display = 'none'; }} />
-            </div>
-            <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">{HOTEL.name}</h1>
-            <p className="text-xs font-bold text-primary/60 uppercase tracking-widest mt-1">{HOTEL.tagline}</p>
-            <p className="text-xs text-slate-400 font-medium mt-2 text-center">{HOTEL.address}</p>
-            <p className="text-xs text-slate-400 font-medium">{HOTEL.phone} · {HOTEL.website}</p>
-            <p className="text-xs text-slate-400 font-medium">{HOTEL.tin}</p>
+          <div className="flex flex-col items-center pt-8 pb-6 px-8 border-b border-border">
+            <HotelBrandMark size="sm" centered showTagline />
+            <p className="text-xs text-muted-foreground mt-3 text-center">
+              {HOTEL_INFO.address} · {HOTEL_INFO.city}
+            </p>
+            <p className="text-xs text-muted-foreground">{HOTEL_INFO.phone}</p>
           </div>
 
-          {/* Invoice meta */}
-          <div className="bg-primary/5 px-10 py-5 flex justify-between items-center border-b border-slate-100">
+          <div className="bg-muted/40 px-8 py-4 flex justify-between items-center border-b border-border">
             <div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Invoice No.</p>
-              <p className="text-base font-black text-primary">{invoiceRef}</p>
+              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Invoice no.</p>
+              <p className="font-semibold text-primary text-sm">{invoiceRef}</p>
             </div>
             <div className="text-right">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Date & Time</p>
-              <p className="text-sm font-black text-slate-700">
+              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Date & time</p>
+              <p className="text-sm font-medium text-foreground">
                 {invoiceDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
               </p>
-              <p className="text-xs text-slate-500 font-medium">{invoiceDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+              <p className="text-xs text-muted-foreground">
+                {invoiceDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </p>
             </div>
           </div>
 
-          {/* Billed to */}
-          <div className="px-10 py-5 border-b border-slate-100">
+          <div className="px-8 py-5 border-b border-border">
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-1">Guest</p>
-                <p className="text-lg font-black text-slate-800">{apiInvoice.guestName}</p>
+                <p className="text-[10px] font-medium text-primary uppercase tracking-wider mb-1">Guest</p>
+                <p className="text-lg font-semibold text-foreground">{apiInvoice.guestName}</p>
               </div>
-              <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mt-1 ${apiInvoice.status === 'PAID' ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'}`}>
-                {apiInvoice.status}
+              <span
+                className={`text-[10px] font-medium uppercase px-2.5 py-1 rounded-full ${
+                  displayStatus === 'PAID'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                    : 'bg-amber-50 text-amber-700 border border-amber-200'
+                }`}
+              >
+                {displayStatus}
               </span>
             </div>
           </div>
 
-          {/* Items */}
-          <div className="px-10 py-6">
+          <div className="px-8 py-6">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-200">
-                  <th className="text-left pb-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">Item</th>
-                  <th className="text-center pb-3 text-[10px] font-black text-slate-400 uppercase tracking-widest w-12">Qty</th>
-                  <th className="text-right pb-3 text-[10px] font-black text-slate-400 uppercase tracking-widest w-28">Price</th>
-                  <th className="text-right pb-3 text-[10px] font-black text-slate-400 uppercase tracking-widest w-28">Total</th>
+                <tr className="border-b border-border">
+                  <th className="text-left pb-3 text-[11px] font-medium text-muted-foreground uppercase">Item</th>
+                  <th className="text-center pb-3 text-[11px] font-medium text-muted-foreground uppercase w-12">Qty</th>
+                  <th className="text-right pb-3 text-[11px] font-medium text-muted-foreground uppercase w-28">Price</th>
+                  <th className="text-right pb-3 text-[11px] font-medium text-muted-foreground uppercase w-28">Total</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-50">
-                {apiInvoice.items?.map((item: any, i: number) => (
-                  <tr key={item.id || i} className="hover:bg-slate-50/50">
-                    <td className="py-3 font-semibold text-slate-700">{item.description}</td>
-                    <td className="py-3 text-center text-slate-500">{item.quantity}</td>
-                    <td className="py-3 text-right text-slate-500">RWF {item.price.toLocaleString()}</td>
-                    <td className="py-3 text-right font-black text-slate-800">RWF {(item.quantity * item.price).toLocaleString()}</td>
+              <tbody className="divide-y divide-border">
+                {apiInvoice.items?.map((item: { id: string; description: string; quantity: number; price: number }, i: number) => (
+                  <tr key={item.id || i}>
+                    <td className="py-3 font-medium text-foreground">{item.description}</td>
+                    <td className="py-3 text-center text-muted-foreground">{item.quantity}</td>
+                    <td className="py-3 text-right text-muted-foreground">RWF {item.price.toLocaleString()}</td>
+                    <td className="py-3 text-right font-medium text-foreground">
+                      RWF {(item.quantity * item.price).toLocaleString()}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
 
-          {/* Totals */}
-          <div className="px-10 pb-8 flex flex-col items-end gap-2 border-t border-slate-100 pt-6">
-            <div className="flex justify-between w-full max-w-[260px] text-sm text-slate-500 font-medium">
+          <div className="px-8 pb-8 flex flex-col items-end gap-2 border-t border-border pt-6">
+            <div className="flex justify-between w-full max-w-[260px] text-sm text-muted-foreground">
               <span>Subtotal</span>
               <span>RWF {subtotal.toLocaleString()}</span>
             </div>
-            <div className="flex justify-between w-full max-w-[260px] pt-3 mt-1 border-t-2 border-primary/30">
-              <span className="text-lg font-black text-slate-900 uppercase tracking-tight">Total</span>
-              <span className="text-2xl font-black text-primary">RWF {grandTotal.toLocaleString()}</span>
+            <div className="flex justify-between w-full max-w-[260px] pt-3 border-t border-border">
+              <span className="text-lg font-semibold text-foreground">Total</span>
+              <span className="text-xl font-semibold text-primary">RWF {grandTotal.toLocaleString()}</span>
             </div>
           </div>
 
-          {/* Thank you footer */}
-          <div className="bg-slate-50 border-t border-slate-100 px-10 py-8 text-center">
-            <p className="text-xs font-black text-slate-400 uppercase tracking-[0.3em] mb-1">Thank you for dining at  Hotel</p>
-            <p className="text-xs text-slate-300 font-medium">{HOTEL.website} · {HOTEL.phone}</p>
+          <div className="bg-muted/30 border-t border-border px-8 py-6 text-center">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
+              Thank you for your visit
+            </p>
+            <p className="text-xs text-muted-foreground">{HOTEL_INFO.phone}</p>
           </div>
-
-          {/* Bottom bar */}
-          <div className="h-2 bg-primary/20" />
         </div>
       </div>
     </div>
@@ -180,11 +178,13 @@ function RestaurantInvoiceContent() {
 
 export default function RestaurantInvoicePage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin" />
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <div className="w-10 h-10 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+        </div>
+      }
+    >
       <RestaurantInvoiceContent />
     </Suspense>
   );

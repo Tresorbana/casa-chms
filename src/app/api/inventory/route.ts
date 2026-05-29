@@ -15,7 +15,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { name, category, stock, unit, price } = body
+    const { name, category, stock, unit, price, minStock } = body
     
     const item = await prisma.inventoryItem.create({
         data: {
@@ -23,7 +23,8 @@ export async function POST(request: Request) {
             category,
             stock: parseInt(stock),
             unit,
-            price: parseFloat(price)
+            price: parseFloat(price),
+            minStock: minStock !== undefined ? parseInt(String(minStock), 10) : 10,
         }
     })
     

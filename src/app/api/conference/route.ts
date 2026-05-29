@@ -16,13 +16,14 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         const body = await request.json()
-        const { name, capacity, pricePerHour } = body
+        const { name, capacity, pricePerHour, pricePerDay } = body
 
         const room = await prisma.conferenceRoom.create({
             data: {
                 name,
                 capacity: parseInt(capacity),
-                pricePerHour: parseFloat(pricePerHour)
+                pricePerHour: parseFloat(pricePerHour),
+                pricePerDay: pricePerDay !== undefined ? parseFloat(pricePerDay) : 0,
             }
         })
 
