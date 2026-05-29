@@ -190,6 +190,8 @@ model Invoice {
   guestName       String
   amount          Float
   status          String        @default("UNPAID")
+  paymentMethod   String?
+  paidAt          DateTime?
   date            DateTime      @default(now())
   guestSignature  String?
   masterInvoiceId String?

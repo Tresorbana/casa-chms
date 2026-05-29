@@ -3,7 +3,7 @@ import React, { Suspense, useState } from 'react';
 import useSWR from 'swr';
 import { fetcher } from '@/lib/fetcher';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { HOTEL_INFO } from '@/lib/hotel-info';
+import { HOTEL_INFO, hotelFullLocation } from '@/lib/hotel-info';
 import { HotelBrandMark } from '@/components/invoice/HotelBrandMark';
 import { InvoiceToolbar } from '@/components/invoice/InvoiceToolbar';
 
@@ -63,10 +63,10 @@ function PreviewContent() {
       <InvoiceToolbar
         invoiceId={invoice.id}
         status={displayStatus}
-        onStatusChange={(s) => {
-          setStatus(s);
-          mutate();
-        }}
+        paymentMethod={invoice.paymentMethod}
+        guestSignature={invoice.guestSignature}
+        invoiceType={invoice.type}
+        onStatusChange={() => mutate()}
       />
 
       <div className="flex flex-col items-center py-8 px-4">
@@ -75,7 +75,7 @@ function PreviewContent() {
 
           <div className="flex flex-col items-center pt-8 pb-6 px-8 border-b border-border">
             <HotelBrandMark size="sm" centered />
-            <p className="text-xs text-muted-foreground mt-2 text-center">{HOTEL_INFO.address} · {HOTEL_INFO.city}</p>
+            <p className="text-xs text-muted-foreground mt-2 text-center">{hotelFullLocation()}</p>
           </div>
 
           <div className="bg-muted/40 px-8 py-4 flex justify-between border-b border-border">

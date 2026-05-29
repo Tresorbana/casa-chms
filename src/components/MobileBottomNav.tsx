@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useUI } from '@/context/UIContext';
+import { isChromelessRoute } from '@/lib/hotel-info';
 
 const NAV = [
   { href: '/',               icon: 'dashboard',      label: 'Home' },
@@ -15,7 +16,7 @@ export default function MobileBottomNav() {
   const pathname = usePathname();
   const { toggleSidebar } = useUI();
 
-  if (pathname === '/login') return null;
+  if (pathname === '/login' || isChromelessRoute(pathname)) return null;
 
   const isActive = (path: string) => {
     if (path === '/' && (pathname === '/' || pathname === '/dashboard')) return true;

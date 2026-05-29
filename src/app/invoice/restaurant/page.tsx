@@ -4,14 +4,22 @@ import useSWR from 'swr';
 import { fetcher } from '@/lib/fetcher';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { HOTEL_INFO } from '@/lib/hotel-info';
-import { HotelBrandMark } from '@/components/invoice/HotelBrandMark';
+import { TEDEUM_INFO } from '@/lib/tedeum-info';
+import { formatPaymentMethod } from '@/lib/payment-methods';
+import { TedeumBrandMark } from '@/components/invoice/TedeumBrandMark';
 import { InvoiceToolbar } from '@/components/invoice/InvoiceToolbar';
+import { toast } from 'sonner';
 
 function RestaurantInvoiceContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const invoiceId = searchParams.get('id');
+  const viewParam = searchParams.get('view');
+
   const [status, setStatus] = useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
+  const [signatureInput, setSignatureInput] = useState('');
+  const [savingSignature, setSavingSignature] = useState(false);
 
   const { data: apiInvoice, isLoading, mutate } = useSWR(
     invoiceId ? `/api/invoices/${invoiceId}` : null,
@@ -19,6 +27,37 @@ function RestaurantInvoiceContent() {
   );
 
   const displayStatus = status ?? apiInvoice?.status ?? 'UNPAID';
+  const displayMethod = paymentMethod ?? apiInvoice?.paymentMethod ?? null;
+  const isPaid = displayStatus === 'PAID';
+  const view = viewParam === 'final' && isPaid ? 'final' : 'client';
+  const isClientCopy = view === 'client';
+  const hasSignature = Boolean(apiInvoice?.guestSignature);
+
+  const saveSignature = async () => {
+    if (!invoiceId || !signatureInput.trim()) {
+      toast.error('Enter the guest name for signature');
+      return;
+    }
+    setSavingSignature(true);
+    try {
+      const res = await fetch(`/api/invoices/${invoiceId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ guestSignature: signatureInput.trim() }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to save signature');
+      }
+      toast.success('Client signature recorded');
+      mutate();
+      setSignatureInput('');
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Failed to save signature');
+    } finally {
+      setSavingSignature(false);
+    }
+  };
 
   if (!invoiceId) {
     return (
@@ -42,11 +81,7 @@ function RestaurantInvoiceContent() {
         <div className="text-center">
           <span className="material-symbols-outlined text-4xl text-muted-foreground/40 block mb-3">receipt_long</span>
           <p className="text-sm font-medium text-foreground">Invoice not found</p>
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="mt-4 text-sm text-primary hover:underline"
-          >
+          <button type="button" onClick={() => router.back()} className="mt-4 text-sm text-primary hover:underline">
             Go back
           </button>
         </div>
@@ -58,8 +93,9 @@ function RestaurantInvoiceContent() {
     apiInvoice.items?.reduce((s: number, i: { price: number; quantity: number }) => s + i.price * i.quantity, 0) ??
     apiInvoice.amount;
   const grandTotal = apiInvoice.amount;
-  const invoiceRef = `INV-${apiInvoice.id.slice(-8).toUpperCase()}`;
+  const invoiceRef = `TED-${apiInvoice.id.slice(-8).toUpperCase()}`;
   const invoiceDate = new Date(apiInvoice.date);
+  const paidDate = apiInvoice.paidAt ? new Date(apiInvoice.paidAt) : null;
 
   return (
     <div className="min-h-screen bg-background print:bg-white">
@@ -75,9 +111,13 @@ function RestaurantInvoiceContent() {
       <InvoiceToolbar
         invoiceId={apiInvoice.id}
         status={displayStatus}
+        paymentMethod={displayMethod}
+        guestSignature={apiInvoice.guestSignature}
+        invoiceType="RESTAURANT"
         backLabel="Back to POS"
-        onStatusChange={(s) => {
+        onStatusChange={(s, m) => {
           setStatus(s);
+          setPaymentMethod(m ?? null);
           mutate();
         }}
       />
@@ -86,17 +126,29 @@ function RestaurantInvoiceContent() {
         <div className="inv-card bg-card w-full max-w-[720px] shadow-sm rounded-xl overflow-hidden border border-border print:border-0">
           <div className="h-1 bg-primary" />
 
-          <div className="flex flex-col items-center pt-8 pb-6 px-8 border-b border-border">
-            <HotelBrandMark size="sm" centered showTagline />
-            <p className="text-xs text-muted-foreground mt-3 text-center">
-              {HOTEL_INFO.address} · {HOTEL_INFO.city}
-            </p>
+          <div className="px-8 pt-6 pb-2 no-print">
+            <span
+              className={`inline-flex text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full ${
+                isClientCopy
+                  ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                  : 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+              }`}
+            >
+              {isClientCopy ? 'Guest copy — signature required' : 'Final receipt — paid'}
+            </span>
+          </div>
+
+          <div className="flex flex-col items-center pt-4 pb-6 px-8 border-b border-border">
+            <TedeumBrandMark centered />
+            <p className="text-xs text-muted-foreground mt-3 text-center">{TEDEUM_INFO.parentHotel}</p>
             <p className="text-xs text-muted-foreground">{HOTEL_INFO.phone}</p>
           </div>
 
           <div className="bg-muted/40 px-8 py-4 flex justify-between items-center border-b border-border">
             <div>
-              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Invoice no.</p>
+              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+                {isClientCopy ? 'Proforma invoice' : 'Tax receipt'}
+              </p>
               <p className="font-semibold text-primary text-sm">{invoiceRef}</p>
             </div>
             <div className="text-right">
@@ -107,23 +159,28 @@ function RestaurantInvoiceContent() {
               <p className="text-xs text-muted-foreground">
                 {invoiceDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </p>
+              {!isClientCopy && paidDate && (
+                <p className="text-xs text-emerald-700 mt-1 font-medium">
+                  Paid {paidDate.toLocaleDateString()} · {formatPaymentMethod(displayMethod)}
+                </p>
+              )}
             </div>
           </div>
 
           <div className="px-8 py-5 border-b border-border">
-            <div className="flex justify-between items-start">
+            <div className="flex justify-between items-start gap-4">
               <div>
                 <p className="text-[10px] font-medium text-primary uppercase tracking-wider mb-1">Guest</p>
                 <p className="text-lg font-semibold text-foreground">{apiInvoice.guestName}</p>
               </div>
               <span
-                className={`text-[10px] font-medium uppercase px-2.5 py-1 rounded-full ${
-                  displayStatus === 'PAID'
+                className={`text-[10px] font-medium uppercase px-2.5 py-1 rounded-full flex-shrink-0 ${
+                  isPaid
                     ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                     : 'bg-amber-50 text-amber-700 border border-amber-200'
                 }`}
               >
-                {displayStatus}
+                {isPaid ? `Paid · ${formatPaymentMethod(displayMethod)}` : 'Awaiting payment'}
               </span>
             </div>
           </div>
@@ -139,21 +196,23 @@ function RestaurantInvoiceContent() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {apiInvoice.items?.map((item: { id: string; description: string; quantity: number; price: number }, i: number) => (
-                  <tr key={item.id || i}>
-                    <td className="py-3 font-medium text-foreground">{item.description}</td>
-                    <td className="py-3 text-center text-muted-foreground">{item.quantity}</td>
-                    <td className="py-3 text-right text-muted-foreground">RWF {item.price.toLocaleString()}</td>
-                    <td className="py-3 text-right font-medium text-foreground">
-                      RWF {(item.quantity * item.price).toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
+                {apiInvoice.items?.map(
+                  (item: { id: string; description: string; quantity: number; price: number }, i: number) => (
+                    <tr key={item.id || i}>
+                      <td className="py-3 font-medium text-foreground">{item.description}</td>
+                      <td className="py-3 text-center text-muted-foreground">{item.quantity}</td>
+                      <td className="py-3 text-right text-muted-foreground">RWF {item.price.toLocaleString()}</td>
+                      <td className="py-3 text-right font-medium text-foreground">
+                        RWF {(item.quantity * item.price).toLocaleString()}
+                      </td>
+                    </tr>
+                  )
+                )}
               </tbody>
             </table>
           </div>
 
-          <div className="px-8 pb-8 flex flex-col items-end gap-2 border-t border-border pt-6">
+          <div className="px-8 pb-6 flex flex-col items-end gap-2 border-t border-border pt-6">
             <div className="flex justify-between w-full max-w-[260px] text-sm text-muted-foreground">
               <span>Subtotal</span>
               <span>RWF {subtotal.toLocaleString()}</span>
@@ -164,11 +223,72 @@ function RestaurantInvoiceContent() {
             </div>
           </div>
 
-          <div className="bg-muted/30 border-t border-border px-8 py-6 text-center">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
-              Thank you for your visit
-            </p>
-            <p className="text-xs text-muted-foreground">{HOTEL_INFO.phone}</p>
+          {isClientCopy ? (
+            <div className="px-8 pb-8 border-t border-dashed border-border pt-6">
+              <p className="text-center text-muted-foreground text-xs mb-4">
+                I confirm the items and total above. By signing, I agree to pay the amount due.
+              </p>
+              {hasSignature ? (
+                <div className="text-center space-y-2">
+                  <div className="max-w-[280px] mx-auto border-b-2 border-foreground/30 pb-1 font-serif text-lg text-foreground italic">
+                    {apiInvoice.guestSignature}
+                  </div>
+                  <p className="text-[10px] font-medium text-emerald-700 uppercase tracking-wider">
+                    Signed by client
+                  </p>
+                </div>
+              ) : (
+                <div className="no-print max-w-sm mx-auto space-y-3">
+                  <input
+                    type="text"
+                    placeholder="Guest full name (signature)"
+                    value={signatureInput}
+                    onChange={(e) => setSignatureInput(e.target.value)}
+                    className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <button
+                    type="button"
+                    onClick={saveSignature}
+                    disabled={savingSignature}
+                    className="w-full bg-primary text-primary-foreground py-2.5 rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50"
+                  >
+                    {savingSignature ? 'Saving...' : 'Confirm client signature'}
+                  </button>
+                </div>
+              )}
+              {!hasSignature && (
+                <div className="hidden print:block mt-4 max-w-[280px] mx-auto">
+                  <div className="h-12 border-b border-foreground/40" />
+                  <p className="text-[10px] text-center text-muted-foreground uppercase tracking-wider mt-2">
+                    Guest signature
+                  </p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="px-8 pb-8 border-t border-border pt-6 space-y-4">
+              <div className="flex justify-between items-center p-4 rounded-lg bg-emerald-50 border border-emerald-200">
+                <div>
+                  <p className="text-[10px] font-medium text-emerald-800 uppercase tracking-wider">Payment status</p>
+                  <p className="text-lg font-semibold text-emerald-900">PAID</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[10px] font-medium text-emerald-800 uppercase tracking-wider">Method</p>
+                  <p className="text-sm font-semibold text-emerald-900">{formatPaymentMethod(displayMethod)}</p>
+                </div>
+              </div>
+              {apiInvoice.guestSignature && (
+                <div className="text-center pt-2">
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Client signature on file</p>
+                  <p className="font-serif italic text-foreground">{apiInvoice.guestSignature}</p>
+                </div>
+              )}
+              <p className="text-center text-xs text-muted-foreground">Thank you for dining at {TEDEUM_INFO.name}</p>
+            </div>
+          )}
+
+          <div className="bg-muted/30 border-t border-border px-8 py-4 text-center text-xs text-muted-foreground">
+            {TEDEUM_INFO.name} {TEDEUM_INFO.subtitle} · {HOTEL_INFO.phone}
           </div>
         </div>
       </div>

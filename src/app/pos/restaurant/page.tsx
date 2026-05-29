@@ -44,13 +44,15 @@ export default function PosRestaurant() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          guestName: guestDescription, amount: cartTotal, status: 'PENDING',
-          items: cart.map(item => ({ description: item.name, quantity: 1, price: item.price }))
-        })
+          guestName: guestDescription,
+          amount: cartTotal,
+          type: 'RESTAURANT',
+          items: cart.map((item) => ({ description: item.name, quantity: 1, price: item.price })),
+        }),
       });
       if (res.ok) {
         const invoice = await res.json();
-        router.push(`/invoice/restaurant?id=${invoice.id}`);
+        router.push(`/invoice/restaurant?id=${invoice.id}&view=client`);
       } else {
         toast.error('Failed to create invoice');
       }
@@ -68,8 +70,8 @@ export default function PosRestaurant() {
       {/* Main */}
       <main className="flex-1 flex flex-col p-4 lg:p-8 min-h-screen">
         <TopBar
-          title="Restaurant POS"
-          description="Point of Sale for restaurant and bar orders."
+          title="Tedeum POS"
+          description="Restaurant & bar orders at Tedeum (The Kamdine Hotel)."
           actions={
             <button
               className="lg:hidden relative p-2 rounded-lg bg-primary text-primary-foreground"

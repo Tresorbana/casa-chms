@@ -5,44 +5,61 @@ import { fetcher } from '@/lib/fetcher';
 import { toast } from 'sonner';
 import TopBar from '@/components/TopBar';
 import Link from 'next/link';
+import { formatPaymentMethod, type PaymentMethodId } from '@/lib/payment-methods';
+import { MarkPaidDialog } from '@/components/invoice/MarkPaidDialog';
+
+type InvoiceRow = {
+  id: string;
+  guestName: string;
+  type: string;
+  amount: number;
+  status: string;
+  paymentMethod?: string | null;
+  guestSignature?: string | null;
+};
 
 export default function InvoicesList() {
   const { data: invoices, isLoading, mutate } = useSWR('/api/invoices', fetcher, {
     onError: () => toast.error('Failed to load invoices'),
   });
   const [filter, setFilter] = useState('');
-  const [markingId, setMarkingId] = useState<string | null>(null);
+  const [payDialogInvoice, setPayDialogInvoice] = useState<InvoiceRow | null>(null);
 
   const filtered =
     invoices?.filter(
-      (inv: { guestName: string; id: string }) =>
+      (inv: InvoiceRow) =>
         inv.guestName.toLowerCase().includes(filter.toLowerCase()) ||
         inv.id.toLowerCase().includes(filter.toLowerCase())
     ) || [];
 
-  const handleMarkPaid = async (id: string) => {
-    setMarkingId(id);
-    try {
-      const res = await fetch(`/api/invoices/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'PAID' }),
-      });
-      if (!res.ok) throw new Error('Failed to update');
-      mutate();
-      toast.success('Invoice marked as paid');
-    } catch {
-      toast.error('Could not mark invoice as paid');
-    } finally {
-      setMarkingId(null);
+  const invoiceHref = (inv: InvoiceRow) => {
+    if (inv.type === 'RESTAURANT') {
+      const view = inv.status === 'PAID' ? 'final' : 'client';
+      return `/invoice/restaurant?id=${inv.id}&view=${view}`;
     }
+    return `/invoice/${inv.id}`;
+  };
+
+  const handleMarkPaid = async (method: PaymentMethodId) => {
+    if (!payDialogInvoice) return;
+    const res = await fetch(`/api/invoices/${payDialogInvoice.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'PAID', paymentMethod: method }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || 'Failed to update');
+    }
+    mutate();
+    toast.success(`Paid via ${formatPaymentMethod(method)}`);
   };
 
   return (
     <div className="min-h-screen bg-background p-4 lg:p-8 flex flex-col gap-6">
       <TopBar
         title="Invoices"
-        description="Guest invoices and billing records."
+        description="Guest folios, Tedeum restaurant bills, and payment records."
         actions={
           <div className="relative">
             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-[18px]">
@@ -68,7 +85,7 @@ export default function InvoicesList() {
             <table className="w-full text-left">
               <thead className="bg-muted/50 border-b border-border">
                 <tr>
-                  {['Invoice ID', 'Guest', 'Type', 'Amount', 'Status', 'Actions'].map((h) => (
+                  {['Invoice', 'Guest', 'Type', 'Amount', 'Status', 'Payment', 'Actions'].map((h) => (
                     <th
                       key={h}
                       className={`px-5 py-3 text-[11px] font-medium text-muted-foreground uppercase tracking-wider ${
@@ -81,7 +98,7 @@ export default function InvoicesList() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filtered.map((inv: { id: string; guestName: string; type: string; amount: number; status: string }) => (
+                {filtered.map((inv: InvoiceRow) => (
                   <tr key={inv.id} className="hover:bg-muted/30 transition-colors">
                     <td className="px-5 py-4 font-mono text-xs text-muted-foreground">
                       #{inv.id.slice(-6).toUpperCase()}
@@ -89,7 +106,7 @@ export default function InvoicesList() {
                     <td className="px-5 py-4 text-sm font-medium text-foreground">{inv.guestName}</td>
                     <td className="px-5 py-4">
                       <span className="px-2 py-1 bg-muted rounded text-[10px] font-medium uppercase text-muted-foreground">
-                        {inv.type}
+                        {inv.type === 'RESTAURANT' ? 'Tedeum' : inv.type}
                       </span>
                     </td>
                     <td className="px-5 py-4 text-sm text-foreground">RWF {inv.amount.toLocaleString()}</td>
@@ -107,21 +124,23 @@ export default function InvoicesList() {
                         {inv.status}
                       </span>
                     </td>
+                    <td className="px-5 py-4 text-xs text-muted-foreground">
+                      {inv.status === 'PAID' ? formatPaymentMethod(inv.paymentMethod) : '—'}
+                    </td>
                     <td className="px-5 py-4 text-right">
                       <div className="inline-flex items-center gap-2">
                         {inv.status !== 'PAID' && (
                           <button
                             type="button"
-                            disabled={markingId === inv.id}
-                            onClick={() => handleMarkPaid(inv.id)}
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium border border-border text-muted-foreground hover:bg-accent hover:text-foreground transition-colors disabled:opacity-50"
+                            onClick={() => setPayDialogInvoice(inv)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium border border-border text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
                           >
-                            <span className="material-symbols-outlined text-[14px]">check_circle</span>
-                            {markingId === inv.id ? '...' : 'Paid'}
+                            <span className="material-symbols-outlined text-[14px]">payments</span>
+                            Mark paid
                           </button>
                         )}
                         <Link
-                          href={`/invoice/${inv.id}`}
+                          href={invoiceHref(inv)}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors"
                         >
                           <span className="material-symbols-outlined text-[14px]">visibility</span>
@@ -133,7 +152,7 @@ export default function InvoicesList() {
                 ))}
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="px-5 py-12 text-center text-muted-foreground text-sm">
+                    <td colSpan={7} className="px-5 py-12 text-center text-muted-foreground text-sm">
                       No invoices found.
                     </td>
                   </tr>
@@ -143,6 +162,14 @@ export default function InvoicesList() {
           </div>
         </div>
       )}
+
+      <MarkPaidDialog
+        open={Boolean(payDialogInvoice)}
+        onClose={() => setPayDialogInvoice(null)}
+        onConfirm={handleMarkPaid}
+        requireSignature={payDialogInvoice?.type === 'RESTAURANT'}
+        hasSignature={Boolean(payDialogInvoice?.guestSignature)}
+      />
     </div>
   );
 }

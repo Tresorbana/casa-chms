@@ -41,7 +41,7 @@ export default function Profile() {
             </div>
             <div className="flex-1 text-center md:text-left">
               <h2 className="text-xl font-semibold text-foreground">{user.name}</h2>
-              <p className="text-sm text-muted-foreground mt-0.5">{user.role} · Hotel Management</p>
+              <p className="text-sm text-muted-foreground mt-0.5">{user.role} · The Kamdine Hotel</p>
               <div className="flex flex-wrap justify-center md:justify-start gap-2 mt-3">
                 <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-muted text-muted-foreground border border-border">
                   ID: {user.id?.substring(0, 8).toUpperCase() || 'GUEST'}
@@ -135,7 +135,7 @@ export default function Profile() {
         </div>
 
         <div className="text-center py-4 border-t border-border">
-          <p className="text-[11px] text-muted-foreground">Hotel Management System · Version 3.0</p>
+          <p className="text-[11px] text-muted-foreground">The Kamdine Hotel · Version 3.0</p>
         </div>
       </div>
     </div>

@@ -1,21 +1,32 @@
 'use client';
-import React, { useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import useSWR from 'swr';
 import { fetcher } from '@/lib/fetcher';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import { HOTEL_INFO } from '@/lib/hotel-info';
+import { formatPaymentMethod } from '@/lib/payment-methods';
 import { HotelBrandMark } from '@/components/invoice/HotelBrandMark';
 import { InvoiceToolbar } from '@/components/invoice/InvoiceToolbar';
 
-export default function InvoicePage() {
+function InvoicePageContent() {
   const params = useParams();
+  const router = useRouter();
   const [status, setStatus] = useState<string | null>(null);
   const { data: invoice, isLoading, mutate } = useSWR(
     params.id ? `/api/invoices/${params.id}` : null,
     fetcher
   );
 
+  useEffect(() => {
+    if (invoice?.type === 'RESTAURANT') {
+      const view = invoice.status === 'PAID' ? 'final' : 'client';
+      router.replace(`/invoice/restaurant?id=${invoice.id}&view=${view}`);
+    }
+  }, [invoice, router]);
+
   const displayStatus = status ?? invoice?.status ?? 'UNPAID';
+  const displayMethod = invoice?.paymentMethod;
 
   if (isLoading) {
     return (
@@ -59,6 +70,9 @@ export default function InvoicePage() {
       <InvoiceToolbar
         invoiceId={invoice.id}
         status={displayStatus}
+        paymentMethod={displayMethod}
+        guestSignature={invoice.guestSignature}
+        invoiceType={invoice.type}
         onStatusChange={(s) => {
           setStatus(s);
           mutate();
@@ -93,6 +107,9 @@ export default function InvoicePage() {
                     <span className="font-medium text-foreground">Status:</span>{' '}
                     <span className={displayStatus === 'PAID' ? 'text-emerald-600' : 'text-amber-600'}>
                       {displayStatus}
+                      {displayStatus === 'PAID' && displayMethod
+                        ? ` · ${formatPaymentMethod(displayMethod)}`
+                        : ''}
                     </span>
                   </p>
                 </div>
@@ -206,7 +223,7 @@ export default function InvoicePage() {
 
           <div className="bg-muted/30 border-t border-border px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-muted-foreground">
             <span>
-              {HOTEL_INFO.name} — {HOTEL_INFO.city}
+              {HOTEL_INFO.name} — {HOTEL_INFO.region}
             </span>
             <span className="flex items-center gap-1.5">
               <span className="material-symbols-outlined text-sm">call</span>
@@ -216,5 +233,19 @@ export default function InvoicePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function InvoicePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <div className="w-10 h-10 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+        </div>
+      }
+    >
+      <InvoicePageContent />
+    </Suspense>
   );
 }

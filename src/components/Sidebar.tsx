@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useUI } from '@/context/UIContext';
+import { HOTEL_INFO, isChromelessRoute } from '@/lib/hotel-info';
 
 const NAV_ITEMS = [
   { href: '/',              icon: 'dashboard',       label: 'Dashboard' },
@@ -13,7 +14,7 @@ const NAV_ITEMS = [
 ];
 
 const OPS_ITEMS = [
-  { href: '/pos/restaurant', icon: 'restaurant',    label: 'Restaurant POS' },
+  { href: '/pos/restaurant', icon: 'restaurant',    label: 'Tedeum POS' },
   { href: '/checkout',       icon: 'receipt_long',  label: 'Checkout' },
   { href: '/invoices',       icon: 'folder_shared', label: 'Invoices' },
   { href: '/inventory',      icon: 'inventory_2',   label: 'Stock' },
@@ -81,7 +82,7 @@ export default function Sidebar() {
 
   useEffect(() => { closeSidebar(); }, [pathname]);
 
-  if (pathname === '/login') return null;
+  if (pathname === '/login' || isChromelessRoute(pathname)) return null;
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
@@ -137,8 +138,8 @@ export default function Sidebar() {
                 <span className="material-symbols-outlined text-primary-foreground text-[20px]">home</span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground leading-none">Hotel Management</p>
-                <p className="text-[10px] text-muted-foreground tracking-wider uppercase mt-0.5">System</p>
+                <p className="text-sm font-medium text-foreground leading-none truncate">{HOTEL_INFO.name}</p>
+                <p className="text-[10px] text-muted-foreground tracking-wider mt-0.5 truncate">Lake Kivu · Rutsiro</p>
               </div>
               <button
                 onClick={toggleSidebarCollapse}

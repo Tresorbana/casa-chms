@@ -7,6 +7,7 @@ import useSWR from 'swr';
 import { toast } from 'sonner';
 import { fetcher } from '@/lib/fetcher';
 import TopBar from '@/components/TopBar';
+import { HOTEL_INFO } from '@/lib/hotel-info';
 
 const RoomDetailsModal = dynamic(() => import('@/components/RoomDetailsModal'), { ssr: false });
 
@@ -257,7 +258,7 @@ export default function Dashboard() {
 
       {/* Footer */}
       <div className="flex justify-between items-center text-[11px] text-muted-foreground pt-2 border-t border-border">
-        <p>© 2026 Hotel Management System</p>
+        <p>© 2026 {HOTEL_INFO.name}</p>
         <div className="flex gap-6">
           <a className="hover:text-foreground transition-colors" href="#">Status</a>
           <a className="hover:text-foreground transition-colors" href="#">Support</a>

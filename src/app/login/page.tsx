@@ -3,24 +3,26 @@ import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { SignInPage, type Testimonial } from '@/components/ui/sign-in';
 
-const sampleTestimonials: Testimonial[] = [
+const LOGIN_HERO_IMAGE = '/Sign%20in%20image.jpeg';
+
+const rwandanTestimonials: Testimonial[] = [
   {
-    avatarSrc: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&q=80',
-    name: 'Sarah Chen',
-    handle: '@sarahdigital',
-    text: 'Amazing platform! The user experience is seamless and the features are exactly what I needed.',
+    avatarSrc: 'https://ui-avatars.com/api/?name=Marie+Uwimana&background=1d4ed8&color=fff&size=128',
+    name: 'Marie-Claire Uwimana',
+    handle: 'Guest · Kigali',
+    text: 'The view over Lake Kivu at sunrise is unforgettable. Kamdine felt peaceful, clean, and truly welcoming.',
   },
   {
-    avatarSrc: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&q=80',
-    name: 'Marcus Johnson',
-    handle: '@marcustech',
-    text: 'This service has transformed how I work. Clean design, powerful features, and excellent support.',
+    avatarSrc: 'https://ui-avatars.com/api/?name=Patrick+Nsengimana&background=047857&color=fff&size=128',
+    name: 'Patrick Nsengimana',
+    handle: 'Traveler · Musanze',
+    text: 'We stopped in Rutsiro on our way west—the rooms were comfortable and the restaurant served excellent local dishes.',
   },
   {
-    avatarSrc: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=150&q=80',
-    name: 'David Martinez',
-    handle: '@davidcreates',
-    text: "I've tried many platforms, but this one stands out. Intuitive, reliable, and genuinely helpful.",
+    avatarSrc: 'https://ui-avatars.com/api/?name=Grace+Mukamana&background=7c3aed&color=fff&size=128',
+    name: 'Grace Mukamana',
+    handle: 'Visitor · Rubavu',
+    text: 'A quiet getaway on the lake. The staff were kind, and the outdoor terrace is perfect for relaxing after a long drive.',
   },
 ];
 
@@ -65,10 +67,14 @@ export default function Login() {
   return (
     <div className="bg-background text-foreground h-screen w-full">
       <SignInPage
-        title="Welcome to HMS"
-        description="Sign in to access the Hotel Management System"
-        heroImageSrc="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=2160&q=80"
-        testimonials={sampleTestimonials}
+        title={
+          <>
+            Welcome to <span className="text-primary">The Kamdine Hotel</span>
+          </>
+        }
+        description="Sign in to manage operations at our Lake Kivu property in Rutsiro."
+        heroImageSrc={LOGIN_HERO_IMAGE}
+        testimonials={rwandanTestimonials}
         onSignIn={handleSignIn}
         onResetPassword={handleResetPassword}
         onCreateAccount={handleCreateAccount}
