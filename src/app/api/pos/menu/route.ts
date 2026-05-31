@@ -21,14 +21,15 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, category, price, description } = body;
+    const { name, category, price, description, inventoryItemId } = body;
 
     const item = await prisma.menuItem.create({
       data: {
         name,
         category,
         price: parseFloat(price),
-        description
+        description,
+        inventoryItemId: inventoryItemId || null,
       }
     });
 

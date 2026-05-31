@@ -13,7 +13,7 @@ export default function Settings() {
   });
   const { data: notificationData } = useSWR('/api/notifications', fetcher);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'STAFF' });
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'RECEPTIONIST' });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleCreateUser = async (e: React.FormEvent) => {
@@ -180,7 +180,7 @@ export default function Settings() {
             <form onSubmit={handleCreateUser} className="p-5 space-y-4">
               {[
                 { label: 'Full Name', key: 'name', type: 'text', placeholder: 'Enter full name' },
-                { label: 'Email Address', key: 'email', type: 'email', placeholder: 'staff@kamdinehotel.rw' },
+                { label: 'Email Address', key: 'email', type: 'email', placeholder: 'staff@ubumwehotel.rw' },
                 { label: 'Password', key: 'password', type: 'password', placeholder: '••••••••' },
               ].map(field => (
                 <div key={field.key}>
@@ -196,8 +196,13 @@ export default function Settings() {
               <div>
                 <label className="text-xs font-medium text-muted-foreground block mb-1.5">Role</label>
                 <select value={formData.role} onChange={(e) => setFormData({ ...formData, role: e.target.value })} className={inputClass}>
-                  <option value="STAFF">Staff</option>
-                  <option value="ADMIN">Administrator</option>
+                  <option value="RECEPTIONIST">Receptionist — Front desk, check-in/out</option>
+                  <option value="BARMAN">Barman — Restaurant & bar management</option>
+                  <option value="WAITER">Waiter — Orders & receipts</option>
+                  <option value="FINANCE">Finance — Income, expenses & reports</option>
+                  <option value="STAFF">Staff — General operations</option>
+                  <option value="ADMIN">Administrator — Full access</option>
+                  <option value="SUPER_ADMIN">Super Admin / Owner — Full oversight</option>
                 </select>
               </div>
               <div className="flex gap-3 pt-2">

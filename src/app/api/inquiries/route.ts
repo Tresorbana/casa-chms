@@ -62,10 +62,10 @@ export async function PUT(request: Request) {
             emailResult = await sendEmail({
                 to: inquiry.email,
                 subject: `Response to your inquiry: ${inquiry.subject}`,
-                text: `Dear ${inquiry.name},\n\nThank you for your inquiry regarding "${inquiry.subject}".\n\nOur response:\n${response}\n\nBest regards,\nThe Kamdine Hotel Team`,
+                text: `Dear ${inquiry.name},\n\nThank you for your inquiry regarding "${inquiry.subject}".\n\nOur response:\n${response}\n\nBest regards,\nUbumwe Hotel by Kamdine Team`,
                 html: `
                     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; rounded: 12px;">
-                        <h2 style="color: #1e293b; border-bottom: 2px solid #57534e; padding-bottom: 10px;">The Kamdine Hotel</h2>
+                        <h2 style="color: #1e293b; border-bottom: 2px solid #57534e; padding-bottom: 10px;">Ubumwe Hotel by Kamdine</h2>
                         <p style="color: #475569; font-size: 16px;">Dear ${inquiry.name},</p>
                         <p style="color: #475569; font-size: 16px;">Thank you for reaching out to us regarding <strong>${inquiry.subject}</strong>.</p>
                         <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #57534e;">
@@ -75,7 +75,7 @@ export async function PUT(request: Request) {
                         <p style="color: #475569; font-size: 16px;">We look forward to welcoming you soon.</p>
                         <p style="color: #64748b; font-size: 14px; margin-top: 30px; border-top: 1px solid #f1f5f9; padding-top: 20px;">
                             Best regards,<br>
-                            <strong>The Kamdine Hotel Team</strong><br>
+                            <strong>Ubumwe Hotel by Kamdine Team</strong><br>
                             Rutsiro District, Western Province, Rwanda
                         </p>
                     </div>

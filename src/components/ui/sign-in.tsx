@@ -131,7 +131,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
             className="animate-slide-right animate-delay-300 absolute inset-4 rounded-3xl bg-cover bg-center bg-no-repeat"
             style={{ backgroundImage: `url("${heroImageSrc}")` }}
             role="img"
-            aria-label="The Kamdine Hotel on Lake Kivu"
+            aria-label="Ubumwe Hotel by Kamdine on Lake Kivu"
           />
           {testimonials.length > 0 && (
             <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-4 px-8 w-full justify-center">

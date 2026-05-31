@@ -83,8 +83,8 @@ export default function PosRestaurant() {
       {/* Main */}
       <main className="flex-1 flex flex-col p-4 lg:p-8 min-h-screen">
         <TopBar
-          title="Tedeum POS"
-          description="Restaurant & bar orders at Tedeum (The Kamdine Hotel)."
+          title="Restaurant & Bar"
+          description="Restaurant & bar orders at Tedeum — Ubumwe Hotel by Kamdine."
           actions={
             <div className="flex items-center gap-2">
               <ExportButton onClick={handleExport} label="Export sales" />

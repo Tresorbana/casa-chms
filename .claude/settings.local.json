@@ -8,7 +8,12 @@
       "PowerShell($response = Invoke-WebRequest -Uri \"http://localhost:3001/\" -UseBasicParsing -TimeoutSec 10 -ErrorAction SilentlyContinue; if \\($response\\) { \"HTTP $\\($response.StatusCode\\) - Dashboard OK\" } else { \"Redirect or error\" })",
       "PowerShell(Get-ChildItem \"D:\\\\Money\\\\Casa-All\\\\Casa\\\\chms\\\\src\\\\components\\\\ui\\\\\" | Select-Object Name, @{Name='KB';Expression={[math]::Round\\($_.Length/1KB,1\\)}})",
       "PowerShell(Get-ChildItem -Path \"D:\\\\Money\\\\Casa-All\\\\Casa\\\\chms\\\\src\\\\components\\\\ui\" | ForEach-Object { \"$\\($_.Name\\) - $\\([math]::Round\\($_.Length/1KB,1\\)\\)KB\" })",
-      "PowerShell(Get-Process *)"
+      "PowerShell(Get-Process *)",
+      "Bash(grep \".tsx$\")",
+      "Bash(mkdir -p \"D:/Money/Casa-All/Casa/chms/src/app/api/finance/[id]\")",
+      "Bash(mkdir -p \"D:/Money/Casa-All/Casa/chms/src/app/api/conference/[id]/items\")",
+      "Bash(mkdir -p \"D:/Money/Casa-All/Casa/chms/src/app/api/conference/[id]/invoice\")",
+      "Bash(npx prisma *)"
     ]
   }
 }

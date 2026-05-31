@@ -84,19 +84,23 @@ model ConferenceRoom {
 }
 
 model ConferenceBooking {
-  id               String         @id @default(cuid())
+  id               String                  @id @default(cuid())
   conferenceRoomId String
   guestName        String
   guestContact     String?
   guestId          String?
   guestEmail       String?
-  bookingType      String         @default("HOURLY")
+  bookingType      String                  @default("HOURLY")
   startTime        DateTime
   endTime          DateTime
   totalAmount      Float
-  status           String         @default("CONFIRMED")
-  createdAt        DateTime       @default(now())
-  conferenceRoom   ConferenceRoom @relation(fields: [conferenceRoomId], references: [id])
+  status           String                  @default("CONFIRMED")
+  createdAt        DateTime                @default(now())
+  invoiceId        String?
+  linkedBookingIds String[]
+  notes            String?
+  conferenceRoom   ConferenceRoom          @relation(fields: [conferenceRoomId], references: [id])
+  items            ConferenceBookingItem[]
 
   @@index([conferenceRoomId])
   @@index([status])
@@ -161,25 +165,28 @@ model Notification {
 }
 
 model InventoryItem {
-  id        String   @id @default(cuid())
-  name      String
-  category  String
-  stock     Int
-  unit      String
-  minStock  Int      @default(10)
-  price     Float
-  updatedAt DateTime @updatedAt
+  id               String          @id @default(cuid())
+  name             String
+  category         String
+  stock            Int
+  unit             String
+  minStock         Int             @default(10)
+  price            Float
+  updatedAt        DateTime        @updatedAt
+  linkedMenuItemId String?
+  movements        StockMovement[]
 
   @@index([category])
 }
 
 model MenuItem {
-  id          String  @id @default(cuid())
-  name        String
-  category    String
-  price       Float
-  description String?
-  available   Boolean @default(true)
+  id              String  @id @default(cuid())
+  name            String
+  category        String
+  price           Float
+  description     String?
+  available       Boolean @default(true)
+  inventoryItemId String?
 
   @@index([available])
   @@index([category])
@@ -214,4 +221,45 @@ model InvoiceItem {
   invoice     Invoice @relation(fields: [invoiceId], references: [id])
 
   @@index([invoiceId])
+}
+
+model StockMovement {
+  id        String        @id @default(cuid())
+  itemId    String
+  type      String        // "IN" | "OUT"
+  quantity  Int
+  reason    String?       // "PURCHASE" | "RESTAURANT_SALE" | "MANUAL_ADJUSTMENT" | "WASTE" | "INITIAL"
+  reference String?       // invoice ID or note
+  createdAt DateTime      @default(now())
+  item      InventoryItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@index([itemId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model Expense {
+  id            String   @id @default(cuid())
+  category      String   // "UTILITIES" | "SUPPLIES" | "SALARIES" | "MAINTENANCE" | "FOOD_PURCHASE" | "MARKETING" | "OTHER"
+  description   String
+  amount        Float
+  date          DateTime @default(now())
+  paymentMethod String?
+  vendor        String?
+  createdAt     DateTime @default(now())
+
+  @@index([category])
+  @@index([date])
+}
+
+model ConferenceBookingItem {
+  id                  String            @id @default(cuid())
+  conferenceBookingId String
+  description         String
+  quantity            Int               @default(1)
+  unitPrice           Float
+  totalPrice          Float
+  conferenceBooking   ConferenceBooking @relation(fields: [conferenceBookingId], references: [id], onDelete: Cascade)
+
+  @@index([conferenceBookingId])
 }

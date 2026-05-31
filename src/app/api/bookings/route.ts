@@ -6,8 +6,10 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const skip = parseInt(searchParams.get('skip') ?? '0')
     const take = Math.min(parseInt(searchParams.get('take') ?? '100'), 200)
+    const status = searchParams.get('status')
 
     const bookings = await prisma.booking.findMany({
+      where: status ? { status } : undefined,
       include: { guest: true, room: { select: { id: true, number: true, type: true } } },
       orderBy: { createdAt: 'desc' },
       skip,

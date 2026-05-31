@@ -69,7 +69,7 @@ export default function Login() {
       <SignInPage
         title={
           <>
-            Welcome to <span className="text-primary">The Kamdine Hotel</span>
+            Welcome to <span className="text-primary">Ubumwe Hotel by Kamdine</span>
           </>
         }
         description="Sign in to manage operations at our Lake Kivu property in Rutsiro."

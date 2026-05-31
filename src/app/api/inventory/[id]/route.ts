@@ -8,7 +8,7 @@ export async function PATCH(
   const params = await props.params;
   try {
     const body = await request.json();
-    const { stock, adjustment, minStock, name, category, unit, price } = body;
+    const { stock, adjustment, minStock, name, category, unit, price, reason } = body;
 
     const existing = await prisma.inventoryItem.findUnique({ where: { id: params.id } });
     if (!existing) {
@@ -16,9 +16,13 @@ export async function PATCH(
     }
 
     let nextStock = existing.stock;
+    let stockDelta = 0;
+
     if (typeof stock === 'number') {
+      stockDelta = stock - existing.stock;
       nextStock = stock;
     } else if (typeof adjustment === 'number') {
+      stockDelta = adjustment;
       nextStock = Math.max(0, existing.stock + adjustment);
     }
 
@@ -33,6 +37,18 @@ export async function PATCH(
         ...(price !== undefined && { price: parseFloat(String(price)) }),
       },
     });
+
+    // Record a StockMovement whenever stock actually changes
+    if (stockDelta !== 0) {
+      await prisma.stockMovement.create({
+        data: {
+          itemId: params.id,
+          type: stockDelta > 0 ? 'IN' : 'OUT',
+          quantity: Math.abs(stockDelta),
+          reason: reason || 'MANUAL_ADJUSTMENT',
+        },
+      });
+    }
 
     return NextResponse.json(item);
   } catch {

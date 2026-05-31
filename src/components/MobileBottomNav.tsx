@@ -7,7 +7,7 @@ import { isChromelessRoute } from '@/lib/hotel-info';
 const NAV = [
   { href: '/',               icon: 'dashboard',      label: 'Home' },
   { href: '/bookings',       icon: 'book_online',    label: 'Bookings' },
-  { href: '/pos/restaurant', icon: 'restaurant',     label: 'POS' },
+  { href: '/pos/restaurant', icon: 'restaurant',     label: 'Restaurant' },
   { href: '/calendar',       icon: 'calendar_month', label: 'Calendar' },
   { href: '/notifications',  icon: 'notifications',  label: 'Alerts' },
 ];

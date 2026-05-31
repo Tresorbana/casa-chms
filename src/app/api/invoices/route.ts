@@ -21,15 +21,51 @@ export async function POST(request: Request) {
           create: items.map((item: any) => ({
             description: item.description,
             quantity: item.quantity,
-            price: item.price
-          }))
-        }
+            price: item.price,
+          })),
+        },
       },
       include: {
         items: true,
-        subInvoices: true
-      }
+        subInvoices: true,
+      },
     });
+
+    // For RESTAURANT invoices, deduct from inventory via linked MenuItems
+    if (type === 'RESTAURANT' && items && items.length > 0) {
+      for (const orderItem of items) {
+        // Look up MenuItem by name matching the invoice item description
+        const menuItem = await prisma.menuItem.findFirst({
+          where: { name: orderItem.description },
+        });
+
+        if (menuItem?.inventoryItemId) {
+          const inventoryItem = await prisma.inventoryItem.findUnique({
+            where: { id: menuItem.inventoryItemId },
+          });
+
+          if (inventoryItem) {
+            const deductQty = orderItem.quantity ?? 1;
+            const newStock = Math.max(0, inventoryItem.stock - deductQty);
+
+            await prisma.inventoryItem.update({
+              where: { id: menuItem.inventoryItemId },
+              data: { stock: newStock },
+            });
+
+            await prisma.stockMovement.create({
+              data: {
+                itemId: menuItem.inventoryItemId,
+                type: 'OUT',
+                quantity: deductQty,
+                reason: 'RESTAURANT_SALE',
+                reference: invoice.id,
+              },
+            });
+          }
+        }
+      }
+    }
 
     return NextResponse.json(invoice);
   } catch (error) {
@@ -44,7 +80,7 @@ export async function GET(request: Request) {
     const invoices = await prisma.invoice.findMany({
       take: 20,
       orderBy: { date: 'desc' },
-      include: { items: true }
+      include: { items: true },
     });
     return NextResponse.json(invoices);
   } catch (error) {

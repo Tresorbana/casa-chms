@@ -14,10 +14,11 @@ const NAV_ITEMS = [
 ];
 
 const OPS_ITEMS = [
-  { href: '/pos/restaurant', icon: 'restaurant',    label: 'Tedeum POS' },
+  { href: '/pos/restaurant', icon: 'restaurant',    label: 'Restaurant & Bar' },
   { href: '/checkout',       icon: 'receipt_long',  label: 'Checkout' },
   { href: '/invoices',       icon: 'folder_shared', label: 'Invoices' },
   { href: '/inventory',      icon: 'inventory_2',   label: 'Stock' },
+  { href: '/finance',        icon: 'account_balance', label: 'Finance' },
 ];
 
 const ADMIN_ITEMS = [
@@ -27,6 +28,7 @@ const ADMIN_ITEMS = [
 ];
 
 const CONFIG_ITEMS = [
+  { href: '/settings',            icon: 'manage_accounts', label: 'Staff & Users' },
   { href: '/settings/rooms',      icon: 'meeting_room',    label: 'Rooms & Floors' },
   { href: '/settings/conference', icon: 'groups',          label: 'Conference' },
   { href: '/settings/services',   icon: 'spa',             label: 'Services' },
@@ -91,6 +93,7 @@ export default function Sidebar() {
 
   const isActive = (path: string) => {
     if (path === '/' && (pathname === '/' || pathname === '/dashboard')) return true;
+    if (path === '/settings') return pathname === '/settings';
     if (path !== '/' && pathname.startsWith(path)) return true;
     return false;
   };

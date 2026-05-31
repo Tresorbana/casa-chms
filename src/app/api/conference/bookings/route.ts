@@ -6,7 +6,7 @@ export async function GET() {
   try {
     const bookings = await prisma.conferenceBooking.findMany({
       orderBy: { startTime: 'desc' },
-      include: { conferenceRoom: true },
+      include: { conferenceRoom: true, items: true },
     });
     return NextResponse.json(bookings);
   } catch {
@@ -29,6 +29,8 @@ export async function POST(request: Request) {
       endDate,
       totalAmount,
       bookingType = 'HOURLY',
+      linkedBookingIds,
+      notes,
     } = body;
 
     const room = await prisma.conferenceRoom.findUnique({ where: { id: conferenceRoomId } });
@@ -103,8 +105,10 @@ export async function POST(request: Request) {
         startTime: resolvedStart,
         endTime: resolvedEnd,
         totalAmount: resolvedTotal,
+        linkedBookingIds: Array.isArray(linkedBookingIds) ? linkedBookingIds : [],
+        notes: notes ?? null,
       },
-      include: { conferenceRoom: true },
+      include: { conferenceRoom: true, items: true },
     });
 
     return NextResponse.json(booking);
