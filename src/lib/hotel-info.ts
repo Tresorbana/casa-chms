@@ -11,7 +11,7 @@ export const HOTEL_INFO = {
   description:
     'Ubumwe Hotel by Kamdine — well-maintained rooms, an on-site restaurant, and a highly-rated outdoor view, known for beautiful exterior views and a relaxing lake getaway.',
   amenities: [
-    'Tedeum Restaurant & Bar',
+    'On-site Restaurant & Bar',
     'Wheelchair accessible entrance & parking',
     'Family-friendly',
   ] as const,

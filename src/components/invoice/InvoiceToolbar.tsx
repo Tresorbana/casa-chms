@@ -13,6 +13,7 @@ type InvoiceToolbarProps = {
   guestSignature?: string | null;
   invoiceType?: string;
   backLabel?: string;
+  backHref?: string;
   onStatusChange?: (status: string, paymentMethod?: string | null) => void;
 };
 
@@ -22,7 +23,8 @@ export function InvoiceToolbar({
   paymentMethod,
   guestSignature,
   invoiceType,
-  backLabel = 'Back',
+  backLabel = 'Back to Invoices',
+  backHref = '/invoices',
   onStatusChange,
 }: InvoiceToolbarProps) {
   const router = useRouter();
@@ -65,7 +67,7 @@ export function InvoiceToolbar({
       <div className="no-print sticky top-0 z-50 px-4 lg:px-6 py-3 flex flex-wrap items-center justify-between gap-3 bg-card border-b border-border">
         <button
           type="button"
-          onClick={() => router.back()}
+          onClick={() => router.push(backHref)}
           className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
           <span className="material-symbols-outlined text-[18px]">arrow_back</span>

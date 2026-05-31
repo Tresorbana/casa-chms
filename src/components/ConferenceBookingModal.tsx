@@ -41,7 +41,6 @@ export default function ConferenceBookingModal({ onClose, onSuccess, initialDate
     endTime: '',
     startDate: toDateInput(baseDate),
     endDate: toDateInput(baseDate),
-    totalAmount: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -61,13 +60,16 @@ export default function ConferenceBookingModal({ onClose, onSuccess, initialDate
     return countBookingDays(formData.startDate, formData.endDate);
   }, [formData.startDate, formData.endDate]);
 
-  useEffect(() => {
-    if (bookingMode !== 'daily' || !selectedRoom?.pricePerDay) return;
-    if (formData.totalAmount !== '' && formData.conferenceRoomId) return;
-    if (dayCount > 0) {
-      setFormData((prev) => ({ ...prev, totalAmount: String(suggestedDailyTotal) }));
-    }
-  }, [bookingMode, selectedRoom, suggestedDailyTotal, dayCount, formData.conferenceRoomId, formData.totalAmount]);
+  const calculatedHourlyTotal = useMemo(() => {
+    if (!selectedRoom?.pricePerHour || !formData.startTime || !formData.endTime) return 0;
+    const start = new Date(formData.startTime).getTime();
+    const end = new Date(formData.endTime).getTime();
+    if (end <= start) return 0;
+    const hours = (end - start) / 3600000;
+    return Math.ceil(hours) * selectedRoom.pricePerHour;
+  }, [selectedRoom, formData.startTime, formData.endTime]);
+
+  const autoTotal = bookingMode === 'daily' ? suggestedDailyTotal : calculatedHourlyTotal;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,7 +86,7 @@ export default function ConferenceBookingModal({ onClose, onSuccess, initialDate
             bookingType: 'DAILY',
             startDate: formData.startDate,
             endDate: formData.endDate,
-            totalAmount: formData.totalAmount || suggestedDailyTotal,
+            totalAmount: autoTotal,
           }
         : {
             conferenceRoomId: formData.conferenceRoomId,
@@ -94,7 +96,7 @@ export default function ConferenceBookingModal({ onClose, onSuccess, initialDate
             bookingType: 'HOURLY',
             startTime: formData.startTime,
             endTime: formData.endTime,
-            totalAmount: formData.totalAmount,
+            totalAmount: autoTotal,
           };
 
     try {
@@ -168,7 +170,7 @@ export default function ConferenceBookingModal({ onClose, onSuccess, initialDate
               required
               className={inputClass}
               value={formData.conferenceRoomId}
-              onChange={(e) => setFormData({ ...formData, conferenceRoomId: e.target.value, totalAmount: '' })}
+              onChange={(e) => setFormData({ ...formData, conferenceRoomId: e.target.value })}
             >
               <option value="">Choose a room...</option>
               {rooms?.map((room) => (
@@ -277,14 +279,12 @@ export default function ConferenceBookingModal({ onClose, onSuccess, initialDate
 
           <div>
             <label className="text-xs font-medium text-muted-foreground block mb-1.5">Total amount (RWF)</label>
-            <input
-              required
-              type="number"
-              className={inputClass}
-              placeholder={bookingMode === 'daily' ? 'Auto-calculated from daily rate' : 'Enter pricing'}
-              value={formData.totalAmount}
-              onChange={(e) => setFormData({ ...formData, totalAmount: e.target.value })}
-            />
+            <div className="w-full bg-muted border border-border rounded-lg px-4 py-2.5 flex items-center justify-between">
+              <span className="text-sm font-semibold text-foreground">
+                {autoTotal > 0 ? `RWF ${autoTotal.toLocaleString()}` : '—'}
+              </span>
+              <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Auto-calculated</span>
+            </div>
           </div>
 
           <div className="flex gap-3 pt-2">

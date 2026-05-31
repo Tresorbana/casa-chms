@@ -72,7 +72,7 @@ export default function InvoicesList() {
     <div className="min-h-screen bg-background p-4 lg:p-8 flex flex-col gap-6">
       <TopBar
         title="Invoices"
-        description="Guest folios, Tedeum restaurant bills, and payment records."
+        description="Hotel guest folios, restaurant bills, and payment records."
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <ExportButton onClick={handleExport} />
@@ -122,7 +122,7 @@ export default function InvoicesList() {
                     <td className="px-5 py-4 text-sm font-medium text-foreground">{inv.guestName}</td>
                     <td className="px-5 py-4">
                       <span className="px-2 py-1 bg-muted rounded text-[10px] font-medium uppercase text-muted-foreground">
-                        {inv.type === 'RESTAURANT' ? 'Tedeum' : inv.type}
+                        {inv.type === 'RESTAURANT' ? 'Restaurant' : inv.type}
                       </span>
                     </td>
                     <td className="px-5 py-4 text-sm text-foreground">RWF {inv.amount.toLocaleString()}</td>

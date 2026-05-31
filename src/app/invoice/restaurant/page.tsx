@@ -3,10 +3,8 @@ import React, { Suspense, useState } from 'react';
 import useSWR from 'swr';
 import { fetcher } from '@/lib/fetcher';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { HOTEL_INFO } from '@/lib/hotel-info';
-import { TEDEUM_INFO } from '@/lib/tedeum-info';
+import { HOTEL_INFO, hotelFullLocation } from '@/lib/hotel-info';
 import { formatPaymentMethod } from '@/lib/payment-methods';
-import { TedeumBrandMark } from '@/components/invoice/TedeumBrandMark';
 import { InvoiceToolbar } from '@/components/invoice/InvoiceToolbar';
 import { toast } from 'sonner';
 
@@ -114,7 +112,8 @@ function RestaurantInvoiceContent() {
         paymentMethod={displayMethod}
         guestSignature={apiInvoice.guestSignature}
         invoiceType="RESTAURANT"
-        backLabel="Back to POS"
+        backLabel="Back to Restaurant"
+        backHref="/pos/restaurant"
         onStatusChange={(s, m) => {
           setStatus(s);
           setPaymentMethod(m ?? null);
@@ -139,8 +138,12 @@ function RestaurantInvoiceContent() {
           </div>
 
           <div className="flex flex-col items-center pt-4 pb-6 px-8 border-b border-border">
-            <TedeumBrandMark centered />
-            <p className="text-xs text-muted-foreground mt-3 text-center">{TEDEUM_INFO.parentHotel}</p>
+            <div className="w-14 h-14 rounded-xl bg-primary flex items-center justify-center shadow-sm mb-3">
+              <span className="material-symbols-outlined text-primary-foreground text-[30px]">restaurant</span>
+            </div>
+            <h1 className="text-xl font-semibold text-slate-900 tracking-tight">{HOTEL_INFO.name}</h1>
+            <p className="text-sm font-medium text-primary">Restaurant & Bar</p>
+            <p className="text-xs text-muted-foreground mt-1 text-center">{hotelFullLocation()}</p>
             <p className="text-xs text-muted-foreground">{HOTEL_INFO.phone}</p>
           </div>
 
@@ -283,12 +286,12 @@ function RestaurantInvoiceContent() {
                   <p className="font-serif italic text-foreground">{apiInvoice.guestSignature}</p>
                 </div>
               )}
-              <p className="text-center text-xs text-muted-foreground">Thank you for dining at {TEDEUM_INFO.name}</p>
+              <p className="text-center text-xs text-muted-foreground">Thank you for dining at {HOTEL_INFO.name}</p>
             </div>
           )}
 
           <div className="bg-muted/30 border-t border-border px-8 py-4 text-center text-xs text-muted-foreground">
-            {TEDEUM_INFO.name} {TEDEUM_INFO.subtitle} · {HOTEL_INFO.phone}
+            {HOTEL_INFO.name} — Restaurant & Bar · {HOTEL_INFO.phone}
           </div>
         </div>
       </div>
