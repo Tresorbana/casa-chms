@@ -64,6 +64,7 @@ function InvoicePageContent() {
           .no-print { display: none !important; }
           .invoice-wrap { padding: 0 !important; }
           .invoice-card { box-shadow: none !important; border: none !important; }
+          main { padding-left: 0 !important; }
         }
       `}</style>
 

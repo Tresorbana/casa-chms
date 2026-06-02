@@ -30,11 +30,11 @@ export async function POST(request: Request) {
                 guestContact: guestContact || null,
                 quantity: parseInt(quantity),
                 totalPrice,
-                status: isWalkIn ? 'PAID' : 'PENDING',
+                status: 'PENDING',
             },
         });
 
-        // Walk-in charges are paid immediately — create a SERVICE invoice for finance tracking
+        // Walk-in charges generate an UNPAID invoice — staff confirms payment separately
         let invoice = null;
         if (isWalkIn) {
             invoice = await prisma.invoice.create({
@@ -42,8 +42,7 @@ export async function POST(request: Request) {
                     guestName,
                     amount: totalPrice,
                     type: 'SERVICE',
-                    status: 'PAID',
-                    paidAt: new Date(),
+                    status: 'UNPAID',
                     items: {
                         create: [{
                             description: service.name,

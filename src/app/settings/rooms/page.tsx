@@ -57,6 +57,15 @@ export default function RoomSettings() {
     } catch { toast.error('Failed to delete room'); }
   };
 
+  const handleToggleMaintenance = async (room: any) => {
+    const next = room.status === 'MAINTENANCE' ? 'AVAILABLE' : 'MAINTENANCE';
+    try {
+      await fetch('/api/rooms', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: room.id, status: next }) });
+      mutate('/api/floors');
+      toast.success(next === 'MAINTENANCE' ? `Room ${room.number} set to maintenance` : `Room ${room.number} is now available`);
+    } catch { toast.error('Failed to update room status'); }
+  };
+
   return (
     <div className="min-h-screen bg-background p-4 lg:p-8 flex flex-col gap-6">
       <TopBar
@@ -138,19 +147,38 @@ export default function RoomSettings() {
               )}
 
               <div className="p-5 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-                {floor.rooms?.map((room: any) => (
-                  <div key={room.id} className="relative group bg-muted/50 border border-border rounded-lg p-3 text-center hover:border-primary/30 transition-all">
+                {floor.rooms?.map((room: any) => {
+                  const isMaintenance = room.status === 'MAINTENANCE';
+                  return (
+                  <div key={room.id} className={`relative group rounded-lg p-3 text-center transition-all border ${isMaintenance ? 'bg-amber-50 dark:bg-amber-950/20 border-amber-300 dark:border-amber-800' : 'bg-muted/50 border-border hover:border-primary/30'}`}>
                     <button
                       onClick={() => handleDeleteRoom(room.id)}
                       className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                      title="Delete room"
                     >
                       <span className="material-symbols-outlined text-[14px]">close</span>
                     </button>
                     <span className="text-[10px] text-muted-foreground uppercase tracking-wider block mb-0.5">{room.type}</span>
-                    <span className="text-base font-semibold text-foreground block">{room.number}</span>
+                    <span className={`text-base font-semibold block ${isMaintenance ? 'text-amber-700 dark:text-amber-400' : 'text-foreground'}`}>{room.number}</span>
                     <span className="text-[10px] text-muted-foreground block mt-0.5">RWF {room.price?.toLocaleString()}</span>
+                    {isMaintenance && (
+                      <span className="text-[9px] font-medium text-amber-600 uppercase tracking-wider block mt-1">Maintenance</span>
+                    )}
+                    <button
+                      onClick={() => handleToggleMaintenance(room)}
+                      title={isMaintenance ? 'Mark as available' : 'Set to maintenance'}
+                      className={`mt-2 w-full flex items-center justify-center gap-1 rounded px-1 py-0.5 text-[9px] font-medium transition-colors opacity-0 group-hover:opacity-100 ${
+                        isMaintenance
+                          ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400'
+                          : 'bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-400'
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-[11px]">{isMaintenance ? 'check_circle' : 'build'}</span>
+                      {isMaintenance ? 'Available' : 'Maintenance'}
+                    </button>
                   </div>
-                ))}
+                  );
+                })}
                 {(!floor.rooms || floor.rooms.length === 0) && (
                   <div className="col-span-full py-6 text-center text-muted-foreground text-xs">No rooms on this floor yet.</div>
                 )}

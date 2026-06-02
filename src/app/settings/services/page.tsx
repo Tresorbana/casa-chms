@@ -4,6 +4,8 @@ import useSWR, { mutate } from 'swr';
 import { fetcher } from '@/lib/fetcher';
 import { toast } from 'sonner';
 import TopBar from '@/components/TopBar';
+import { MarkPaidDialog } from '@/components/invoice/MarkPaidDialog';
+import { type PaymentMethodId, formatPaymentMethod } from '@/lib/payment-methods';
 
 const inputClass = "w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring outline-none transition-all";
 
@@ -22,6 +24,7 @@ export default function ServicesSettings() {
   const [assignForm, setAssignForm] = useState({ type: 'RESIDENT', serviceId: '', bookingId: '', guestName: '', guestContact: '', quantity: 1 });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lastInvoiceId, setLastInvoiceId] = useState<string | null>(null);
+  const [payDialog, setPayDialog] = useState<{ open: boolean; invoiceId: string | null }>({ open: false, invoiceId: null });
 
   const handleCreateService = async () => {
     if (!createForm.name || !createForm.price) { toast.error('Name and price are required'); return; }
@@ -67,9 +70,7 @@ export default function ServicesSettings() {
 
       if (assignForm.type === 'WALKIN' && data.invoiceId) {
         setLastInvoiceId(data.invoiceId);
-        toast.success('Service charged — invoice created', {
-          action: { label: 'View Invoice', onClick: () => window.open(`/invoice/${data.invoiceId}`, '_blank') },
-        });
+        setPayDialog({ open: true, invoiceId: data.invoiceId });
       } else {
         toast.success('Service added to guest folio');
       }
@@ -84,6 +85,23 @@ export default function ServicesSettings() {
       mutate('/api/services');
       toast.success('Service deleted');
     } catch { toast.error('Failed to delete service'); }
+  };
+
+  const handleConfirmPayment = async (method: PaymentMethodId) => {
+    if (!payDialog.invoiceId) return;
+    const res = await fetch(`/api/invoices/${payDialog.invoiceId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'PAID', paymentMethod: method }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Failed to confirm payment');
+    }
+    toast.success(`Payment confirmed via ${formatPaymentMethod(method)}`, {
+      action: { label: 'View Invoice', onClick: () => window.open(`/invoice/${payDialog.invoiceId}`, '_blank') },
+    });
+    setPayDialog({ open: false, invoiceId: null });
   };
 
   return (
@@ -282,6 +300,12 @@ export default function ServicesSettings() {
           )}
         </div>
       )}
+
+      <MarkPaidDialog
+        open={payDialog.open}
+        onClose={() => setPayDialog({ open: false, invoiceId: null })}
+        onConfirm={handleConfirmPayment}
+      />
     </div>
   );
 }
