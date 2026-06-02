@@ -124,29 +124,6 @@ export default function Settings() {
         </div>
 
         <div className="space-y-6">
-          {/* Config */}
-          <div className="bg-card border border-border rounded-xl p-5">
-            <h3 className="text-sm font-semibold text-foreground mb-4">Configuration</h3>
-            <div className="space-y-4">
-              {[
-                { label: 'VAT Rate', value: '15.0%' },
-                { label: 'Service Charge', value: '10.0%' },
-                { label: 'Currency', value: 'RWF' },
-              ].map(item => (
-                <div key={item.label} className="flex justify-between items-center py-3 border-b border-border last:border-0">
-                  <span className="text-sm text-muted-foreground">{item.label}</span>
-                  <span className="text-sm font-semibold text-foreground">{item.value}</span>
-                </div>
-              ))}
-            </div>
-            <button
-              onClick={() => toast.info('Configuration saved')}
-              className="w-full mt-4 py-2.5 border border-border rounded-lg text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
-            >
-              Update Configuration
-            </button>
-          </div>
-
           {/* System Info */}
           <div className="bg-card border border-border rounded-xl p-5">
             <h4 className="text-sm font-semibold text-foreground mb-4">System Info</h4>

@@ -11,15 +11,17 @@ export default function ServicesSettings() {
   const { data: servicesData, isLoading } = useSWR('/api/services', fetcher, {
     onError: () => toast.error('Failed to load services'),
   });
-  const { data: bookingsData } = useSWR('/api/bookings?status=CHECKED_IN', fetcher);
+  // Use checkout API which correctly returns all currently in-house guests (CONFIRMED + CHECKED_IN with checkIn <= now)
+  const { data: checkoutData } = useSWR('/api/checkout', fetcher);
 
   const services = Array.isArray(servicesData) ? servicesData : [];
-  const activeBookings = Array.isArray(bookingsData) ? bookingsData : [];
+  const activeBookings: any[] = Array.isArray(checkoutData?.occupied) ? checkoutData.occupied : [];
 
   const [modal, setModal] = useState<'create' | 'assign' | null>(null);
   const [createForm, setCreateForm] = useState({ name: '', price: '', unit: 'session' });
   const [assignForm, setAssignForm] = useState({ type: 'RESIDENT', serviceId: '', bookingId: '', guestName: '', guestContact: '', quantity: 1 });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [lastInvoiceId, setLastInvoiceId] = useState<string | null>(null);
 
   const handleCreateService = async () => {
     if (!createForm.name || !createForm.price) { toast.error('Name and price are required'); return; }
@@ -45,17 +47,32 @@ export default function ServicesSettings() {
 
   const handleAssignService = async () => {
     if (!assignForm.serviceId) { toast.error('Please select a service'); return; }
+    if (assignForm.type === 'RESIDENT' && !assignForm.bookingId) { toast.error('Please select an active booking'); return; }
+    if (assignForm.type === 'WALKIN' && (!assignForm.guestName || !assignForm.guestContact)) { toast.error('Guest name and contact are required'); return; }
     setIsSubmitting(true);
     try {
+      const payload = assignForm.type === 'RESIDENT'
+        ? { serviceId: assignForm.serviceId, bookingId: assignForm.bookingId, quantity: assignForm.quantity }
+        : { serviceId: assignForm.serviceId, guestName: assignForm.guestName, guestContact: assignForm.guestContact, quantity: assignForm.quantity };
+
       const res = await fetch('/api/services/charge', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(assignForm),
+        body: JSON.stringify(payload),
       });
       if (!res.ok) { toast.error('Failed to assign service'); return; }
+      const data = await res.json();
       setModal(null);
       setAssignForm({ type: 'RESIDENT', serviceId: '', bookingId: '', guestName: '', guestContact: '', quantity: 1 });
-      toast.success('Service assigned');
+
+      if (assignForm.type === 'WALKIN' && data.invoiceId) {
+        setLastInvoiceId(data.invoiceId);
+        toast.success('Service charged — invoice created', {
+          action: { label: 'View Invoice', onClick: () => window.open(`/invoice/${data.invoiceId}`, '_blank') },
+        });
+      } else {
+        toast.success('Service added to guest folio');
+      }
     } catch { toast.error('Failed to assign service'); }
     finally { setIsSubmitting(false); }
   };
@@ -93,6 +110,23 @@ export default function ServicesSettings() {
           </div>
         }
       />
+
+      {lastInvoiceId && (
+        <div className="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+          <span className="material-symbols-outlined text-emerald-600 text-[20px]">receipt_long</span>
+          <p className="text-sm text-emerald-800 flex-1">Walk-in invoice generated successfully.</p>
+          <a
+            href={`/invoice/${lastInvoiceId}`}
+            target="_blank"
+            className="text-sm font-medium text-emerald-700 hover:underline"
+          >
+            View Invoice →
+          </a>
+          <button onClick={() => setLastInvoiceId(null)} className="text-emerald-500 hover:text-emerald-700">
+            <span className="material-symbols-outlined text-[16px]">close</span>
+          </button>
+        </div>
+      )}
 
       {/* Create Service Modal */}
       {modal === 'create' && (
@@ -147,7 +181,7 @@ export default function ServicesSettings() {
                 {['RESIDENT', 'WALKIN'].map(t => (
                   <button
                     key={t}
-                    onClick={() => setAssignForm({ ...assignForm, type: t })}
+                    onClick={() => setAssignForm({ ...assignForm, type: t, bookingId: '', guestName: '', guestContact: '' })}
                     className={`flex-1 py-2 rounded-md text-xs font-medium transition-all ${assignForm.type === t ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
                   >
                     {t === 'RESIDENT' ? 'Resident (Room)' : 'Walk-in'}
@@ -163,34 +197,54 @@ export default function ServicesSettings() {
               </div>
               {assignForm.type === 'RESIDENT' ? (
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground block mb-1.5">Active Room Booking</label>
+                  <label className="text-xs font-medium text-muted-foreground block mb-1.5">
+                    Active Room Booking
+                    {activeBookings.length === 0 && (
+                      <span className="ml-2 text-amber-600">(no guests currently checked in)</span>
+                    )}
+                  </label>
                   <select className={inputClass} value={assignForm.bookingId} onChange={e => setAssignForm({ ...assignForm, bookingId: e.target.value })}>
-                    <option value="">Select active booking...</option>
+                    <option value="">
+                      {activeBookings.length === 0 ? 'No active guests — use Walk-in tab' : 'Select active booking...'}
+                    </option>
                     {activeBookings.map((b: any) => (
-                      <option key={b.id} value={b.id}>Room {b.room?.number} – {b.guest?.name}</option>
+                      <option key={b.bookingId} value={b.bookingId}>
+                        Room {b.roomNumber} – {b.guestName}
+                      </option>
                     ))}
                   </select>
+                  {activeBookings.length === 0 && (
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      No guests have checked in yet. Switch to the <button className="text-primary hover:underline" onClick={() => setAssignForm({ ...assignForm, type: 'WALKIN' })}>Walk-in tab</button> to charge a non-resident.
+                    </p>
+                  )}
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-xs font-medium text-muted-foreground block mb-1.5">Guest Name</label>
-                    <input type="text" className={inputClass} placeholder="Full Name" value={assignForm.guestName} onChange={e => setAssignForm({ ...assignForm, guestName: e.target.value })} />
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs font-medium text-muted-foreground block mb-1.5">Guest Name</label>
+                      <input type="text" className={inputClass} placeholder="Full Name" value={assignForm.guestName} onChange={e => setAssignForm({ ...assignForm, guestName: e.target.value })} />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-muted-foreground block mb-1.5">Contact</label>
+                      <input type="text" className={inputClass} placeholder="Phone" value={assignForm.guestContact} onChange={e => setAssignForm({ ...assignForm, guestContact: e.target.value })} />
+                    </div>
                   </div>
-                  <div>
-                    <label className="text-xs font-medium text-muted-foreground block mb-1.5">Contact</label>
-                    <input type="text" className={inputClass} placeholder="Phone" value={assignForm.guestContact} onChange={e => setAssignForm({ ...assignForm, guestContact: e.target.value })} />
+                  <div className="flex items-start gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <span className="material-symbols-outlined text-blue-500 text-[16px] mt-0.5">info</span>
+                    <p className="text-xs text-blue-700">An invoice will be generated automatically for walk-in service charges.</p>
                   </div>
                 </div>
               )}
               <div>
                 <label className="text-xs font-medium text-muted-foreground block mb-1.5">Quantity</label>
-                <input type="number" min="1" className={inputClass} value={assignForm.quantity} onChange={e => setAssignForm({ ...assignForm, quantity: parseInt(e.target.value) })} />
+                <input type="number" min="1" className={inputClass} value={assignForm.quantity} onChange={e => setAssignForm({ ...assignForm, quantity: parseInt(e.target.value) || 1 })} />
               </div>
               <div className="flex gap-3 pt-2">
                 <button onClick={() => setModal(null)} className="flex-1 px-4 py-2.5 rounded-lg text-sm text-muted-foreground border border-border hover:bg-accent transition-colors">Cancel</button>
                 <button onClick={handleAssignService} disabled={isSubmitting} className="flex-1 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">
-                  {isSubmitting ? 'Assigning...' : 'Confirm Charge'}
+                  {isSubmitting ? 'Processing...' : assignForm.type === 'WALKIN' ? 'Charge & Generate Invoice' : 'Add to Folio'}
                 </button>
               </div>
             </div>
