@@ -119,7 +119,7 @@ export default function Sidebar() {
       {/* Sidebar */}
       <aside
         className={`fixed left-0 top-0 h-full z-50 flex flex-col bg-sidebar border-r border-sidebar-border
-          transition-all duration-300 overflow-hidden
+          transition-all duration-300 overflow-hidden print:hidden
           w-64 ${desktopWidth}
           ${mobileTranslate} lg:translate-x-0`}
       >

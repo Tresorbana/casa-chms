@@ -8,8 +8,9 @@ import { ExportButton } from '@/components/ExportButton';
 import { exportToExcel, roomExportRows } from '@/lib/export-excel';
 
 const STATUS_CONFIG: Record<string, { dot: string; bg: string; text: string; border: string }> = {
-  AVAILABLE: { dot: 'bg-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-950/30', text: 'text-emerald-700 dark:text-emerald-400', border: 'border-emerald-200 dark:border-emerald-800' },
-  OCCUPIED:  { dot: 'bg-blue-500',    bg: 'bg-blue-50 dark:bg-blue-950/30',       text: 'text-blue-700 dark:text-blue-400',       border: 'border-blue-200 dark:border-blue-800' },
+  AVAILABLE:   { dot: 'bg-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-950/30', text: 'text-emerald-700 dark:text-emerald-400', border: 'border-emerald-200 dark:border-emerald-800' },
+  OCCUPIED:    { dot: 'bg-blue-500',    bg: 'bg-blue-50 dark:bg-blue-950/30',       text: 'text-blue-700 dark:text-blue-400',       border: 'border-blue-200 dark:border-blue-800' },
+  MAINTENANCE: { dot: 'bg-amber-500',   bg: 'bg-amber-50 dark:bg-amber-950/30',     text: 'text-amber-700 dark:text-amber-400',     border: 'border-amber-200 dark:border-amber-800' },
 };
 
 export default function RoomStatus() {
@@ -20,19 +21,17 @@ export default function RoomStatus() {
 
   const safeRooms = Array.isArray(rooms) ? rooms : [];
   const stats = {
-    total:     safeRooms.length,
-    available: safeRooms.filter((r: any) => r.status === 'AVAILABLE').length,
-    occupied:  safeRooms.filter((r: any) => r.status === 'OCCUPIED').length,
+    total:       safeRooms.length,
+    available:   safeRooms.filter((r: any) => r.status === 'AVAILABLE').length,
+    occupied:    safeRooms.filter((r: any) => r.status === 'OCCUPIED').length,
+    maintenance: safeRooms.filter((r: any) => r.status === 'MAINTENANCE').length,
   };
 
-  // Only show AVAILABLE and OCCUPIED rooms
-  const visibleRooms = safeRooms.filter((r: any) => r.status === 'AVAILABLE' || r.status === 'OCCUPIED');
-  const filteredRooms = visibleRooms.filter((r: any) => filter === 'ALL' || r.status === filter);
+  const filteredRooms = safeRooms.filter((r: any) => filter === 'ALL' || r.status === filter);
 
   const handleExport = () => {
-    const source = filter === 'ALL' ? visibleRooms : filteredRooms;
     exportToExcel(
-      roomExportRows(source),
+      roomExportRows(filteredRooms),
       `Rooms_${filter}_${new Date().toISOString().split('T')[0]}`,
       'Rooms'
     );
@@ -44,15 +43,16 @@ export default function RoomStatus() {
       <TopBar
         title="Room Status"
         description="Real-time status of all hotel rooms."
-        actions={<ExportButton onClick={handleExport} disabled={!visibleRooms.length} />}
+        actions={<ExportButton onClick={handleExport} disabled={!safeRooms.length} />}
       />
 
       {/* Summary strip */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Total Rooms', value: stats.total, dot: '' },
-          { label: 'Available',   value: stats.available, dot: 'bg-emerald-500' },
-          { label: 'Occupied',    value: stats.occupied,  dot: 'bg-blue-500' },
+          { label: 'Total Rooms',  value: stats.total,       dot: '' },
+          { label: 'Available',    value: stats.available,   dot: 'bg-emerald-500' },
+          { label: 'Occupied',     value: stats.occupied,    dot: 'bg-blue-500' },
+          { label: 'Maintenance',  value: stats.maintenance, dot: 'bg-amber-500' },
         ].map(item => (
           <div key={item.label} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
             {item.dot && <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${item.dot}`} />}
@@ -65,8 +65,8 @@ export default function RoomStatus() {
       </div>
 
       {/* Filter tabs */}
-      <div className="flex gap-2">
-        {(['ALL', 'AVAILABLE', 'OCCUPIED'] as const).map((s) => {
+      <div className="flex flex-wrap gap-2">
+        {(['ALL', 'AVAILABLE', 'OCCUPIED', 'MAINTENANCE'] as const).map((s) => {
           const cfg = STATUS_CONFIG[s as keyof typeof STATUS_CONFIG];
           const count = s === 'ALL' ? stats.total : stats[s.toLowerCase() as keyof typeof stats];
           return (
@@ -107,7 +107,7 @@ export default function RoomStatus() {
                 </div>
                 <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">{room.type}</p>
                 <p className={`text-xs ${cfg.text}`}>
-                  {room.status === 'OCCUPIED' ? 'Occupied' : 'Available'}
+                  {room.status === 'OCCUPIED' ? 'Occupied' : room.status === 'MAINTENANCE' ? 'Maintenance' : 'Available'}
                 </p>
               </div>
             );
