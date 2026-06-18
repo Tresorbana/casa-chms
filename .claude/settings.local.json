@@ -14,8 +14,7 @@
       "Bash(mkdir -p \"D:/Money/Casa-All/Casa/chms/src/app/api/conference/[id]/items\")",
       "Bash(mkdir -p \"D:/Money/Casa-All/Casa/chms/src/app/api/conference/[id]/invoice\")",
       "Bash(npx prisma *)",
-      "Bash(npx tsc *)",
-      "Bash(wait *)"
+      "Bash(npx tsc *)"
     ]
   }
 }
