@@ -13,7 +13,9 @@ const EXPENSE_CATEGORIES = [
   'SALARIES',
   'MAINTENANCE',
   'FOOD_PURCHASE',
-  'MARKETING',
+  'TRANSPORT',
+  'RENT',
+  'FUEL',
   'OTHER',
 ];
 
@@ -23,7 +25,9 @@ const CATEGORY_LABELS: Record<string, string> = {
   SALARIES: 'Salaries & Wages',
   MAINTENANCE: 'Maintenance',
   FOOD_PURCHASE: 'Food & Beverage Purchase',
-  MARKETING: 'Marketing',
+  TRANSPORT: 'Transport',
+  RENT: 'Rent',
+  FUEL: 'Fuel',
   OTHER: 'Other',
 };
 
@@ -41,7 +45,9 @@ function categoryColor(cat: string) {
     SALARIES: 'bg-amber-100 text-amber-700',
     MAINTENANCE: 'bg-orange-100 text-orange-700',
     FOOD_PURCHASE: 'bg-green-100 text-green-700',
-    MARKETING: 'bg-pink-100 text-pink-700',
+    TRANSPORT: 'bg-pink-100 text-pink-700',
+    RENT: 'bg-pink-100 text-pink-700',
+    FUEL: 'bg-amber-100 text-amber-700',
     OTHER: 'bg-muted text-muted-foreground',
   };
   return map[cat] || 'bg-muted text-muted-foreground';
