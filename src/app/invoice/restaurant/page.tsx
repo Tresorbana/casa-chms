@@ -90,6 +90,7 @@ function RestaurantInvoiceContent() {
   const subtotal =
     apiInvoice.items?.reduce((s: number, i: { price: number; quantity: number }) => s + i.price * i.quantity, 0) ??
     apiInvoice.amount;
+  const itemCount = apiInvoice.items?.reduce((s: number, i: { quantity: number }) => s + i.quantity, 0) ?? 0;
   const grandTotal = apiInvoice.amount;
   const invoiceRef = `TED-${apiInvoice.id.slice(-8).toUpperCase()}`;
   const invoiceDate = new Date(apiInvoice.date);
@@ -188,41 +189,88 @@ function RestaurantInvoiceContent() {
             </div>
           </div>
 
-          <div className="px-8 py-6">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left pb-3 text-[11px] font-medium text-muted-foreground uppercase">Item</th>
-                  <th className="text-center pb-3 text-[11px] font-medium text-muted-foreground uppercase w-12">Qty</th>
-                  <th className="text-right pb-3 text-[11px] font-medium text-muted-foreground uppercase w-28">Price</th>
-                  <th className="text-right pb-3 text-[11px] font-medium text-muted-foreground uppercase w-28">Total</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {apiInvoice.items?.map(
-                  (item: { id: string; description: string; quantity: number; price: number }, i: number) => (
-                    <tr key={item.id || i}>
-                      <td className="py-3 font-medium text-foreground">{item.description}</td>
-                      <td className="py-3 text-center text-muted-foreground">{item.quantity}</td>
-                      <td className="py-3 text-right text-muted-foreground">RWF {item.price.toLocaleString()}</td>
-                      <td className="py-3 text-right font-medium text-foreground">
-                        RWF {(item.quantity * item.price).toLocaleString()}
-                      </td>
-                    </tr>
-                  )
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="px-8 pb-6 flex flex-col items-end gap-2 border-t border-border pt-6">
-            <div className="flex justify-between w-full max-w-[260px] text-sm text-muted-foreground">
-              <span>Subtotal</span>
-              <span>RWF {subtotal.toLocaleString()}</span>
+          <div className="px-8 py-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-medium text-primary uppercase tracking-wider">Ordered items</p>
+                <p className="text-sm text-muted-foreground">{itemCount} item{itemCount !== 1 ? 's' : ''} on this bill</p>
+              </div>
+              <div className="rounded-full border border-border bg-muted/40 px-3 py-1 text-xs text-muted-foreground">
+                {apiInvoice.items?.length || 0} line item{(apiInvoice.items?.length || 0) !== 1 ? 's' : ''}
+              </div>
             </div>
-            <div className="flex justify-between w-full max-w-[260px] pt-3 border-t border-border">
-              <span className="text-lg font-semibold text-foreground">Total</span>
-              <span className="text-xl font-semibold text-primary">RWF {grandTotal.toLocaleString()}</span>
+
+            <div className="overflow-hidden rounded-xl border border-border">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/50">
+                  <tr>
+                    <th className="text-left px-4 py-3 text-[11px] font-medium text-muted-foreground uppercase">Item</th>
+                    <th className="text-center px-4 py-3 text-[11px] font-medium text-muted-foreground uppercase w-16">Qty</th>
+                    <th className="text-right px-4 py-3 text-[11px] font-medium text-muted-foreground uppercase w-32">Unit</th>
+                    <th className="text-right px-4 py-3 text-[11px] font-medium text-muted-foreground uppercase w-32">Total</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border bg-card">
+                  {apiInvoice.items?.map(
+                    (item: { id: string; description: string; quantity: number; price: number }, i: number) => (
+                      <tr key={item.id || i} className="hover:bg-muted/30 transition-colors">
+                        <td className="px-4 py-4">
+                          <div className="flex items-start gap-3">
+                            <div className="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center text-[11px] font-semibold flex-shrink-0">
+                              {String(i + 1).padStart(2, '0')}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-medium text-foreground">{item.description}</p>
+                              <p className="text-[11px] text-muted-foreground mt-0.5">
+                                Menu line #{String(i + 1).padStart(2, '0')}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4 text-center text-muted-foreground font-medium">{item.quantity}</td>
+                        <td className="px-4 py-4 text-right text-muted-foreground">RWF {item.price.toLocaleString()}</td>
+                        <td className="px-4 py-4 text-right font-semibold text-foreground">
+                          RWF {(item.quantity * item.price).toLocaleString()}
+                        </td>
+                      </tr>
+                    )
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+              <div className="rounded-xl border border-border bg-muted/30 p-4">
+                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Order summary</p>
+                <div className="mt-3 space-y-2 text-sm">
+                  <div className="flex justify-between gap-4">
+                    <span className="text-muted-foreground">Items</span>
+                    <span className="font-medium text-foreground">{itemCount}</span>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <span className="text-muted-foreground">Lines</span>
+                    <span className="font-medium text-foreground">{apiInvoice.items?.length || 0}</span>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <span className="text-muted-foreground">Payment</span>
+                    <span className="font-medium text-foreground">{formatPaymentMethod(displayMethod)}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-border bg-primary/5 p-4">
+                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Totals</p>
+                <div className="mt-3 space-y-2">
+                  <div className="flex justify-between text-sm text-muted-foreground">
+                    <span>Subtotal</span>
+                    <span>RWF {subtotal.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between items-end pt-2 border-t border-border">
+                    <span className="text-lg font-semibold text-foreground">Total</span>
+                    <span className="text-2xl font-semibold text-primary">RWF {grandTotal.toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 

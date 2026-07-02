@@ -10,9 +10,10 @@ import { exportWorkbook, sheetsFromReportData } from '@/lib/export-excel';
 
 export default function PosRestaurant() {
   const { data: menuItems, error } = useSWR('/api/pos/menu', fetcher);
+  const { data: checkoutData } = useSWR('/api/checkout', fetcher);
   const [orderType, setOrderType] = useState('resident');
   const [cart, setCart] = useState<any[]>([]);
-  const [residentRoom, setResidentRoom] = useState('');
+  const [residentRoomId, setResidentRoomId] = useState('');
   const [walkInName, setWalkInName] = useState('');
   const [walkInContact, setWalkInContact] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -22,6 +23,7 @@ export default function PosRestaurant() {
   const router = useRouter();
 
   const safeItems = Array.isArray(menuItems) ? menuItems : [];
+  const occupiedRooms = Array.isArray(checkoutData?.occupied) ? checkoutData.occupied : [];
   const categories = ['All Items', ...Array.from(new Set(safeItems.map((item: any) => item.category)))];
   const filteredItems = safeItems.filter((item: any) => {
     const matchCat = selectedCategory === 'All Items' || item.category === selectedCategory;
@@ -37,10 +39,14 @@ export default function PosRestaurant() {
 
   const handleFinalize = async () => {
     if (cart.length === 0) { toast.error('Cart is empty'); return; }
+    if (orderType === 'resident' && !residentRoomId) {
+      toast.error('Please choose an occupied room');
+      return;
+    }
     setIsSubmitting(true);
     try {
       const guestDescription = orderType === 'resident'
-        ? `Room ${residentRoom}`
+        ? `Room ${occupiedRooms.find((room: any) => room.roomId === residentRoomId)?.roomNumber || ''}`.trim()
         : `${walkInName || 'Guest'} (${walkInContact || 'No Contact'})`;
       const res = await fetch('/api/invoices', {
         method: 'POST',
@@ -49,6 +55,8 @@ export default function PosRestaurant() {
           guestName: guestDescription,
           amount: cartTotal,
           type: 'RESTAURANT',
+          customerType: orderType === 'resident' ? 'RESIDENT' : 'WALKIN',
+          roomId: orderType === 'resident' ? residentRoomId : null,
           items: cart.map((item) => ({ description: item.name, quantity: 1, price: item.price })),
         }),
       });
@@ -191,7 +199,25 @@ export default function PosRestaurant() {
             ))}
           </div>
           {orderType === 'resident' ? (
-            <input className={inputClass} placeholder="Room Number..." value={residentRoom} onChange={e => setResidentRoom(e.target.value)} />
+            <div className="space-y-2">
+              <select
+                className={inputClass}
+                value={residentRoomId}
+                onChange={e => setResidentRoomId(e.target.value)}
+              >
+                <option value="">Select occupied room...</option>
+                {occupiedRooms.map((room: any) => (
+                  <option key={room.roomId} value={room.roomId}>
+                    Room {room.roomNumber} — {room.guestName}
+                  </option>
+                ))}
+              </select>
+              {occupiedRooms.length === 0 && (
+                <p className="text-xs text-amber-600">
+                  No occupied rooms available right now. Please check in a guest first.
+                </p>
+              )}
+            </div>
           ) : (
             <div className="space-y-2">
               <input className={inputClass} placeholder="Guest Name..." value={walkInName} onChange={e => setWalkInName(e.target.value)} />

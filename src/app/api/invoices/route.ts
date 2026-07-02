@@ -1,10 +1,43 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 
+async function findOccupiedRoom(roomId: string) {
+  const now = new Date();
+  const room = await prisma.room.findFirst({
+    where: { OR: [{ id: roomId }, { number: roomId }] },
+    include: {
+      bookings: {
+        where: {
+          status: { in: ['CONFIRMED', 'CHECKED_IN'] },
+          checkIn: { lte: now },
+        },
+        orderBy: { checkIn: 'desc' },
+        include: { guest: true },
+        take: 1,
+      },
+    },
+  });
+
+  const booking = room?.bookings[0] ?? null;
+  if (!room || !booking || room.status !== 'OCCUPIED') return null;
+  return { room, booking };
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { guestName, amount, type, items, masterInvoiceId } = body;
+    const { guestName, amount, type, items, masterInvoiceId, customerType, roomId } = body;
+
+    if (type === 'RESTAURANT' && roomId) {
+      const occupiedRoom = await findOccupiedRoom(roomId);
+      if (!occupiedRoom) {
+        return NextResponse.json({ error: 'That room is not occupied right now' }, { status: 400 });
+      }
+    }
+
+    if (type === 'RESTAURANT' && customerType === 'RESIDENT' && !roomId) {
+      return NextResponse.json({ error: 'Resident orders require an occupied room' }, { status: 400 });
+    }
 
     // Validation for Master Invoice
     if (type === 'MASTER' && (!items || items.length === 0)) {

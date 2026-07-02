@@ -1,9 +1,11 @@
 'use client';
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import useSWR from 'swr';
 import { toast } from 'sonner';
 import TopBar from '@/components/TopBar';
 import { countries } from '@/lib/countries';
+import { fetcher } from '@/lib/fetcher';
 
 const inputClass = "w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:border-ring outline-none transition-all";
 const labelClass = "text-xs font-medium text-muted-foreground";
@@ -12,28 +14,43 @@ function BookingsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const roomNumberParam = searchParams.get('roomNumber');
+  const { data: roomsData } = useSWR('/api/rooms', fetcher);
 
   const [formData, setFormData] = useState({
-    name: '', phone: '', email: '', idNumber: '', nationality: '',
-    address: '', checkIn: '', checkOut: '', roomType: '',
-    roomNumber: roomNumberParam || '', adults: 1, children: 0, specialRequests: ''
+    name: '',
+    phone: '',
+    email: '',
+    idNumber: '',
+    nationality: '',
+    address: '',
+    checkIn: '',
+    checkOut: '',
+    roomType: '',
+    roomNumber: roomNumberParam || '',
+    adults: 1,
+    children: 0,
+    specialRequests: '',
   });
   const [estimatedTotal, setEstimatedTotal] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const rooms = Array.isArray(roomsData) ? roomsData : [];
+  const selectedRoom = rooms.find((room: any) => room.number === formData.roomNumber);
+
   useEffect(() => {
-    if (formData.checkIn && formData.checkOut && formData.roomType) {
+    if (formData.checkIn && formData.checkOut && selectedRoom) {
       const start = new Date(formData.checkIn);
       const end = new Date(formData.checkOut);
       const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-      const rates: any = { TWIN: 45000, VIP: 75000, SUITE: 120000, FAMILY: 150000 };
-      setEstimatedTotal(days > 0 ? days * (rates[formData.roomType] || 0) : 0);
+      setEstimatedTotal(days > 0 ? days * Number(selectedRoom.price || 0) : 0);
+      return;
     }
-  }, [formData.checkIn, formData.checkOut, formData.roomType]);
+    setEstimatedTotal(0);
+  }, [formData.checkIn, formData.checkOut, selectedRoom]);
 
   const handleChange = (e: any) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: any) => {
@@ -44,11 +61,15 @@ function BookingsContent() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          guestName: formData.name, guestEmail: formData.email,
-          guestPhone: formData.phone, roomNumber: formData.roomNumber,
-          checkIn: formData.checkIn, checkOut: formData.checkOut,
-          nationality: formData.nationality, totalAmount: estimatedTotal
-        })
+          guestName: formData.name,
+          guestEmail: formData.email,
+          guestPhone: formData.phone,
+          roomNumber: formData.roomNumber,
+          checkIn: formData.checkIn,
+          checkOut: formData.checkOut,
+          nationality: formData.nationality,
+          totalAmount: estimatedTotal,
+        }),
       });
       if (res.ok) {
         toast.success('Booking created successfully');
@@ -70,7 +91,6 @@ function BookingsContent() {
 
       <form onSubmit={handleSubmit} className="max-w-6xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Guest Profile */}
           <div className="lg:col-span-7">
             <div className="bg-card border border-border rounded-xl overflow-hidden">
               <div className="px-6 py-4 border-b border-border flex items-center gap-3">
@@ -102,7 +122,11 @@ function BookingsContent() {
                     <label className={labelClass}>Nationality</label>
                     <select className={inputClass} name="nationality" value={formData.nationality} onChange={handleChange}>
                       <option value="">Select country...</option>
-                      {countries.map(c => <option key={c} value={c}>{c}</option>)}
+                      {countries.map((country) => (
+                        <option key={country} value={country}>
+                          {country}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -110,7 +134,6 @@ function BookingsContent() {
             </div>
           </div>
 
-          {/* Booking Details */}
           <div className="lg:col-span-5">
             <div className="bg-card border border-border rounded-xl overflow-hidden">
               <div className="px-6 py-4 border-b border-border flex items-center gap-3">
@@ -131,20 +154,41 @@ function BookingsContent() {
                     <input className={inputClass} type="date" name="checkOut" value={formData.checkOut} onChange={handleChange} required />
                   </div>
                 </div>
+
                 <div className="space-y-1.5">
                   <label className={labelClass}>Room Type</label>
                   <select className={inputClass} name="roomType" value={formData.roomType} onChange={handleChange} required>
                     <option value="">Select type...</option>
-                    <option value="TWIN">Twin Room — RWF 45,000/night</option>
-                    <option value="VIP">VIP Room — RWF 75,000/night</option>
-                    <option value="SUITE">Executive Suite — RWF 120,000/night</option>
-                    <option value="FAMILY">Family Room — RWF 150,000/night</option>
+                    <option value="TWIN">Twin Room</option>
+                    <option value="VIP">VIP Room</option>
+                    <option value="SUITE">Executive Suite</option>
+                    <option value="FAMILY">Family Room</option>
                   </select>
                 </div>
+
                 <div className="space-y-1.5">
                   <label className={labelClass}>Room Number</label>
                   <input className={inputClass} placeholder="e.g. 101" type="text" name="roomNumber" value={formData.roomNumber} onChange={handleChange} required />
                 </div>
+
+                {selectedRoom && (
+                  <div className="rounded-lg border border-border bg-muted/40 px-4 py-3">
+                    <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Selected room</p>
+                    <div className="mt-1 flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-foreground">Room {selectedRoom.number}</p>
+                        <p className="text-xs text-muted-foreground">{selectedRoom.type}</p>
+                      </div>
+                      <p className="text-sm font-medium text-primary">
+                        RWF {Number(selectedRoom.price || 0).toLocaleString()}/night
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {formData.roomNumber && !selectedRoom && (
+                  <p className="text-xs text-amber-600">This room number was not found in the rooms list.</p>
+                )}
 
                 <div className="pt-4 border-t border-border">
                   <div className="flex justify-between items-center mb-4">
@@ -157,9 +201,13 @@ function BookingsContent() {
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
-                      <><span className="material-symbols-outlined text-[18px] animate-spin">refresh</span> Creating...</>
+                      <>
+                        <span className="material-symbols-outlined text-[18px] animate-spin">refresh</span> Creating...
+                      </>
                     ) : (
-                      <><span className="material-symbols-outlined text-[18px]">check</span> Confirm Booking</>
+                      <>
+                        <span className="material-symbols-outlined text-[18px]">check</span> Confirm Booking
+                      </>
                     )}
                   </button>
                 </div>
