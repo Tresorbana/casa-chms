@@ -1,5 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import xlsx from 'xlsx';
+import fs from 'node:fs';
+import path from 'node:path';
 
 const prisma = new PrismaClient();
 
@@ -82,8 +84,19 @@ async function main() {
     throw new Error('Usage: node --import tsx scripts/import-pauceck-menu.ts <path-to-pauceck_menu.xlsx> [--replace]');
   }
 
+  const resolvedPath = path.resolve(filePath);
+  if (!fs.existsSync(resolvedPath)) {
+    throw new Error(
+      `File not found: ${filePath}\n` +
+        `On the VPS you need to upload the spreadsheet first, then pass its Linux path.\n` +
+        `Example:\n` +
+        `  scp -i kamdine C:\\Users\\treso\\Downloads\\pauceck_menu.xlsx ubuntu@102.202.208.212:~/pauceck_menu.xlsx\n` +
+        `  npm run import:pauceck-menu -- ~/pauceck_menu.xlsx`
+    );
+  }
+
   const replace = process.argv.includes('--replace');
-  const items = readWorkbook(filePath);
+  const items = readWorkbook(resolvedPath);
   const categories = Array.from(new Set(items.map((item) => item.section)));
 
   if (replace) {
