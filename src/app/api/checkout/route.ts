@@ -239,24 +239,64 @@ export async function POST(request: Request) {
     const folio = buildFolio(room, booking);
     const now = new Date();
 
-    const invoice = await prisma.invoice.create({
+    // Find any existing unpaid invoices for this booking (accommodation, services, restaurant charges)
+    const existingUnpaidInvoices = await prisma.invoice.findMany({
+      where: {
+        guestName: folio.guestName,
+        status: 'UNPAID',
+        masterInvoiceId: null, // Only get master invoices or standalone invoices
+      },
+      include: { items: true },
+    });
+
+    // Calculate total from existing unpaid invoices
+    const existingUnpaidTotal = existingUnpaidInvoices.reduce((sum, inv) => sum + inv.amount, 0);
+    const consolidatedTotal = folio.grandTotal + existingUnpaidTotal;
+
+    // Create all line items: existing items + new folio items
+    const allLineItems = [
+      ...existingUnpaidInvoices.flatMap((inv) =>
+        inv.items.map((item) => ({
+          description: item.description,
+          quantity: item.quantity,
+          price: item.price,
+        }))
+      ),
+      ...folio.lineItems.map((item) => ({
+        description: item.description,
+        quantity: item.quantity,
+        price: item.price,
+      })),
+    ];
+
+    // Create master invoice with all consolidated items
+    const masterInvoice = await prisma.invoice.create({
       data: {
         guestName: folio.guestName,
-        amount: folio.grandTotal,
+        amount: consolidatedTotal,
         type: 'ROOM',
         status: markPaid ? 'PAID' : 'UNPAID',
         paymentMethod: markPaid ? paymentMethod : null,
         paidAt: markPaid ? now : null,
         items: {
-          create: folio.lineItems.map((item) => ({
-            description: item.description,
-            quantity: item.quantity,
-            price: item.price,
-          })),
+          create: allLineItems,
         },
       },
       include: { items: true },
     });
+
+    // Link existing invoices as sub-invoices to the master invoice
+    if (existingUnpaidInvoices.length > 0) {
+      await prisma.invoice.updateMany({
+        where: {
+          id: { in: existingUnpaidInvoices.map((inv) => inv.id) },
+        },
+        data: {
+          masterInvoiceId: masterInvoice.id,
+          status: 'PAID', // Mark sub-invoices as paid since they're now consolidated
+        },
+      });
+    }
 
     if (finalize) {
       await prisma.booking.update({
@@ -282,8 +322,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      invoice,
+      invoice: masterInvoice,
       folio,
+      consolidatedInvoices: existingUnpaidInvoices.length,
       finalized: finalize,
       room: { id: room.id, number: room.number },
     });
