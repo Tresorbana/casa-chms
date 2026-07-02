@@ -239,14 +239,20 @@ export async function POST(request: Request) {
     const folio = buildFolio(room, booking);
     const now = new Date();
 
-    // Find any existing unpaid invoices for this booking (accommodation, services, restaurant charges)
+    // Find any unpaid invoices for the same guest that should be paid together at checkout.
+    // This includes room charges, restaurant orders, and other service invoices that were created separately.
     const existingUnpaidInvoices = await prisma.invoice.findMany({
       where: {
-        guestName: folio.guestName,
         status: 'UNPAID',
-        masterInvoiceId: null, // Only get master invoices or standalone invoices
+        masterInvoiceId: null,
+        type: { in: ['ROOM', 'RESTAURANT', 'SERVICE'] },
+        OR: [
+          { guestName: folio.guestName },
+          { guestName: { equals: folio.guestName, mode: 'insensitive' } },
+        ],
       },
       include: { items: true },
+      orderBy: { date: 'asc' },
     });
 
     // Calculate total from existing unpaid invoices

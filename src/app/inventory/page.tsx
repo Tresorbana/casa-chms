@@ -28,8 +28,11 @@ export default function Inventory() {
   const [tab, setTab] = useState<Tab>('stock');
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAdjustModalOpen, setIsAdjustModalOpen] = useState(false);
   const [adjustItem, setAdjustItem] = useState<any>(null);
+  const [editingItem, setEditingItem] = useState<any>(null);
+  const [editItem, setEditItem] = useState({ name: '', category: 'Housekeeping', unit: 'pcs', price: '0', minStock: '10' });
   const [adjustQty, setAdjustQty] = useState('');
   const [adjustType, setAdjustType] = useState<'IN' | 'OUT'>('IN');
   const [adjustReason, setAdjustReason] = useState('PURCHASE');
@@ -84,6 +87,45 @@ export default function Inventory() {
       toast.success(adjustment > 0 ? 'Stock added' : 'Stock removed');
     } catch { toast.error('Failed to update stock'); }
     finally { setAdjustingId(null); }
+  };
+
+  const openEditModal = (item: any) => {
+    setEditingItem(item);
+    setEditItem({
+      name: item.name,
+      category: item.category,
+      unit: item.unit,
+      price: String(item.price ?? 0),
+      minStock: String(item.minStock ?? 10),
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditItem = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingItem) return;
+    setIsSubmitting(true);
+    try {
+      const res = await fetch(`/api/inventory/${editingItem.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: editItem.name,
+          category: editItem.category,
+          unit: editItem.unit,
+          price: Number(editItem.price),
+          minStock: Number(editItem.minStock),
+        }),
+      });
+      if (!res.ok) throw new Error('Failed');
+      mutate();
+      setIsEditModalOpen(false);
+      toast.success('Item updated');
+    } catch {
+      toast.error('Failed to update item');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const openAdjustModal = (item: any) => {
@@ -186,6 +228,54 @@ export default function Inventory() {
                 <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-2.5 rounded-lg text-sm text-muted-foreground border border-border hover:bg-accent transition-colors">Cancel</button>
                 <button type="submit" disabled={isSubmitting} className="flex-1 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">
                   {isSubmitting ? 'Adding...' : 'Add Item'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Item Modal */}
+      {isEditModalOpen && editingItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/20 backdrop-blur-sm p-4">
+          <div className="bg-card border border-border rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+            <div className="p-5 border-b border-border flex justify-between items-center">
+              <h3 className="text-sm font-semibold text-foreground">Edit Inventory Item</h3>
+              <button onClick={() => setIsEditModalOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors">
+                <span className="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            </div>
+            <form onSubmit={handleEditItem} className="p-5 space-y-4">
+              <div>
+                <label className="text-xs font-medium text-muted-foreground block mb-1.5">Item Name</label>
+                <input required className={inputClass} value={editItem.name} onChange={e => setEditItem({ ...editItem, name: e.target.value })} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground block mb-1.5">Category</label>
+                  <select className={inputClass} value={editItem.category} onChange={e => setEditItem({ ...editItem, category: e.target.value })}>
+                    {['Housekeeping', 'Linen', 'Food & Bev', 'Beverages', 'Maintenance', 'Office'].map(c => <option key={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground block mb-1.5">Unit</label>
+                  <input className={inputClass} value={editItem.unit} onChange={e => setEditItem({ ...editItem, unit: e.target.value })} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground block mb-1.5">Min Alert</label>
+                  <input type="number" className={inputClass} value={editItem.minStock} onChange={e => setEditItem({ ...editItem, minStock: e.target.value })} />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground block mb-1.5">Unit Price</label>
+                  <input type="number" className={inputClass} value={editItem.price} onChange={e => setEditItem({ ...editItem, price: e.target.value })} />
+                </div>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => setIsEditModalOpen(false)} className="flex-1 px-4 py-2.5 rounded-lg text-sm text-muted-foreground border border-border hover:bg-accent transition-colors">Cancel</button>
+                <button type="submit" disabled={isSubmitting} className="flex-1 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">
+                  {isSubmitting ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
             </form>
@@ -326,6 +416,10 @@ export default function Inventory() {
                           <button type="button" disabled={adjustingId === item.id} onClick={() => quickAdjust(item.id, 1)}
                             className="p-1.5 hover:bg-accent rounded-lg transition-colors text-muted-foreground hover:text-foreground disabled:opacity-50" title="Add 1">
                             <span className="material-symbols-outlined text-[18px]">add</span>
+                          </button>
+                          <button type="button" onClick={() => openEditModal(item)}
+                            className="p-1.5 hover:bg-accent rounded-lg transition-colors text-muted-foreground hover:text-foreground" title="Edit item">
+                            <span className="material-symbols-outlined text-[18px]">edit</span>
                           </button>
                           <button type="button" onClick={() => openAdjustModal(item)}
                             className="px-2 py-1.5 text-[10px] font-medium rounded-lg border border-border hover:bg-accent transition-colors" title="Adjust stock">

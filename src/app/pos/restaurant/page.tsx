@@ -31,11 +31,22 @@ export default function PosRestaurant() {
     return matchCat && matchSearch;
   });
 
+  const getCartItemKey = (item: any) => item.id ? `id:${item.id}` : `name:${item.name}`;
+
   const addToCart = (item: any) => {
-    setCart(prev => [...prev, item]);
+    setCart(prev => {
+      const existingItem = prev.find(entry => getCartItemKey(entry) === getCartItemKey(item));
+      if (existingItem) {
+        return prev.map(entry => getCartItemKey(entry) === getCartItemKey(item)
+          ? { ...entry, quantity: (entry.quantity || 1) + 1 }
+          : entry);
+      }
+      return [...prev, { ...item, quantity: 1 }];
+    });
     toast.success(`${item.name} added`, { duration: 1500 });
   };
-  const cartTotal = cart.reduce((sum, item) => sum + item.price, 0);
+  const cartTotal = cart.reduce((sum, item) => sum + item.price * (item.quantity || 1), 0);
+  const cartCount = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
 
   const handleFinalize = async () => {
     if (cart.length === 0) { toast.error('Cart is empty'); return; }
@@ -57,7 +68,7 @@ export default function PosRestaurant() {
           type: 'RESTAURANT',
           customerType: orderType === 'resident' ? 'RESIDENT' : 'WALKIN',
           roomId: orderType === 'resident' ? residentRoomId : null,
-          items: cart.map((item) => ({ description: item.name, quantity: 1, price: item.price })),
+          items: cart.map((item) => ({ description: item.name, quantity: item.quantity || 1, price: item.price })),
         }),
       });
       if (res.ok) {
@@ -87,9 +98,9 @@ export default function PosRestaurant() {
   const inputClass = "w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-ring transition-all";
 
   return (
-    <div className="min-h-screen bg-background flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-background lg:grid lg:grid-cols-[minmax(0,1fr)_320px]">
       {/* Main */}
-      <main className="flex-1 flex flex-col p-4 lg:p-8 min-h-screen">
+      <main className="flex flex-col p-4 lg:p-8 min-h-screen overflow-y-auto">
         <TopBar
           title="Restaurant & Bar"
           description="Restaurant & Bar — take orders and generate bills."
@@ -101,9 +112,9 @@ export default function PosRestaurant() {
                 onClick={() => setIsCartOpen(!isCartOpen)}
               >
                 <span className="material-symbols-outlined text-[20px]">shopping_cart</span>
-                {cart.length > 0 && (
+                {cartCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[9px] font-bold w-5 h-5 flex items-center justify-center rounded-full">
-                    {cart.length}
+                    {cartCount}
                   </span>
                 )}
               </button>
@@ -179,7 +190,7 @@ export default function PosRestaurant() {
 
       {/* Cart Sidebar */}
       <div
-        className={`fixed inset-y-0 right-0 w-80 z-50 flex flex-col bg-card border-l border-border transform transition-transform duration-300 lg:relative lg:w-80 lg:translate-x-0 ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        className={`fixed inset-y-0 right-0 w-80 z-50 flex flex-col bg-card border-l border-border transform transition-transform duration-300 lg:static lg:inset-auto lg:right-auto lg:h-screen lg:w-[320px] lg:translate-x-0 ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}
       >
         <div className="p-5 border-b border-border">
           <div className="flex justify-between items-center mb-4">
@@ -232,16 +243,21 @@ export default function PosRestaurant() {
               <span className="material-symbols-outlined text-3xl opacity-30">shopping_cart</span>
               <p className="text-sm">Cart is empty</p>
             </div>
-          ) : cart.map((item, index) => (
-            <div key={index} className="flex gap-3 items-center">
+          ) : cart.map((item) => (
+            <div key={getCartItemKey(item)} className="flex gap-3 items-center">
               <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 bg-muted">
                 <span className="material-symbols-outlined text-muted-foreground text-[16px]">restaurant</span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">{item.name}</p>
-                <p className="text-xs text-muted-foreground">RWF {item.price.toLocaleString()}</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium text-foreground truncate">{item.name}</p>
+                  {item.quantity > 1 && (
+                    <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">×{item.quantity}</span>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">RWF {(item.price * (item.quantity || 1)).toLocaleString()}</p>
               </div>
-              <button className="text-muted-foreground hover:text-destructive transition-colors" onClick={() => setCart(cart.filter((_, i) => i !== index))}>
+              <button className="text-muted-foreground hover:text-destructive transition-colors" onClick={() => setCart(prev => prev.filter(entry => getCartItemKey(entry) !== getCartItemKey(item)))}>
                 <span className="material-symbols-outlined text-[16px]">close</span>
               </button>
             </div>
