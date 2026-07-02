@@ -22,13 +22,18 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { name, category, price, description, inventoryItemId } = body;
+    const parsedPrice = Number(price);
+
+    if (!name || !category || Number.isNaN(parsedPrice)) {
+      return NextResponse.json({ error: 'Name, category, and valid price are required' }, { status: 400 });
+    }
 
     const item = await prisma.menuItem.create({
       data: {
         name,
         category,
-        price: parseFloat(price),
-        description,
+        price: parsedPrice,
+        description: description || null,
         inventoryItemId: inventoryItemId || null,
       }
     });

@@ -10,7 +10,8 @@
     "lint": "next lint",
     "db:push": "npx prisma db push",
     "normalize:room-types": "node --import tsx scripts/normalize-room-types.ts",
-    "import:beverages": "node --import tsx scripts/import-beverages.ts"
+    "import:beverages": "node --import tsx scripts/import-beverages.ts",
+    "import:pauceck-menu": "node --import tsx scripts/import-pauceck-menu.ts"
   },
   "keywords": [],
   "author": "",

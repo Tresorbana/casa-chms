@@ -5,7 +5,38 @@ import { fetcher } from '@/lib/fetcher';
 import { toast } from 'sonner';
 import TopBar from '@/components/TopBar';
 
-const CATEGORIES = ["Appetizers", "Main Course", "Wine & Spirits", "Cocktails", "Desserts", "Beverages", "Breakfast", "Soft Drinks", "Water & Juices"];
+const CATEGORIES = [
+  'Beverages',
+  'Cassava Bread',
+  'Ubumwe Hotel VIP',
+  'Dessert',
+  'Accompaniments',
+  'Barbecue',
+  'Drinks Soft',
+  'Fish',
+  'Pizza',
+  'Pastes',
+  'Vegetarian',
+  'Main Red Meat',
+  'Cold Starter',
+  'Hot Starter',
+  'Fresh Juice',
+  'Eggs',
+  'Cereales',
+  'Breads',
+  'Breakfast',
+  'Tea Break',
+  'Hot Drinks',
+  'Sandwiches',
+  'Snacks',
+  'African Kitchen',
+  'Appetizers',
+  'Main Course',
+  'Wine & Spirits',
+  'Cocktails',
+  'Soft Drinks',
+  'Water & Juices',
+];
 const inputClass = "w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring outline-none transition-all";
 
 export default function MenuSettings() {
@@ -16,19 +47,47 @@ export default function MenuSettings() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({ name: '', category: 'Main Course', price: '', description: '', inventoryItemId: '' });
+  const [editingItem, setEditingItem] = useState<any>(null);
+  const [formData, setFormData] = useState({ name: '', category: 'Beverages', price: '', description: '', inventoryItemId: '' });
 
   const safeItems = Array.isArray(menuItems) ? menuItems : [];
   const inventoryItems = Array.isArray(inventoryData) ? inventoryData.filter((i: any) =>
     ['Food & Bev', 'Beverages'].includes(i.category)
   ) : [];
 
-  const handleCreate = async (e: React.FormEvent) => {
+  const resetForm = () => {
+    setEditingItem(null);
+    setFormData({ name: '', category: 'Beverages', price: '', description: '', inventoryItemId: '' });
+  };
+
+  const openCreateModal = () => {
+    resetForm();
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (item: any) => {
+    setEditingItem(item);
+    setFormData({
+      name: item.name ?? '',
+      category: item.category ?? 'Beverages',
+      price: item.price != null ? String(item.price) : '',
+      description: item.description ?? '',
+      inventoryItemId: item.inventoryItemId ?? '',
+    });
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    resetForm();
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const res = await fetch('/api/pos/menu', {
-        method: 'POST',
+      const res = await fetch(editingItem ? `/api/pos/menu/${editingItem.id}` : '/api/pos/menu', {
+        method: editingItem ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
@@ -37,13 +96,15 @@ export default function MenuSettings() {
       });
       if (res.ok) {
         mutate('/api/pos/menu?all=true');
-        setIsModalOpen(false);
-        setFormData({ name: '', category: 'Main Course', price: '', description: '', inventoryItemId: '' });
-        toast.success('Menu item created');
+        closeModal();
+        toast.success(editingItem ? 'Menu item updated' : 'Menu item created');
       } else {
-        toast.error('Failed to create item');
+        const err = await res.json().catch(() => null);
+        toast.error(err?.error || (editingItem ? 'Failed to update item' : 'Failed to create item'));
       }
-    } catch { toast.error('Error creating item'); }
+    } catch {
+      toast.error(editingItem ? 'Error updating item' : 'Error creating item');
+    }
     finally { setIsSubmitting(false); }
   };
 
@@ -76,7 +137,7 @@ export default function MenuSettings() {
         description="Configure restaurant & bar menu items, pricing, and inventory links."
         actions={
           <button
-            onClick={() => setIsModalOpen(true)}
+            onClick={openCreateModal}
             className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
           >
             <span className="material-symbols-outlined text-[18px]">add</span>
@@ -136,9 +197,18 @@ export default function MenuSettings() {
                     </button>
                   </td>
                   <td className="px-5 py-4 text-right">
-                    <button onClick={() => handleDelete(item.id)} className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors">
-                      <span className="material-symbols-outlined text-[18px]">delete</span>
-                    </button>
+                    <div className="inline-flex items-center gap-1">
+                      <button
+                        onClick={() => openEditModal(item)}
+                        className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors"
+                        title="Edit item"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">edit</span>
+                      </button>
+                      <button onClick={() => handleDelete(item.id)} className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors">
+                        <span className="material-symbols-outlined text-[18px]">delete</span>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -151,12 +221,12 @@ export default function MenuSettings() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/20 backdrop-blur-sm">
           <div className="w-full max-w-md bg-card border border-border rounded-xl shadow-xl overflow-hidden">
             <div className="p-5 border-b border-border flex justify-between items-center">
-              <h2 className="text-sm font-semibold text-foreground">Add Menu Item</h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors">
+              <h2 className="text-sm font-semibold text-foreground">{editingItem ? 'Edit Menu Item' : 'Add Menu Item'}</h2>
+              <button onClick={closeModal} className="text-muted-foreground hover:text-foreground transition-colors">
                 <span className="material-symbols-outlined text-[20px]">close</span>
               </button>
             </div>
-            <form onSubmit={handleCreate} className="p-5 space-y-4">
+            <form onSubmit={handleSubmit} className="p-5 space-y-4">
               <div>
                 <label className="text-xs font-medium text-muted-foreground block mb-1.5">Item Name</label>
                 <input required type="text" className={inputClass} placeholder="e.g. Primus Beer, Grilled Salmon" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
@@ -191,9 +261,9 @@ export default function MenuSettings() {
                 <textarea className={inputClass} rows={2} placeholder="Brief description..." value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} style={{ resize: 'none' }} />
               </div>
               <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-2.5 rounded-lg text-sm text-muted-foreground border border-border hover:bg-accent transition-colors">Cancel</button>
+                <button type="button" onClick={closeModal} className="flex-1 px-4 py-2.5 rounded-lg text-sm text-muted-foreground border border-border hover:bg-accent transition-colors">Cancel</button>
                 <button type="submit" disabled={isSubmitting} className="flex-1 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">
-                  {isSubmitting ? 'Saving...' : 'Create Item'}
+                  {isSubmitting ? 'Saving...' : editingItem ? 'Save Changes' : 'Create Item'}
                 </button>
               </div>
             </form>

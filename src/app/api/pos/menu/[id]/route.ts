@@ -28,17 +28,27 @@ export async function PUT(
     try {
         const id = params.id
         const body = await request.json()
-        const { name, category, price, description, available } = body
+        const { name, category, price, description, available, inventoryItemId } = body
+
+        const updates: Record<string, unknown> = {}
+        if (name !== undefined) updates.name = name
+        if (category !== undefined) updates.category = category
+        if (price !== undefined) {
+            const parsedPrice = Number(price)
+            if (Number.isNaN(parsedPrice)) {
+                return NextResponse.json({ error: 'Invalid price' }, { status: 400 })
+            }
+            updates.price = parsedPrice
+        }
+        if (description !== undefined) updates.description = description
+        if (available !== undefined) {
+            updates.available = typeof available === 'string' ? available === 'true' : Boolean(available)
+        }
+        if (inventoryItemId !== undefined) updates.inventoryItemId = inventoryItemId || null
 
         const item = await prisma.menuItem.update({
             where: { id },
-            data: {
-                name,
-                category,
-                price: price ? parseFloat(price) : undefined,
-                description,
-                available
-            }
+            data: updates
         })
 
         return NextResponse.json(item)
