@@ -4,9 +4,13 @@ import { getSession } from '@/lib/auth'
 import bcrypt from 'bcryptjs'
 import { canAssignRole, normalizeRole } from '@/lib/rbac'
 
+function canManageUsers(role: string | null | undefined) {
+    return ['ADMIN', 'SUPER_ADMIN'].includes(normalizeRole(role) ?? '');
+}
+
 export async function GET() {
     const session = await getSession()
-    if (!session || !['ADMIN', 'SUPER_ADMIN'].includes(session.user.role)) {
+    if (!session || !canManageUsers(session.user.role)) {
         return NextResponse.json({ error: 'Forbidden' }, { status: session ? 403 : 401 })
     }
 
@@ -29,7 +33,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
     const session = await getSession()
-    if (!session || !['ADMIN', 'SUPER_ADMIN'].includes(session.user.role)) {
+    if (!session || !canManageUsers(session.user.role)) {
         return NextResponse.json({ error: 'Forbidden' }, { status: session ? 403 : 401 })
     }
 
@@ -65,7 +69,7 @@ export async function POST(request: Request) {
 
 export async function PATCH(request: Request) {
     const session = await getSession()
-    if (!session || !['ADMIN', 'SUPER_ADMIN'].includes(session.user.role)) {
+    if (!session || !canManageUsers(session.user.role)) {
         return NextResponse.json({ error: 'Forbidden' }, { status: session ? 403 : 401 })
     }
 

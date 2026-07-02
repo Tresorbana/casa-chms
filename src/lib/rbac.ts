@@ -84,7 +84,8 @@ const ROLE_ORDER: Record<Role, number> = {
 };
 
 export function normalizeRole(role: string | null | undefined): Role | null {
-  return role && (ROLES as readonly string[]).includes(role) ? (role as Role) : null;
+  const normalized = role?.trim().toUpperCase();
+  return normalized && (ROLES as readonly string[]).includes(normalized) ? (normalized as Role) : null;
 }
 
 export function canAssignRole(actorRole: string | null | undefined, targetRole: string | null | undefined) {
@@ -94,7 +95,7 @@ export function canAssignRole(actorRole: string | null | undefined, targetRole: 
   if (!actor) return false;
   if (!target) return false;
   if (actor === 'SUPER_ADMIN') return true;
-  if (actor === 'ADMIN') return target !== 'SUPER_ADMIN';
+  if (actor === 'ADMIN') return true;
   return false;
 }
 
