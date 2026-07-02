@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useUI } from '@/context/UIContext';
 import { HOTEL_INFO, isChromelessRoute } from '@/lib/hotel-info';
+import { canAccessRoute } from '@/lib/rbac';
 
 const NAV_ITEMS = [
   { href: '/',              icon: 'dashboard',       label: 'Dashboard' },
@@ -29,7 +30,7 @@ const ADMIN_ITEMS = [
 
 const CONFIG_ITEMS = [
   { href: '/settings',            icon: 'manage_accounts', label: 'Staff & Users' },
-  { href: '/settings/rooms',      icon: 'meeting_room',    label: 'Rooms & Floors' },
+  { href: '/settings/rooms',      icon: 'meeting_room',    label: 'Rooms & Categories' },
   { href: '/settings/conference', icon: 'groups',          label: 'Conference' },
   { href: '/settings/services',   icon: 'spa',             label: 'Services' },
   { href: '/settings/menu',       icon: 'restaurant_menu', label: 'Menu Items' },
@@ -75,11 +76,13 @@ function SectionLabel({ label, collapsed }: { label: string; collapsed: boolean 
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<any>(undefined);
   const { isSidebarOpen, isSidebarCollapsed, closeSidebar, toggleSidebarCollapse } = useUI();
 
   useEffect(() => {
-    fetch('/api/auth/me').then(r => r.json()).then(d => { if (d.user) setUser(d.user); });
+    fetch('/api/auth/me')
+      .then(r => r.json())
+      .then(d => setUser(d.user ?? null));
   }, []);
 
   useEffect(() => { closeSidebar(); }, [pathname]);
@@ -96,6 +99,11 @@ export default function Sidebar() {
     if (path === '/settings') return pathname === '/settings';
     if (path !== '/' && pathname.startsWith(path)) return true;
     return false;
+  };
+
+  const canSee = (href: string) => {
+    if (user === undefined) return true;
+    return canAccessRoute(user?.role ?? null, href);
   };
 
   const initials = user?.name
@@ -157,24 +165,36 @@ export default function Sidebar() {
 
         {/* Navigation */}
         <nav className={`flex-1 py-3 overflow-y-auto scrollbar-hide space-y-0.5 ${isSidebarCollapsed ? 'px-1' : 'px-2'}`}>
-          {NAV_ITEMS.map(item => (
+          {NAV_ITEMS.filter(item => canSee(item.href)).map(item => (
             <NavItem key={item.href} {...item} active={isActive(item.href)} collapsed={isSidebarCollapsed} />
           ))}
 
-          <SectionLabel label="Operations" collapsed={isSidebarCollapsed} />
-          {OPS_ITEMS.map(item => (
-            <NavItem key={item.href} {...item} active={isActive(item.href)} collapsed={isSidebarCollapsed} />
-          ))}
+          {OPS_ITEMS.some(item => canSee(item.href)) && (
+            <>
+              <SectionLabel label="Operations" collapsed={isSidebarCollapsed} />
+              {OPS_ITEMS.filter(item => canSee(item.href)).map(item => (
+                <NavItem key={item.href} {...item} active={isActive(item.href)} collapsed={isSidebarCollapsed} />
+              ))}
+            </>
+          )}
 
-          <SectionLabel label="Admin" collapsed={isSidebarCollapsed} />
-          {ADMIN_ITEMS.map(item => (
-            <NavItem key={item.href} {...item} active={isActive(item.href)} collapsed={isSidebarCollapsed} />
-          ))}
+          {ADMIN_ITEMS.some(item => canSee(item.href)) && (
+            <>
+              <SectionLabel label="Admin" collapsed={isSidebarCollapsed} />
+              {ADMIN_ITEMS.filter(item => canSee(item.href)).map(item => (
+                <NavItem key={item.href} {...item} active={isActive(item.href)} collapsed={isSidebarCollapsed} />
+              ))}
+            </>
+          )}
 
-          <SectionLabel label="Config" collapsed={isSidebarCollapsed} />
-          {CONFIG_ITEMS.map(item => (
-            <NavItem key={item.href} {...item} active={isActive(item.href)} collapsed={isSidebarCollapsed} />
-          ))}
+          {CONFIG_ITEMS.some(item => canSee(item.href)) && (
+            <>
+              <SectionLabel label="Config" collapsed={isSidebarCollapsed} />
+              {CONFIG_ITEMS.filter(item => canSee(item.href)).map(item => (
+                <NavItem key={item.href} {...item} active={isActive(item.href)} collapsed={isSidebarCollapsed} />
+              ))}
+            </>
+          )}
         </nav>
 
         {/* User footer */}

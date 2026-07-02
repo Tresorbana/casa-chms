@@ -223,7 +223,7 @@ export default function Dashboard() {
               <div key={floorNum}>
                 <div className="flex items-center gap-3 mb-3">
                   <h4 className="text-sm font-semibold text-foreground">
-                    {roomsByFloor[floorNum][0]?.floor?.name || `Floor ${floorNum}`}
+                    {roomsByFloor[floorNum][0]?.floor?.name || `Category ${floorNum}`}
                   </h4>
                   <div className="h-px flex-1 bg-border" />
                   <span className="text-[11px] text-muted-foreground">

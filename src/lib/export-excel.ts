@@ -216,7 +216,7 @@ export function roomExportRows(
     Type: r.type,
     Status: r.status,
     'Rate/night (RWF)': r.price,
-    Floor: r.floor?.name || (r.floor?.number != null ? `Floor ${r.floor.number}` : '—'),
+    Category: r.floor?.name || (r.floor?.number != null ? `Category ${r.floor.number}` : '—'),
     Guest: r.activeBooking?.guest?.name || '—',
     'Check-in': r.activeBooking?.checkIn
       ? new Date(r.activeBooking.checkIn).toLocaleDateString()

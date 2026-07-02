@@ -99,9 +99,9 @@ export async function GET(request: Request) {
           type: r.type,
           status: r.status,
           price: r.price,
-          floor:
+          category:
             r.floor?.name ||
-            (r.floor?.number != null ? `Floor ${r.floor.number}` : '—'),
+            (r.floor?.number != null ? `Category ${r.floor.number}` : '—'),
           guest: b?.guest?.name || '',
           checkIn: b?.checkIn || null,
           checkOut: b?.checkOut || null,

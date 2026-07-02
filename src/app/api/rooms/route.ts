@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
+import { normalizeRoomType } from '@/lib/room-types'
 
 export async function GET() {
   try {
@@ -41,11 +42,12 @@ export async function POST(request: Request) {
   try {
     const body = await request.json()
     const { number, type, price, floorId } = body
+    const normalizedType = normalizeRoomType(type) ?? String(type ?? '').toUpperCase()
 
     const room = await prisma.room.create({
       data: {
         number,
-        type,
+        type: normalizedType,
         price: parseFloat(price),
         floorId,
         status: 'AVAILABLE'
@@ -62,11 +64,12 @@ export async function PUT(request: Request) {
   try {
     const body = await request.json()
     const { id, status, number, type, price, floorId } = body
+    const normalizedType = type !== undefined ? normalizeRoomType(type) ?? String(type).toUpperCase() : undefined
 
     const data: any = {}
     if (status) data.status = status
     if (number) data.number = number
-    if (type) data.type = type
+    if (normalizedType) data.type = normalizedType
     if (price) data.price = parseFloat(price)
     if (floorId) data.floorId = floorId
 
@@ -80,4 +83,3 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: 'Failed to update room' }, { status: 500 })
   }
 }
-

@@ -8,8 +8,9 @@
     "build": "npx prisma generate && npx prisma db push && next build",
     "start": "next start",
     "lint": "next lint",
-    "seed": "node --env-file=.env --import tsx prisma/seed.ts",
-    "db:push": "npx prisma db push"
+    "db:push": "npx prisma db push",
+    "normalize:room-types": "node --import tsx scripts/normalize-room-types.ts",
+    "import:beverages": "node --import tsx scripts/import-beverages.ts"
   },
   "keywords": [],
   "author": "",

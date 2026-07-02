@@ -26,7 +26,7 @@ function BookingsContent() {
       const start = new Date(formData.checkIn);
       const end = new Date(formData.checkOut);
       const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-      const rates: any = { standard: 45000, double: 75000, suite: 120000, family: 150000 };
+      const rates: any = { TWIN: 45000, VIP: 75000, SUITE: 120000, FAMILY: 150000 };
       setEstimatedTotal(days > 0 ? days * (rates[formData.roomType] || 0) : 0);
     }
   }, [formData.checkIn, formData.checkOut, formData.roomType]);
@@ -135,10 +135,10 @@ function BookingsContent() {
                   <label className={labelClass}>Room Type</label>
                   <select className={inputClass} name="roomType" value={formData.roomType} onChange={handleChange} required>
                     <option value="">Select type...</option>
-                    <option value="standard">Standard Single — RWF 45,000/night</option>
-                    <option value="double">Deluxe Double — RWF 75,000/night</option>
-                    <option value="suite">Executive Suite — RWF 120,000/night</option>
-                    <option value="family">Family Room — RWF 150,000/night</option>
+                    <option value="TWIN">Twin Room — RWF 45,000/night</option>
+                    <option value="VIP">VIP Room — RWF 75,000/night</option>
+                    <option value="SUITE">Executive Suite — RWF 120,000/night</option>
+                    <option value="FAMILY">Family Room — RWF 150,000/night</option>
                   </select>
                 </div>
                 <div className="space-y-1.5">

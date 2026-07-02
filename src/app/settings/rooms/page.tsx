@@ -9,13 +9,13 @@ const inputClass = "w-full bg-background border border-border rounded-lg px-4 py
 
 export default function RoomSettings() {
   const { data: floorsData, isLoading } = useSWR('/api/floors', fetcher, {
-    onError: () => toast.error('Failed to load floors'),
+    onError: () => toast.error('Failed to load categories'),
   });
   const floors = Array.isArray(floorsData) ? floorsData : [];
   const [isAddingFloor, setIsAddingFloor] = useState(false);
   const [newFloorNumber, setNewFloorNumber] = useState('');
   const [addingRoomToFloor, setAddingRoomToFloor] = useState<string | null>(null);
-  const [newRoomData, setNewRoomData] = useState({ number: '', type: 'Standard', price: '' });
+  const [newRoomData, setNewRoomData] = useState({ number: '', type: 'TWIN', price: '' });
 
   const handleAddFloor = async () => {
     if (!newFloorNumber) return;
@@ -24,17 +24,17 @@ export default function RoomSettings() {
       setIsAddingFloor(false);
       setNewFloorNumber('');
       mutate('/api/floors');
-      toast.success('Floor added');
-    } catch { toast.error('Failed to add floor'); }
+      toast.success('Category added');
+    } catch { toast.error('Failed to add category'); }
   };
 
   const handleDeleteFloor = async (id: string) => {
-    if (!confirm('Delete this floor and all its rooms?')) return;
+    if (!confirm('Delete this category and all its rooms?')) return;
     try {
       await fetch(`/api/floors/${id}`, { method: 'DELETE' });
       mutate('/api/floors');
-      toast.success('Floor deleted');
-    } catch { toast.error('Failed to delete floor'); }
+      toast.success('Category deleted');
+    } catch { toast.error('Failed to delete category'); }
   };
 
   const handleAddRoom = async (floorId: string) => {
@@ -42,7 +42,7 @@ export default function RoomSettings() {
     try {
       await fetch('/api/rooms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...newRoomData, floorId }) });
       setAddingRoomToFloor(null);
-      setNewRoomData({ number: '', type: 'Standard', price: '' });
+      setNewRoomData({ number: '', type: 'TWIN', price: '' });
       mutate('/api/floors');
       toast.success('Room added');
     } catch { toast.error('Failed to add room'); }
@@ -69,26 +69,26 @@ export default function RoomSettings() {
   return (
     <div className="min-h-screen bg-background p-4 lg:p-8 flex flex-col gap-6">
       <TopBar
-        title="Rooms & Floors"
-        description="Configure floors and rooms for your property."
+        title="Rooms & Categories"
+        description="Configure room categories and rooms for your property."
         actions={
           <button
             onClick={() => setIsAddingFloor(true)}
             className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
           >
             <span className="material-symbols-outlined text-[18px]">add</span>
-            Add Floor
+            Add Category
           </button>
         }
       />
 
       {isAddingFloor && (
         <div className="bg-card border border-border rounded-xl p-5">
-          <h3 className="text-sm font-semibold text-foreground mb-4">New Floor</h3>
+          <h3 className="text-sm font-semibold text-foreground mb-4">New Category</h3>
           <div className="flex gap-3">
             <input
               type="number"
-              placeholder="Floor number (e.g. 1)"
+              placeholder="Category number (e.g. 1)"
               className={inputClass}
               value={newFloorNumber}
               onChange={e => setNewFloorNumber(e.target.value)}
@@ -100,7 +100,7 @@ export default function RoomSettings() {
       )}
 
       {isLoading ? (
-        <div className="py-16 text-center text-muted-foreground text-sm">Loading floors...</div>
+        <div className="py-16 text-center text-muted-foreground text-sm">Loading categories...</div>
       ) : (
         <div className="space-y-4">
           {floors.map((floor: any) => (
@@ -110,7 +110,7 @@ export default function RoomSettings() {
                   <div className="w-8 h-8 bg-primary/10 text-primary rounded-lg flex items-center justify-center text-sm font-semibold">
                     {floor.number}
                   </div>
-                  <h3 className="text-sm font-semibold text-foreground">Floor {floor.number}</h3>
+                  <h3 className="text-sm font-semibold text-foreground">Category {floor.number}</h3>
                   <span className="text-[11px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
                     {floor.rooms?.length || 0} rooms
                   </span>
@@ -119,7 +119,7 @@ export default function RoomSettings() {
                   <button onClick={() => setAddingRoomToFloor(floor.id)} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-all" title="Add Room">
                     <span className="material-symbols-outlined text-[18px]">add_box</span>
                   </button>
-                  <button onClick={() => handleDeleteFloor(floor.id)} className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all" title="Delete Floor">
+                  <button onClick={() => handleDeleteFloor(floor.id)} className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all" title="Delete Category">
                     <span className="material-symbols-outlined text-[18px]">delete</span>
                   </button>
                 </div>
@@ -134,7 +134,7 @@ export default function RoomSettings() {
                   <div className="flex-1 min-w-[100px]">
                     <label className="text-xs text-muted-foreground block mb-1">Type</label>
                     <select className={inputClass} value={newRoomData.type} onChange={e => setNewRoomData({ ...newRoomData, type: e.target.value })}>
-                      <option>Standard</option><option>Deluxe</option><option>Suite</option>
+                      <option value="TWIN">Twin</option><option value="VIP">VIP</option><option value="SUITE">Suite</option>
                     </select>
                   </div>
                   <div className="flex-1 min-w-[100px]">
@@ -180,7 +180,7 @@ export default function RoomSettings() {
                   );
                 })}
                 {(!floor.rooms || floor.rooms.length === 0) && (
-                  <div className="col-span-full py-6 text-center text-muted-foreground text-xs">No rooms on this floor yet.</div>
+                  <div className="col-span-full py-6 text-center text-muted-foreground text-xs">No rooms in this category yet.</div>
                 )}
               </div>
             </div>
@@ -189,7 +189,7 @@ export default function RoomSettings() {
           {floors.length === 0 && (
             <div className="py-20 text-center border border-dashed border-border rounded-xl">
               <span className="material-symbols-outlined text-4xl text-muted-foreground/30 mb-3 block">layers</span>
-              <p className="text-sm text-muted-foreground">No floors defined yet</p>
+              <p className="text-sm text-muted-foreground">No categories defined yet</p>
             </div>
           )}
         </div>

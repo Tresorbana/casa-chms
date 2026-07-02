@@ -1,8 +1,10 @@
 'use client';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useUI } from '@/context/UIContext';
 import { isChromelessRoute } from '@/lib/hotel-info';
+import { canAccessRoute } from '@/lib/rbac';
 
 const NAV = [
   { href: '/',               icon: 'dashboard',      label: 'Home' },
@@ -14,6 +16,13 @@ const NAV = [
 export default function MobileBottomNav() {
   const pathname = usePathname();
   const { toggleSidebar } = useUI();
+  const [user, setUser] = useState<any>(undefined);
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then(r => r.json())
+      .then(d => setUser(d.user ?? null));
+  }, []);
 
   if (pathname === '/login' || isChromelessRoute(pathname)) return null;
 
@@ -23,13 +32,18 @@ export default function MobileBottomNav() {
     return false;
   };
 
+  const canSee = (href: string) => {
+    if (user === undefined) return true;
+    return canAccessRoute(user?.role ?? null, href);
+  };
+
   return (
     <nav
       className="fixed bottom-0 left-0 right-0 lg:hidden z-50 bg-background/98 backdrop-blur-md border-t border-border shadow-[0_-2px_12px_rgba(0,0,0,0.08)]"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       <div className="flex items-center justify-around h-[60px] px-1">
-        {NAV.map(item => {
+        {NAV.filter(item => canSee(item.href)).map(item => {
           const active = isActive(item.href);
           return (
             <Link

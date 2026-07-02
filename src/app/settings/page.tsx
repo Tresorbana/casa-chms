@@ -5,16 +5,61 @@ import { fetcher } from '@/lib/fetcher';
 import { toast } from 'sonner';
 import TopBar from '@/components/TopBar';
 
-const inputClass = "w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring outline-none transition-all";
+const inputClass = 'w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring outline-none transition-all';
+
+type UserForm = {
+  name: string;
+  email: string;
+  password: string;
+  role: string;
+};
 
 export default function Settings() {
   const { data: users, isLoading: usersLoading } = useSWR('/api/users', fetcher, {
     onError: () => toast.error('Failed to load users'),
   });
   const { data: notificationData } = useSWR('/api/notifications', fetcher);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'RECEPTIONIST' });
+  const [editingUser, setEditingUser] = useState<any>(null);
+  const [formData, setFormData] = useState<UserForm>({
+    name: '',
+    email: '',
+    password: '',
+    role: 'RECEPTIONIST',
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const resetForm = () => {
+    setEditingUser(null);
+    setFormData({
+      name: '',
+      email: '',
+      password: '',
+      role: 'RECEPTIONIST',
+    });
+  };
+
+  const openCreateModal = () => {
+    resetForm();
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (user: any) => {
+    setEditingUser(user);
+    setFormData({
+      name: user.name ?? '',
+      email: user.email ?? '',
+      password: '',
+      role: user.role ?? 'STAFF',
+    });
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    resetForm();
+  };
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,8 +72,7 @@ export default function Settings() {
       });
       if (res.ok) {
         mutate('/api/users');
-        setIsModalOpen(false);
-        setFormData({ name: '', email: '', password: '', role: 'STAFF' });
+        closeModal();
         toast.success('User created successfully');
       } else {
         const err = await res.json();
@@ -41,6 +85,46 @@ export default function Settings() {
     }
   };
 
+  const handleEditUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingUser) return;
+
+    setIsSubmitting(true);
+    try {
+      const payload: Record<string, unknown> = {
+        id: editingUser.id,
+        name: formData.name,
+        email: formData.email,
+        role: formData.role,
+      };
+
+      if (formData.password.trim()) {
+        payload.password = formData.password;
+      }
+
+      const res = await fetch('/api/users', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        mutate('/api/users');
+        closeModal();
+        toast.success('User updated successfully');
+      } else {
+        const err = await res.json();
+        toast.error(err.error || 'Failed to update user');
+      }
+    } catch {
+      toast.error('Error updating user');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSubmit = editingUser ? handleEditUser : handleCreateUser;
+
   return (
     <div className="min-h-screen bg-background p-4 lg:p-8 flex flex-col gap-6">
       <TopBar
@@ -48,7 +132,7 @@ export default function Settings() {
         description="Manage staff access and system configuration."
         actions={
           <button
-            onClick={() => setIsModalOpen(true)}
+            onClick={openCreateModal}
             className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
           >
             <span className="material-symbols-outlined text-[18px]">person_add</span>
@@ -59,7 +143,6 @@ export default function Settings() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          {/* Users Table */}
           <div className="bg-card border border-border rounded-xl overflow-hidden">
             <div className="px-5 py-4 border-b border-border">
               <h3 className="text-sm font-semibold text-foreground">Staff Members</h3>
@@ -69,15 +152,17 @@ export default function Settings() {
               <div className="p-8 text-center text-muted-foreground text-sm">Loading users...</div>
             ) : (
               <div className="divide-y divide-border">
-                {users?.map((u: any) => (
-                  <div key={u.id} className="flex items-center justify-between px-5 py-4 hover:bg-muted/30 transition-colors">
+                {users?.map((user: any) => (
+                  <div key={user.id} className="flex items-center justify-between px-5 py-4 hover:bg-muted/30 transition-colors">
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold">
-                        {u.name.substring(0, 2).toUpperCase()}
+                        {(user.name ?? '?').substring(0, 2).toUpperCase()}
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-foreground">{u.name}</p>
-                        <p className="text-xs text-muted-foreground">{u.email} · {u.role}</p>
+                        <p className="text-sm font-medium text-foreground">{user.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {user.email} · {user.role}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -85,7 +170,12 @@ export default function Settings() {
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                         Active
                       </span>
-                      <button className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors">
+                      <button
+                        type="button"
+                        onClick={() => openEditModal(user)}
+                        className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors"
+                        title="Edit user"
+                      >
                         <span className="material-symbols-outlined text-[18px]">settings</span>
                       </button>
                     </div>
@@ -95,7 +185,6 @@ export default function Settings() {
             )}
           </div>
 
-          {/* Audit Log */}
           <div className="bg-card border border-border rounded-xl overflow-hidden">
             <div className="px-5 py-4 border-b border-border flex justify-between items-center">
               <div>
@@ -105,8 +194,8 @@ export default function Settings() {
               <button className="text-xs text-muted-foreground hover:text-foreground transition-colors">View all</button>
             </div>
             <div className="p-5 space-y-3">
-              {(notificationData && Array.isArray(notificationData) ? notificationData.slice(0, 5) : []).map((log: any, i: number) => (
-                <div key={i} className="flex items-center justify-between p-3 bg-muted/40 rounded-lg border border-border">
+              {(notificationData && Array.isArray(notificationData) ? notificationData.slice(0, 5) : []).map((log: any, index: number) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-muted/40 rounded-lg border border-border">
                   <div className="flex items-center gap-3">
                     <div className={`w-2 h-2 rounded-full ${log.type === 'WARNING' ? 'bg-amber-500' : log.type === 'SUCCESS' ? 'bg-emerald-500' : 'bg-blue-500'}`} />
                     <p className="text-sm text-foreground truncate max-w-[240px]">{log.message}</p>
@@ -124,7 +213,6 @@ export default function Settings() {
         </div>
 
         <div className="space-y-6">
-          {/* System Info */}
           <div className="bg-card border border-border rounded-xl p-5">
             <h4 className="text-sm font-semibold text-foreground mb-4">System Info</h4>
             <div className="space-y-3">
@@ -144,37 +232,52 @@ export default function Settings() {
         </div>
       </div>
 
-      {/* Create User Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-foreground/20 backdrop-blur-sm p-4">
           <div className="bg-card border border-border w-full max-w-md rounded-xl shadow-xl overflow-hidden">
             <div className="p-5 border-b border-border flex justify-between items-center">
-              <h2 className="text-sm font-semibold text-foreground">Create Staff Account</h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors">
+              <h2 className="text-sm font-semibold text-foreground">
+                {editingUser ? 'Edit Staff Account' : 'Create Staff Account'}
+              </h2>
+              <button onClick={closeModal} className="text-muted-foreground hover:text-foreground transition-colors">
                 <span className="material-symbols-outlined text-[20px]">close</span>
               </button>
             </div>
-            <form onSubmit={handleCreateUser} className="p-5 space-y-4">
+            <form onSubmit={handleSubmit} className="p-5 space-y-4">
               {[
-                { label: 'Full Name', key: 'name', type: 'text', placeholder: 'Enter full name' },
-                { label: 'Email Address', key: 'email', type: 'email', placeholder: 'staff@ubumwehotel.rw' },
-                { label: 'Password', key: 'password', type: 'password', placeholder: '••••••••' },
+                { label: 'Full Name', key: 'name', type: 'text', placeholder: 'Enter full name', required: true },
+                { label: 'Email Address', key: 'email', type: 'email', placeholder: 'staff@ubumwehotel.rw', required: true },
+                {
+                  label: editingUser ? 'New Password' : 'Password',
+                  key: 'password',
+                  type: 'password',
+                  placeholder: editingUser ? 'Leave blank to keep current password' : '••••••••',
+                  required: !editingUser,
+                },
               ].map(field => (
                 <div key={field.key}>
                   <label className="text-xs font-medium text-muted-foreground block mb-1.5">{field.label}</label>
                   <input
-                    required type={field.type} placeholder={field.placeholder}
+                    required={field.required}
+                    type={field.type}
+                    placeholder={field.placeholder}
                     value={(formData as any)[field.key]}
                     onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
                     className={inputClass}
                   />
                 </div>
               ))}
+
               <div>
                 <label className="text-xs font-medium text-muted-foreground block mb-1.5">Role</label>
-                <select value={formData.role} onChange={(e) => setFormData({ ...formData, role: e.target.value })} className={inputClass}>
+                <select
+                  value={formData.role}
+                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                  className={inputClass}
+                >
                   <option value="RECEPTIONIST">Receptionist — Front desk, check-in/out</option>
                   <option value="BARMAN">Barman — Restaurant & bar management</option>
+                  <option value="STORE_KEEPER">Store Keeper — Inventory receiving & stock control</option>
                   <option value="WAITER">Waiter — Orders & receipts</option>
                   <option value="FINANCE">Finance — Income, expenses & reports</option>
                   <option value="STAFF">Staff — General operations</option>
@@ -182,10 +285,13 @@ export default function Settings() {
                   <option value="SUPER_ADMIN">Super Admin / Owner — Full oversight</option>
                 </select>
               </div>
+
               <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-2.5 rounded-lg text-sm text-muted-foreground border border-border hover:bg-accent transition-colors">Cancel</button>
+                <button type="button" onClick={closeModal} className="flex-1 px-4 py-2.5 rounded-lg text-sm text-muted-foreground border border-border hover:bg-accent transition-colors">
+                  Cancel
+                </button>
                 <button type="submit" disabled={isSubmitting} className="flex-1 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">
-                  {isSubmitting ? 'Creating...' : 'Create Account'}
+                  {isSubmitting ? (editingUser ? 'Saving...' : 'Creating...') : (editingUser ? 'Save Changes' : 'Create Account')}
                 </button>
               </div>
             </form>

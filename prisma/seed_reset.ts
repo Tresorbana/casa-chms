@@ -25,19 +25,19 @@ async function reset() {
         {
             number: 1, name: 'Floor 1', rooms: [
                 { number: '101', type: 'EXECUTIVE', price: 6500 },
-                { number: '102', type: 'STANDARD', price: 8500 },
+                { number: '102', type: 'TWIN', price: 8500 },
                 { number: '103', type: 'SUITE', price: 10500 },
-                { number: '104', type: 'DELUXE', price: 4500 },
+                { number: '104', type: 'VIP', price: 4500 },
                 { number: '105', type: 'EXECUTIVE', price: 6500 },
             ]
         },
         {
             number: 2, name: 'Floor 2', rooms: [
-                { number: '201', type: 'STANDARD', price: 8500 },
+                { number: '201', type: 'TWIN', price: 8500 },
                 { number: '202', type: 'SUITE', price: 10500 },
-                { number: '203', type: 'DELUXE', price: 4500 },
+                { number: '203', type: 'VIP', price: 4500 },
                 { number: '204', type: 'EXECUTIVE', price: 6500 },
-                { number: '205', type: 'STANDARD', price: 8500 },
+                { number: '205', type: 'TWIN', price: 8500 },
             ]
         }
     ]

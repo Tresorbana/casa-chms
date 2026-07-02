@@ -83,15 +83,15 @@ export default function RoomDetailsModal({ room, onClose, onUpdate }: RoomDetail
 
             <div className="space-y-4">
               <div>
-                <p className="text-xs font-medium text-muted-foreground mb-1.5">Category</p>
+                <p className="text-xs font-medium text-muted-foreground mb-1.5">Room Type</p>
                 {isEditing ? (
                   <select
                     value={formData.type}
                     onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                     className={inputClass}
                   >
-                    <option value="STANDARD">Standard</option>
-                    <option value="DELUXE">Deluxe</option>
+                    <option value="TWIN">Twin</option>
+                    <option value="VIP">VIP</option>
                     <option value="EXECUTIVE">Executive</option>
                     <option value="SUITE">Suite</option>
                   </select>
@@ -117,9 +117,9 @@ export default function RoomDetailsModal({ room, onClose, onUpdate }: RoomDetail
               </div>
 
               <div>
-                <p className="text-xs font-medium text-muted-foreground mb-1.5">Floor</p>
+                <p className="text-xs font-medium text-muted-foreground mb-1.5">Category</p>
                 <p className="text-sm font-medium text-foreground">
-                  {room.floor?.name || `Floor ${room.floor?.number}`}
+                  {room.floor?.name || `Category ${room.floor?.number}`}
                 </p>
               </div>
             </div>
