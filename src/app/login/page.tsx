@@ -5,26 +5,7 @@ import { SignInPage, type Testimonial } from '@/components/ui/sign-in';
 
 const LOGIN_HERO_IMAGE = '/sign-in.jpeg';
 
-const rwandanTestimonials: Testimonial[] = [
-  {
-    avatarSrc: 'https://ui-avatars.com/api/?name=Marie+Uwimana&background=1d4ed8&color=fff&size=128',
-    name: 'Marie-Claire Uwimana',
-    handle: 'Guest · Kigali',
-    text: 'The view over Lake Kivu at sunrise is unforgettable. Kamdine felt peaceful, clean, and truly welcoming.',
-  },
-  {
-    avatarSrc: 'https://ui-avatars.com/api/?name=Patrick+Nsengimana&background=047857&color=fff&size=128',
-    name: 'Patrick Nsengimana',
-    handle: 'Traveler · Musanze',
-    text: 'We stopped in Rutsiro on our way west—the rooms were comfortable and the restaurant served excellent local dishes.',
-  },
-  {
-    avatarSrc: 'https://ui-avatars.com/api/?name=Grace+Mukamana&background=7c3aed&color=fff&size=128',
-    name: 'Grace Mukamana',
-    handle: 'Visitor · Rubavu',
-    text: 'A quiet getaway on the lake. The staff were kind, and the outdoor terrace is perfect for relaxing after a long drive.',
-  },
-];
+const rwandanTestimonials: Testimonial[] = [];
 
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
@@ -65,7 +46,7 @@ export default function Login() {
   };
 
   return (
-    <div className="bg-background text-foreground h-screen w-full">
+    <div className="h-screen w-full overflow-hidden">
       <SignInPage
         title={
           <>
