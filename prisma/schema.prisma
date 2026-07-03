@@ -33,6 +33,7 @@ model Room {
   status   String    @default("AVAILABLE")
   floorId  String?
   bookings Booking[]
+  invoices Invoice[]
   floor    Floor?    @relation(fields: [floorId], references: [id], onDelete: Cascade)
 
   @@index([floorId])
@@ -210,16 +211,19 @@ model Invoice {
   guestSignature  String?
   masterInvoiceId String?
   type            String        @default("ROOM")
+  roomId          String?
   createdByName   String?
   createdById     String?
   masterInvoice   Invoice?      @relation("MasterToSub", fields: [masterInvoiceId], references: [id])
   subInvoices     Invoice[]     @relation("MasterToSub")
   items           InvoiceItem[]
+  room            Room?         @relation(fields: [roomId], references: [id])
 
   @@index([masterInvoiceId])
   @@index([status])
   @@index([date])
   @@index([createdById])
+  @@index([roomId])
 }
 
 model InvoiceItem {

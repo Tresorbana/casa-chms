@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import useSWR from 'swr';
 import { fetcher } from '@/lib/fetcher';
 import { calculateDailyTotal, countBookingDays } from '@/lib/conference-booking';
@@ -27,16 +27,16 @@ function toDateInput(date: Date) {
   return date.toISOString().slice(0, 10);
 }
 
-interface HotelBooking {
+interface AvailableRoom {
   id: string;
-  status: string;
-  guest: { name: string };
-  room: { number: string };
+  number: string;
+  type: string;
+  price: number;
+  floor?: { name?: string } | null;
 }
 
 export default function ConferenceBookingModal({ onClose, onSuccess, initialDate }: ConferenceBookingModalProps) {
   const { data: rooms } = useSWR<ConferenceRoomOption[]>('/api/conference', fetcher);
-  const { data: hotelBookingsRaw } = useSWR<HotelBooking[]>('/api/bookings', fetcher);
   const baseDate = initialDate ? new Date(initialDate) : new Date();
 
   const [bookingMode, setBookingMode] = useState<BookingMode>('daily');
@@ -52,14 +52,24 @@ export default function ConferenceBookingModal({ onClose, onSuccess, initialDate
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [linkedBookingIds, setLinkedBookingIds] = useState<string[]>([]);
+  const [roomsToBook, setRoomsToBook] = useState<string[]>([]);
 
-  const activeHotelBookings = (hotelBookingsRaw ?? []).filter(
-    (b) => b.status === 'CONFIRMED' || b.status === 'CHECKED_IN'
-  );
+  // Fetch available rooms once dates are selected
+  const availabilityKey = useMemo(() => {
+    if (bookingMode === 'daily' && formData.startDate && formData.endDate) {
+      return `/api/rooms/available?checkIn=${formData.startDate}&checkOut=${formData.endDate}`;
+    }
+    if (bookingMode === 'hourly' && formData.startTime && formData.endTime) {
+      return `/api/rooms/available?checkIn=${formData.startTime}&checkOut=${formData.endTime}`;
+    }
+    return null;
+  }, [bookingMode, formData.startDate, formData.endDate, formData.startTime, formData.endTime]);
 
-  const toggleLinkedBooking = (id: string) =>
-    setLinkedBookingIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
+  const { data: availableRoomsRaw } = useSWR<AvailableRoom[]>(availabilityKey, fetcher);
+  const availableRooms = availableRoomsRaw ?? [];
+
+  const toggleRoom = (id: string) =>
+    setRoomsToBook((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
 
   const selectedRoom = useMemo(
     () => rooms?.find((r) => r.id === formData.conferenceRoomId),
@@ -103,7 +113,7 @@ export default function ConferenceBookingModal({ onClose, onSuccess, initialDate
             startDate: formData.startDate,
             endDate: formData.endDate,
             totalAmount: autoTotal,
-            linkedBookingIds,
+            roomsToBook,
           }
         : {
             conferenceRoomId: formData.conferenceRoomId,
@@ -114,7 +124,7 @@ export default function ConferenceBookingModal({ onClose, onSuccess, initialDate
             startTime: formData.startTime,
             endTime: formData.endTime,
             totalAmount: autoTotal,
-            linkedBookingIds,
+            roomsToBook,
           };
 
     try {
@@ -212,7 +222,7 @@ export default function ConferenceBookingModal({ onClose, onSuccess, initialDate
                     type="date"
                     className={inputClass}
                     value={formData.startDate}
-                    onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                    onChange={(e) => { setFormData({ ...formData, startDate: e.target.value }); setRoomsToBook([]); }}
                   />
                 </div>
                 <div>
@@ -223,7 +233,7 @@ export default function ConferenceBookingModal({ onClose, onSuccess, initialDate
                     className={inputClass}
                     min={formData.startDate}
                     value={formData.endDate}
-                    onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                    onChange={(e) => { setFormData({ ...formData, endDate: e.target.value }); setRoomsToBook([]); }}
                   />
                 </div>
               </div>
@@ -243,7 +253,7 @@ export default function ConferenceBookingModal({ onClose, onSuccess, initialDate
                   type="datetime-local"
                   className={inputClass}
                   value={formData.startTime}
-                  onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
+                  onChange={(e) => { setFormData({ ...formData, startTime: e.target.value }); setRoomsToBook([]); }}
                 />
               </div>
               <div>
@@ -253,7 +263,7 @@ export default function ConferenceBookingModal({ onClose, onSuccess, initialDate
                   type="datetime-local"
                   className={inputClass}
                   value={formData.endTime}
-                  onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+                  onChange={(e) => { setFormData({ ...formData, endTime: e.target.value }); setRoomsToBook([]); }}
                 />
               </div>
             </div>
@@ -295,34 +305,44 @@ export default function ConferenceBookingModal({ onClose, onSuccess, initialDate
             </div>
           </div>
 
-          {activeHotelBookings.length > 0 && (
+          {availabilityKey && (
             <div>
               <label className="text-xs font-medium text-muted-foreground block mb-1.5">
-                Link hotel rooms{' '}
-                <span className="text-[10px] font-normal">(optional — for group bookings)</span>
+                Book hotel rooms for attendees
+                <span className="text-[10px] font-normal ml-1">(optional)</span>
               </label>
-              <div className="border border-border rounded-lg overflow-hidden max-h-40 overflow-y-auto">
-                {activeHotelBookings.map((b) => (
-                  <label
-                    key={b.id}
-                    className="flex items-center gap-2 px-3 py-2 text-xs hover:bg-accent transition-colors border-b border-border/50 last:border-0 cursor-pointer"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={linkedBookingIds.includes(b.id)}
-                      onChange={() => toggleLinkedBooking(b.id)}
-                      className="rounded border-border"
-                    />
-                    <span className="material-symbols-outlined text-[14px] text-muted-foreground">hotel</span>
-                    <span className="flex-1">Room {b.room?.number} — {b.guest?.name}</span>
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full border ${b.status === 'CHECKED_IN' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-blue-50 text-blue-700 border-blue-200'}`}>
-                      {b.status === 'CHECKED_IN' ? 'In' : 'Conf'}
-                    </span>
-                  </label>
-                ))}
-              </div>
-              {linkedBookingIds.length > 0 && (
-                <p className="text-[10px] text-muted-foreground mt-1">{linkedBookingIds.length} room{linkedBookingIds.length !== 1 ? 's' : ''} linked</p>
+              {availableRooms.length === 0 ? (
+                <p className="text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-2 border border-border">
+                  {availableRoomsRaw === undefined ? 'Checking availability…' : 'No rooms available for these dates'}
+                </p>
+              ) : (
+                <div className="border border-border rounded-lg overflow-hidden max-h-44 overflow-y-auto">
+                  {availableRooms.map((room) => (
+                    <label
+                      key={room.id}
+                      className="flex items-center gap-2 px-3 py-2 text-xs hover:bg-accent transition-colors border-b border-border/50 last:border-0 cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={roomsToBook.includes(room.id)}
+                        onChange={() => toggleRoom(room.id)}
+                        className="rounded border-border"
+                      />
+                      <span className="material-symbols-outlined text-[14px] text-muted-foreground">hotel</span>
+                      <span className="flex-1">
+                        Room {room.number}
+                        {room.floor?.name ? ` · ${room.floor.name}` : ''}
+                      </span>
+                      <span className="text-muted-foreground">{room.type}</span>
+                      <span className="font-medium text-foreground">RWF {room.price.toLocaleString()}/night</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+              {roomsToBook.length > 0 && (
+                <p className="text-[10px] text-primary mt-1 font-medium">
+                  {roomsToBook.length} room{roomsToBook.length !== 1 ? 's' : ''} will be booked for attendees
+                </p>
               )}
             </div>
           )}

@@ -98,6 +98,42 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Room is already booked for this period' }, { status: 409 });
     }
 
+    // If rooms are requested for attendees, create hotel bookings for them
+    const roomsToBook: string[] = Array.isArray(body.roomsToBook) ? body.roomsToBook : [];
+    const allLinkedIds: string[] = Array.isArray(linkedBookingIds) ? [...linkedBookingIds] : [];
+
+    if (roomsToBook.length > 0) {
+      // Find or create a guest record for the event organizer
+      let guest = await prisma.guest.findFirst({
+        where: guestContact
+          ? { phone: guestContact }
+          : { name: { equals: guestName, mode: 'insensitive' } },
+      });
+      if (!guest) {
+        guest = await prisma.guest.create({
+          data: { name: guestName, phone: guestContact ?? null },
+        });
+      }
+
+      const createdRoomBookings = await prisma.$transaction(
+        roomsToBook.map((roomId: string) =>
+          prisma.booking.create({
+            data: {
+              guestId: guest!.id,
+              roomId,
+              checkIn: resolvedStart,
+              checkOut: resolvedEnd,
+              totalAmount: 0,
+              status: 'CONFIRMED',
+              createdByName,
+            },
+          })
+        )
+      );
+
+      allLinkedIds.push(...createdRoomBookings.map((b) => b.id));
+    }
+
     const booking = await prisma.conferenceBooking.create({
       data: {
         conferenceRoomId,
@@ -109,7 +145,7 @@ export async function POST(request: Request) {
         startTime: resolvedStart,
         endTime: resolvedEnd,
         totalAmount: resolvedTotal,
-        linkedBookingIds: Array.isArray(linkedBookingIds) ? linkedBookingIds : [],
+        linkedBookingIds: allLinkedIds,
         notes: notes ?? null,
         createdByName,
       },

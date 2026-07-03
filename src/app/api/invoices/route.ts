@@ -52,20 +52,19 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { guestName, amount, type, items, masterInvoiceId, customerType, roomId } = body;
 
+    let resolvedRoomId: string | null = null;
+
     if (type === 'RESTAURANT' && roomId) {
       const occupiedRoom = await findOccupiedRoom(roomId);
       if (!occupiedRoom) {
         return NextResponse.json({ error: 'That room is not occupied right now' }, { status: 400 });
       }
+      // Store the actual room DB id (not number) so checkout can match by roomId directly
+      resolvedRoomId = occupiedRoom.room.id;
     }
 
     if (type === 'RESTAURANT' && customerType === 'RESIDENT' && !roomId) {
       return NextResponse.json({ error: 'Resident orders require an occupied room' }, { status: 400 });
-    }
-
-    // Validation for Master Invoice
-    if (type === 'MASTER' && (!items || items.length === 0)) {
-      // Logic to auto-compile master invoice from sub-invoices if provided
     }
 
     const invoice = await prisma.invoice.create({
@@ -74,6 +73,7 @@ export async function POST(request: Request) {
         amount,
         type: type || 'ROOM',
         masterInvoiceId,
+        roomId: resolvedRoomId,
         createdByName,
         createdById,
         items: {
