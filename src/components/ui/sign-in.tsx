@@ -126,20 +126,21 @@ export const SignInPage: React.FC<SignInPageProps> = ({
 
       {/* Right column: hero image + testimonials */}
       {heroImageSrc && (
-        <section className="hidden md:block flex-1 relative p-4">
-          <div
-            className="animate-slide-right animate-delay-300 absolute inset-4 rounded-3xl bg-cover bg-center bg-no-repeat"
-            style={{ backgroundImage: `url("${heroImageSrc}")` }}
-            role="img"
-            aria-label="Ubumwe Hotel by Kamdine on Lake Kivu"
-          />
-          {testimonials.length > 0 && (
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-4 px-8 w-full justify-center">
-              <TestimonialCard testimonial={testimonials[0]} delay="animate-delay-1000" />
-              {testimonials[1] && <div className="hidden xl:flex"><TestimonialCard testimonial={testimonials[1]} delay="animate-delay-1200" /></div>}
-              {testimonials[2] && <div className="hidden 2xl:flex"><TestimonialCard testimonial={testimonials[2]} delay="animate-delay-1400" /></div>}
-            </div>
-          )}
+        <section className="hidden md:flex flex-1 relative p-4">
+          <div className="relative w-full rounded-3xl overflow-hidden">
+            <img
+              src={heroImageSrc}
+              alt="Ubumwe Hotel by Kamdine on Lake Kivu"
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            {testimonials.length > 0 && (
+              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-4 px-8 w-full justify-center">
+                <TestimonialCard testimonial={testimonials[0]} delay="animate-delay-1000" />
+                {testimonials[1] && <div className="hidden xl:flex"><TestimonialCard testimonial={testimonials[1]} delay="animate-delay-1200" /></div>}
+                {testimonials[2] && <div className="hidden 2xl:flex"><TestimonialCard testimonial={testimonials[2]} delay="animate-delay-1400" /></div>}
+              </div>
+            )}
+          </div>
         </section>
       )}
     </div>
