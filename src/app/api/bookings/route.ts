@@ -62,14 +62,37 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Room not found' }, { status: 404 })
     }
 
-    // Check for overlapping bookings
+    // Strict date validation
     const newCheckIn = new Date(checkIn)
     const newCheckOut = new Date(checkOut)
 
+    if (isNaN(newCheckIn.getTime()) || isNaN(newCheckOut.getTime())) {
+      return NextResponse.json({ error: 'Invalid dates provided' }, { status: 400 })
+    }
+
+    const todayStart = new Date()
+    todayStart.setHours(0, 0, 0, 0)
+
+    if (newCheckIn < todayStart) {
+      return NextResponse.json({
+        error: 'Invalid check-in date',
+        message: 'Check-in date cannot be in the past.'
+      }, { status: 400 })
+    }
+
     if (newCheckOut <= newCheckIn) {
       return NextResponse.json({
-        error: 'Invalid Dates',
-        message: 'Check-out date must be after check-in date.'
+        error: 'Invalid dates',
+        message: 'Check-out must be after check-in.'
+      }, { status: 400 })
+    }
+
+    const maxStay = new Date(newCheckIn)
+    maxStay.setFullYear(maxStay.getFullYear() + 1)
+    if (newCheckOut > maxStay) {
+      return NextResponse.json({
+        error: 'Invalid dates',
+        message: 'Stay cannot exceed one year.'
       }, { status: 400 })
     }
 

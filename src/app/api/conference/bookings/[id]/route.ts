@@ -57,15 +57,28 @@ export async function PATCH(request: Request, { params }: Params) {
     const existing = await prisma.conferenceBooking.findUnique({ where: { id } });
     if (!existing) return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     let data: Record<string, any> = {};
 
     switch (action) {
-      case 'CHECK_IN':
+      case 'CHECK_IN': {
         if (existing.status !== 'CONFIRMED') {
           return NextResponse.json({ error: 'Only confirmed bookings can be checked in' }, { status: 400 });
         }
+        const eventDay = new Date(existing.startTime);
+        eventDay.setHours(0, 0, 0, 0);
+        if (today < eventDay) {
+          const fmt = eventDay.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+          return NextResponse.json(
+            { error: `Event starts on ${fmt}. Cannot check in before the event date.` },
+            { status: 400 }
+          );
+        }
         data = { status: 'CHECKED_IN', checkedInAt: new Date() };
         break;
+      }
       case 'CHECK_OUT':
         if (existing.status !== 'CHECKED_IN') {
           return NextResponse.json({ error: 'Booking must be checked in first' }, { status: 400 });

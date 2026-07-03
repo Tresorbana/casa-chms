@@ -241,15 +241,17 @@ export async function POST(request: Request) {
     const now = new Date();
 
     // Find any unpaid invoices for the same guest that should be paid together at checkout.
-    // This includes room charges, restaurant orders, and other service invoices that were created separately.
+    // Match by: (1) guest name, or (2) the legacy "Room 200" format used by the POS before the fix.
+    const roomLabel = `Room ${room.number}`;
     const existingUnpaidInvoices = await prisma.invoice.findMany({
       where: {
         status: 'UNPAID',
         masterInvoiceId: null,
         type: { in: ['ROOM', 'RESTAURANT', 'SERVICE'] },
         OR: [
-          { guestName: folio.guestName },
           { guestName: { equals: folio.guestName, mode: 'insensitive' } },
+          { guestName: { equals: roomLabel, mode: 'insensitive' } },
+          { guestName: { startsWith: roomLabel, mode: 'insensitive' } },
         ],
       },
       include: { items: true },

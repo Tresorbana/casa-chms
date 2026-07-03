@@ -26,16 +26,12 @@ export function HotelBrandMark({
       </div>
       <div className={centered ? 'flex flex-col items-center' : ''}>
         <h1 className={`${titleClass} font-semibold text-slate-900 tracking-tight`}>{HOTEL_INFO.name}</h1>
-        <p className="text-[11px] text-slate-500 mt-0.5">
-          Also known as {HOTEL_INFO.aliases.join(' · ')}
-        </p>
         {showTagline && (
-          <p className="text-xs font-medium text-primary/80 mt-1">{HOTEL_INFO.tagline}</p>
+          <p className="text-xs text-slate-500 mt-0.5">{HOTEL_INFO.tagline}</p>
         )}
         {showContact && (
           <div className="mt-2 space-y-0.5 text-xs text-slate-500">
             <p>{hotelFullLocation()}</p>
-            <p className="text-slate-400">{HOTEL_INFO.locationNote}</p>
             <p>{HOTEL_INFO.phone}</p>
             <p>{HOTEL_INFO.email}</p>
           </div>

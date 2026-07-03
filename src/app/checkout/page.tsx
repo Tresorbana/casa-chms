@@ -242,7 +242,7 @@ function CheckoutFolioView({
 
             <div className="p-6 md:p-10 border-b border-border">
               <div className="flex flex-col lg:flex-row justify-between items-start gap-8">
-                <HotelBrandMark showContact />
+                <HotelBrandMark showContact showTagline={false} />
                 <div className="text-left lg:text-right">
                   <h2 className="text-2xl font-semibold text-muted-foreground/50 uppercase tracking-tight">Folio</h2>
                   <p className="text-sm font-semibold text-primary mt-1">{folioRef}</p>

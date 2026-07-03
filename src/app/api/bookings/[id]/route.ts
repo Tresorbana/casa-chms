@@ -60,14 +60,27 @@ export async function PATCH(request: Request, { params }: Params) {
     let bookingData: Record<string, any> = {};
     let roomData: Record<string, any> | null = null;
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     switch (action) {
-      case 'CHECK_IN':
+      case 'CHECK_IN': {
         if (existing.status !== 'CONFIRMED') {
           return NextResponse.json({ error: 'Only confirmed bookings can be checked in' }, { status: 400 });
+        }
+        const checkInDay = new Date(existing.checkIn);
+        checkInDay.setHours(0, 0, 0, 0);
+        if (today < checkInDay) {
+          const fmt = checkInDay.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+          return NextResponse.json(
+            { error: `Check-in date is ${fmt}. Cannot check in before the arrival date.` },
+            { status: 400 }
+          );
         }
         bookingData = { status: 'CHECKED_IN', checkedInAt: new Date() };
         roomData = { status: 'OCCUPIED' };
         break;
+      }
       case 'CHECK_OUT':
         if (existing.status !== 'CHECKED_IN') {
           return NextResponse.json({ error: 'Guest must be checked in first' }, { status: 400 });

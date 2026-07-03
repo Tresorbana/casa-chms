@@ -28,7 +28,7 @@ export default function Events() {
     onError: () => toast.error('Failed to load venues'),
   });
   const { data: bookingsData, mutate: mutateBookings } = useSWR('/api/conference/bookings', fetcher);
-  const { data: activeBookingsData } = useSWR('/api/bookings?status=CHECKED_IN', fetcher);
+  const { data: allHotelBookingsData } = useSWR('/api/bookings', fetcher);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
@@ -40,10 +40,11 @@ export default function Events() {
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
   const [isActioning, setIsActioning] = useState(false);
+  const [isLinkingRoom, setIsLinkingRoom] = useState(false);
 
   const venues = Array.isArray(venuesData) ? venuesData : [];
   const schedule = Array.isArray(bookingsData) ? bookingsData : [];
-  const activeBookings = Array.isArray(activeBookingsData) ? activeBookingsData : [];
+  const allHotelBookings = Array.isArray(allHotelBookingsData) ? allHotelBookingsData : [];
 
   const handleExport = () => {
     exportToExcel(conferenceExportRows(schedule), `Conference_Events_${new Date().toISOString().split('T')[0]}`, 'Events');
@@ -53,6 +54,7 @@ export default function Events() {
   const openBookingDetail = (booking: any) => {
     setSelectedBooking(booking);
     setAddItemForm({ description: '', quantity: '1', unitPrice: '' });
+    setIsLinkingRoom(false);
   };
 
   const openEditModal = () => {
@@ -112,6 +114,41 @@ export default function Events() {
       toast.success(messages[action] || 'Updated');
     } catch { toast.error('Error updating booking'); }
     finally { setIsActioning(false); }
+  };
+
+  const handleLinkRoom = async (bookingId: string) => {
+    if (!selectedBooking) return;
+    const newIds = [...(selectedBooking.linkedBookingIds ?? []), bookingId];
+    try {
+      const res = await fetch(`/api/conference/bookings/${selectedBooking.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ linkedBookingIds: newIds }),
+      });
+      if (!res.ok) { toast.error('Failed to link room'); return; }
+      const updated = await res.json();
+      mutateBookings();
+      setSelectedBooking(updated);
+      setIsLinkingRoom(false);
+      toast.success('Hotel room linked');
+    } catch { toast.error('Error linking room'); }
+  };
+
+  const handleUnlinkRoom = async (bookingId: string) => {
+    if (!selectedBooking) return;
+    const newIds = (selectedBooking.linkedBookingIds ?? []).filter((id: string) => id !== bookingId);
+    try {
+      const res = await fetch(`/api/conference/bookings/${selectedBooking.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ linkedBookingIds: newIds }),
+      });
+      if (!res.ok) { toast.error('Failed to unlink room'); return; }
+      const updated = await res.json();
+      mutateBookings();
+      setSelectedBooking(updated);
+      toast.success('Room unlinked');
+    } catch { toast.error('Error unlinking room'); }
   };
 
   const handleAddItem = async (e: React.FormEvent) => {
@@ -334,26 +371,79 @@ export default function Events() {
                 </div>
 
                 {/* Linked Hotel Rooms */}
-                {activeBookings.length > 0 && (
-                  <div>
-                    <p className="text-xs font-medium text-muted-foreground mb-2">Linked Hotel Stays</p>
-                    {(selectedBooking.linkedBookingIds ?? []).length === 0 ? (
-                      <p className="text-xs text-muted-foreground italic">No hotel rooms linked to this event</p>
-                    ) : (
-                      <div className="space-y-1">
-                        {selectedBooking.linkedBookingIds.map((bid: string) => {
-                          const b = activeBookings.find((ab: any) => ab.id === bid);
-                          return b ? (
-                            <div key={bid} className="flex items-center gap-2 p-2 bg-muted/40 rounded-lg border border-border text-xs">
-                              <span className="material-symbols-outlined text-[14px] text-muted-foreground">hotel</span>
-                              <span>Room {b.room?.number} — {b.guest?.name}</span>
-                            </div>
-                          ) : null;
-                        })}
+                {(() => {
+                  const linkedIds: string[] = selectedBooking.linkedBookingIds ?? [];
+                  const canEdit = !['CANCELLED', 'INVOICED', 'CHECKED_OUT'].includes(selectedBooking.status);
+                  const availableToLink = allHotelBookings.filter((b: any) =>
+                    ['CONFIRMED', 'CHECKED_IN'].includes(b.status) && !linkedIds.includes(b.id)
+                  );
+                  return (
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-xs font-medium text-muted-foreground">Linked Hotel Stays</p>
+                        {canEdit && (
+                          <button
+                            onClick={() => setIsLinkingRoom(!isLinkingRoom)}
+                            className="text-[10px] text-primary flex items-center gap-0.5 hover:opacity-70 transition-opacity"
+                          >
+                            <span className="material-symbols-outlined text-[12px]">{isLinkingRoom ? 'close' : 'add'}</span>
+                            {isLinkingRoom ? 'Close' : 'Link Room'}
+                          </button>
+                        )}
                       </div>
-                    )}
-                  </div>
-                )}
+                      {linkedIds.length === 0 ? (
+                        <p className="text-xs text-muted-foreground italic">No hotel rooms linked to this event</p>
+                      ) : (
+                        <div className="space-y-1">
+                          {linkedIds.map((bid: string) => {
+                            const b = allHotelBookings.find((ab: any) => ab.id === bid);
+                            return (
+                              <div key={bid} className="flex items-center gap-2 p-2 bg-muted/40 rounded-lg border border-border text-xs">
+                                <span className="material-symbols-outlined text-[14px] text-muted-foreground">hotel</span>
+                                <span className="flex-1">
+                                  {b ? `Room ${b.room?.number} — ${b.guest?.name}` : `Stay ${bid.slice(-6)}`}
+                                </span>
+                                {canEdit && (
+                                  <button
+                                    onClick={() => handleUnlinkRoom(bid)}
+                                    className="text-muted-foreground hover:text-destructive transition-colors"
+                                    title="Unlink room"
+                                  >
+                                    <span className="material-symbols-outlined text-[12px]">link_off</span>
+                                  </button>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                      {isLinkingRoom && (
+                        <div className="mt-2 border border-border rounded-lg overflow-hidden">
+                          <div className="px-3 py-1.5 bg-muted/50 border-b border-border">
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Select hotel booking</p>
+                          </div>
+                          <div className="max-h-44 overflow-y-auto">
+                            {availableToLink.length === 0 ? (
+                              <p className="text-xs text-muted-foreground p-3 text-center italic">No active hotel stays to link</p>
+                            ) : (
+                              availableToLink.map((b: any) => (
+                                <button
+                                  key={b.id}
+                                  onClick={() => handleLinkRoom(b.id)}
+                                  className="w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-accent transition-colors border-b border-border/50 last:border-0 text-left"
+                                >
+                                  <span className="material-symbols-outlined text-[14px] text-muted-foreground">hotel</span>
+                                  <span className="flex-1">Room {b.room?.number} — {b.guest?.name}</span>
+                                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full border ${b.status === 'CHECKED_IN' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-blue-50 text-blue-700 border-blue-200'}`}>{b.status === 'CHECKED_IN' ? 'In' : 'Conf'}</span>
+                                </button>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 {/* Extras / Food Items */}
                 <div>

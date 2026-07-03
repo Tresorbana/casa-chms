@@ -78,19 +78,30 @@ export default function PosRestaurant() {
     }
     setIsSubmitting(true);
     try {
-      const guestDescription = orderType === 'resident'
-        ? `Room ${occupiedRooms.find((room: any) => room.roomId === residentRoomId)?.roomNumber || ''}`.trim()
-        : `${walkInName || 'Guest'} (${walkInContact || 'No Contact'})`;
+      const residentRoom = occupiedRooms.find((room: any) => room.roomId === residentRoomId);
+      // For residents: use the real guest name so checkout can match this invoice automatically.
+      // Include room number in the first item description for traceability.
+      const guestName = orderType === 'resident'
+        ? (residentRoom?.guestName || `Room ${residentRoom?.roomNumber || ''}`.trim())
+        : `${walkInName || 'Guest'}`;
+      const roomNote = orderType === 'resident' && residentRoom
+        ? ` — Room ${residentRoom.roomNumber}`
+        : '';
       const res = await fetch('/api/invoices', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          guestName: guestDescription,
+          guestName,
           amount: cartTotal,
           type: 'RESTAURANT',
           customerType: orderType === 'resident' ? 'RESIDENT' : 'WALKIN',
           roomId: orderType === 'resident' ? residentRoomId : null,
-          items: cart.map((item) => ({ description: item.name, quantity: item.quantity || 1, price: item.price })),
+          roomNote,
+          items: cart.map((item, i) => ({
+            description: i === 0 ? `${item.name}${roomNote}` : item.name,
+            quantity: item.quantity || 1,
+            price: item.price,
+          })),
         }),
       });
       if (res.ok) {

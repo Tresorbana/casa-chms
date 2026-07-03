@@ -86,7 +86,7 @@ function InvoicePageContent() {
 
           <div className="p-8 md:p-12">
             <div className="flex flex-col sm:flex-row justify-between items-start gap-8 mb-10">
-              <HotelBrandMark showContact />
+              <HotelBrandMark showContact showTagline={false} />
               <div className="text-left sm:text-right flex-shrink-0">
                 <h2 className="text-3xl font-semibold text-muted-foreground/40 uppercase tracking-tight leading-none">
                   Invoice
