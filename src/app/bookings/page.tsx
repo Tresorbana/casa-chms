@@ -145,10 +145,15 @@ function BookingsContent() {
             </button>
             <button
               onClick={() => setActiveView('manage')}
-              className={`inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg transition-colors ${activeView === 'manage' ? 'bg-primary text-primary-foreground' : 'border border-border text-foreground hover:bg-accent'}`}
+              className={`inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg transition-colors ${activeView === 'manage' ? 'bg-primary text-primary-foreground' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
             >
-              <span className="material-symbols-outlined text-[18px]">manage_accounts</span>
+              <span className="material-symbols-outlined text-[18px]">table_rows</span>
               Manage Bookings
+              {bookings.length > 0 && (
+                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${activeView === 'manage' ? 'bg-white/20' : 'bg-white/25'}`}>
+                  {bookings.length}
+                </span>
+              )}
             </button>
           </div>
         }
@@ -375,9 +380,10 @@ function BookingsContent() {
                               <button
                                 onClick={() => { setCancelTarget(b); setCancelReason(''); }}
                                 title="Cancel Booking"
-                                className="p-1.5 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 transition-colors text-xs font-medium whitespace-nowrap"
                               >
-                                <span className="material-symbols-outlined text-[16px]">cancel</span>
+                                <span className="material-symbols-outlined text-[14px]">cancel</span>
+                                Cancel
                               </button>
                             )}
                             {b.status === 'CANCELLED' && (

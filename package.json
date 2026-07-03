@@ -12,7 +12,8 @@
     "normalize:room-types": "node --import tsx scripts/normalize-room-types.ts",
     "import:beverages": "node --import tsx scripts/import-beverages.ts",
     "import:pauceck-menu": "node --import tsx scripts/import-pauceck-menu.ts",
-    "import:stock": "node --import tsx scripts/import-stock-items.ts"
+    "import:stock": "node --import tsx scripts/import-stock-items.ts",
+    "db:reset": "node --import tsx scripts/reset-db.ts"
   },
   "keywords": [],
   "author": "",
