@@ -37,6 +37,8 @@ type CheckoutDetail = {
     lineItems: FolioLine[];
     roomLineTotal: number;
     servicesTotal: number;
+    restaurantLineItems: FolioLine[];
+    restaurantTotal: number;
     grandTotal: number;
   };
 };
@@ -306,6 +308,26 @@ function CheckoutFolioView({
                       </td>
                     </tr>
                   ))}
+                  {(folio.restaurantLineItems ?? []).length > 0 && (
+                    <>
+                      <tr>
+                        <td colSpan={3} className="px-4 pt-5 pb-1">
+                          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                            Restaurant &amp; bar charges
+                          </p>
+                        </td>
+                      </tr>
+                      {folio.restaurantLineItems.map((item, i) => (
+                        <tr key={`rest-${i}`}>
+                          <td className="px-4 py-3 font-medium text-foreground">{item.description}</td>
+                          <td className="px-4 py-3 text-center text-muted-foreground">{item.quantity}</td>
+                          <td className="px-4 py-3 text-right font-medium text-foreground">
+                            RWF {(item.quantity * item.price).toLocaleString()}
+                          </td>
+                        </tr>
+                      ))}
+                    </>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -319,6 +341,12 @@ function CheckoutFolioView({
                 <div className="flex justify-between text-sm text-muted-foreground max-w-xs ml-auto">
                   <span>Services & extras</span>
                   <span>RWF {folio.servicesTotal.toLocaleString()}</span>
+                </div>
+              )}
+              {(folio.restaurantTotal ?? 0) > 0 && (
+                <div className="flex justify-between text-sm text-muted-foreground max-w-xs ml-auto">
+                  <span>Restaurant & bar</span>
+                  <span>RWF {folio.restaurantTotal.toLocaleString()}</span>
                 </div>
               )}
               <div className="flex justify-between text-lg font-semibold max-w-xs ml-auto pt-2 border-t border-border">

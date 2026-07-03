@@ -52,15 +52,11 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { guestName, amount, type, items, masterInvoiceId, customerType, roomId } = body;
 
-    let resolvedRoomId: string | null = null;
-
     if (type === 'RESTAURANT' && roomId) {
       const occupiedRoom = await findOccupiedRoom(roomId);
       if (!occupiedRoom) {
         return NextResponse.json({ error: 'That room is not occupied right now' }, { status: 400 });
       }
-      // Store the actual room DB id (not number) so checkout can match by roomId directly
-      resolvedRoomId = occupiedRoom.room.id;
     }
 
     if (type === 'RESTAURANT' && customerType === 'RESIDENT' && !roomId) {
@@ -73,7 +69,6 @@ export async function POST(request: Request) {
         amount,
         type: type || 'ROOM',
         masterInvoiceId,
-        roomId: resolvedRoomId,
         createdByName,
         createdById,
         items: {

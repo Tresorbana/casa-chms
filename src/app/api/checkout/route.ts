@@ -173,6 +173,29 @@ async function listOccupiedRooms() {
     });
   }
 
+  // Add pending restaurant invoice totals to each room's balance due
+  if (occupied.length > 0) {
+    const allRestInvoices = await prisma.invoice.findMany({
+      where: { status: 'UNPAID', type: 'RESTAURANT', masterInvoiceId: null },
+      select: { guestName: true, amount: true },
+    });
+    for (const row of occupied) {
+      const roomLabelLc = `room ${row.roomNumber}`.toLowerCase();
+      const guestLc = row.guestName.toLowerCase().trim();
+      for (const inv of allRestInvoices) {
+        const invName = (inv.guestName ?? '').toLowerCase().trim();
+        if (
+          invName === guestLc ||
+          invName === roomLabelLc ||
+          invName.startsWith(roomLabelLc + ' ') ||
+          invName.startsWith(roomLabelLc + '—')
+        ) {
+          row.balanceDue += inv.amount;
+        }
+      }
+    }
+  }
+
   occupied.sort((a, b) => a.roomNumber.localeCompare(b.roomNumber, undefined, { numeric: true }));
   return occupied;
 }
@@ -189,6 +212,32 @@ export async function GET(request: Request) {
       }
       const { room, booking } = found;
       const folio = buildFolio(room, booking);
+
+      // Fetch pending restaurant charges for this guest
+      const roomLabel = `Room ${room.number}`;
+      const restaurantInvoices = await prisma.invoice.findMany({
+        where: {
+          status: 'UNPAID',
+          type: 'RESTAURANT',
+          masterInvoiceId: null,
+          OR: [
+            { guestName: { equals: folio.guestName, mode: 'insensitive' } },
+            { guestName: { equals: roomLabel, mode: 'insensitive' } },
+            { guestName: { startsWith: roomLabel, mode: 'insensitive' } },
+          ],
+        },
+        include: { items: true },
+        orderBy: { date: 'asc' },
+      });
+      const restaurantTotal = restaurantInvoices.reduce((s, inv) => s + inv.amount, 0);
+      const restaurantLineItems = restaurantInvoices.flatMap((inv) =>
+        inv.items.map((item) => ({
+          description: item.description,
+          quantity: item.quantity,
+          price: item.price,
+        }))
+      );
+
       return NextResponse.json({
         room: {
           id: room.id,
@@ -203,7 +252,12 @@ export async function GET(request: Request) {
           checkIn: booking.checkIn,
           checkOut: booking.checkOut,
         },
-        folio,
+        folio: {
+          ...folio,
+          restaurantLineItems,
+          restaurantTotal,
+          grandTotal: folio.grandTotal + restaurantTotal,
+        },
       });
     }
 
@@ -249,7 +303,6 @@ export async function POST(request: Request) {
         masterInvoiceId: null,
         type: { in: ['ROOM', 'RESTAURANT', 'SERVICE'] },
         OR: [
-          { roomId: room.id },
           { guestName: { equals: folio.guestName, mode: 'insensitive' } },
           { guestName: { equals: roomLabel, mode: 'insensitive' } },
           { guestName: { startsWith: roomLabel, mode: 'insensitive' } },
