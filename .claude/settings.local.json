@@ -16,7 +16,8 @@
       "Bash(npx prisma *)",
       "Bash(npx tsc *)",
       "Bash(node -e \"const { Client } = require\\('pg'\\); const c = new Client\\({host:'localhost',port:5432,user:'postgres',password:'postgres',database:'chms'}\\); c.connect\\(\\).then\\(\\(\\)=>console.log\\('connected'\\)\\).catch\\(e=>console.log\\('error:',e.message\\)\\)\")",
-      "Bash(grep -E \"\\\\.\\(tsx?|jsx?\\)$\")"
+      "Bash(grep -E \"\\\\.\\(tsx?|jsx?\\)$\")",
+      "Bash(git mv *)"
     ]
   }
 }

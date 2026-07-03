@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { SignInPage, type Testimonial } from '@/components/ui/sign-in';
 
-const LOGIN_HERO_IMAGE = '/Sign%20in%20image.jpeg';
+const LOGIN_HERO_IMAGE = '/sign-in.jpeg';
 
 const rwandanTestimonials: Testimonial[] = [
   {

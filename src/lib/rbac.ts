@@ -36,7 +36,7 @@ const ROUTE_RULES: RouteRule[] = [
 
   { pattern: /^\/settings(?:\/.*)?$/, roles: ADMIN_ROLES },
   { pattern: /^\/finance(?:\/.*)?$/, roles: FINANCE_ROLES },
-  { pattern: /^\/reports(?:\/.*)?$/, roles: FINANCE_ROLES },
+  { pattern: /^\/reports(?:\/.*)?$/, roles: AUTHENTICATED_ROLES },
   { pattern: /^\/inventory(?:\/.*)?$/, roles: ['BARMAN', 'STORE_KEEPER', 'FINANCE', 'ADMIN', 'SUPER_ADMIN'] },
   { pattern: /^\/pos\/restaurant(?:\/.*)?$/, roles: MENU_ROLES },
   { pattern: /^\/cms\/requests(?:\/.*)?$/, roles: RECEPTION_ROLES },
@@ -68,7 +68,7 @@ const ROUTE_RULES: RouteRule[] = [
   { pattern: /^\/api\/invoices(?:\/.*)?$/, roles: OPS_ROLES },
   { pattern: /^\/api\/finance(?:\/.*)?$/, roles: FINANCE_ROLES },
   { pattern: /^\/api\/conference\/bookings\/[^/]+$/, roles: RECEPTION_ROLES },
-  { pattern: /^\/api\/reports(?:\/.*)?$/, roles: FINANCE_ROLES },
+  { pattern: /^\/api\/reports(?:\/.*)?$/, roles: AUTHENTICATED_ROLES },
   { pattern: /^\/api\/services\/charge$/, roles: OPS_ROLES },
   { pattern: /^\/api\/services(?:\/.*)?$/, roles: SERVICE_ROLES },
   { pattern: /^\/api\/pos\/menu(?:\/.*)?$/, roles: MENU_ROLES },
