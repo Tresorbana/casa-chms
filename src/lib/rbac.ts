@@ -44,6 +44,7 @@ const ROUTE_RULES: RouteRule[] = [
   { pattern: /^\/bookings(?:\/.*)?$/, roles: RECEPTION_ROLES },
   { pattern: /^\/checkout(?:\/.*)?$/, roles: RECEPTION_ROLES },
   { pattern: /^\/events(?:\/.*)?$/, roles: RECEPTION_ROLES },
+  { pattern: /^\/api\/conference\/report$/, roles: RECEPTION_ROLES },
   { pattern: /^\/invoice(?:\/.*)?$/, roles: OPS_ROLES },
 
   { pattern: /^\/api\/dashboard$/, roles: AUTHENTICATED_ROLES },
@@ -57,6 +58,7 @@ const ROUTE_RULES: RouteRule[] = [
   { pattern: /^\/verify-routing(?:\/.*)?$/, roles: AUTHENTICATED_ROLES },
 
   { pattern: /^\/api\/bookings(?:\/.*)?$/, roles: RECEPTION_ROLES },
+  { pattern: /^\/api\/bookings\/[^/]+$/, roles: RECEPTION_ROLES },
   { pattern: /^\/api\/checkout(?:\/.*)?$/, roles: RECEPTION_ROLES },
   { pattern: /^\/api\/rooms$/, roles: AUTHENTICATED_ROLES, methods: ['GET'] },
   { pattern: /^\/api\/rooms(?:\/.*)?$/, roles: ADMIN_ROLES, methods: ['POST', 'PUT', 'PATCH', 'DELETE'] },
@@ -65,6 +67,7 @@ const ROUTE_RULES: RouteRule[] = [
   { pattern: /^\/api\/inventory(?:\/.*)?$/, roles: ['BARMAN', 'STORE_KEEPER', 'FINANCE', 'ADMIN', 'SUPER_ADMIN'] },
   { pattern: /^\/api\/invoices(?:\/.*)?$/, roles: OPS_ROLES },
   { pattern: /^\/api\/finance(?:\/.*)?$/, roles: FINANCE_ROLES },
+  { pattern: /^\/api\/conference\/bookings\/[^/]+$/, roles: RECEPTION_ROLES },
   { pattern: /^\/api\/reports(?:\/.*)?$/, roles: FINANCE_ROLES },
   { pattern: /^\/api\/services\/charge$/, roles: OPS_ROLES },
   { pattern: /^\/api\/services(?:\/.*)?$/, roles: SERVICE_ROLES },

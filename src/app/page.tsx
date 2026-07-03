@@ -52,6 +52,11 @@ export default function Dashboard() {
 
   const stats = data?.stats ?? {};
   const rooms: any[] = data?.rooms ?? [];
+  const role: string = data?.role ?? 'STAFF';
+  const isAdmin = ['ADMIN', 'SUPER_ADMIN'].includes(role);
+  const isFinance = ['FINANCE', 'ADMIN', 'SUPER_ADMIN'].includes(role);
+  const isReception = ['RECEPTIONIST', 'ADMIN', 'SUPER_ADMIN'].includes(role);
+  const isRestaurant = ['WAITER', 'BARMAN', 'ADMIN', 'SUPER_ADMIN'].includes(role);
 
   const { sortedFloors, roomsByFloor } = useMemo(() => {
     const roomsByFloor: Record<number, any[]> = {};
@@ -93,8 +98,10 @@ export default function Dashboard() {
   }
 
   const revenueToday = stats.revenueToday ?? 0;
-  const estimatedServices = Math.round(revenueToday * 0.28);
-  const roomRevenue = revenueToday - estimatedServices;
+  const restaurantRevenueToday = stats.restaurantRevenueToday ?? 0;
+  const checkinsToday = stats.checkinsToday ?? 0;
+  const checkoutsToday = stats.checkoutsToday ?? 0;
+  const eventsToday = stats.eventsToday ?? 0;
 
   return (
     <div className="min-h-screen bg-background p-4 lg:p-8 flex flex-col gap-6">
@@ -125,75 +132,120 @@ export default function Dashboard() {
         }
       />
 
-      {/* Stat Cards */}
+      {/* Stat Cards — role-based */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-element">
-        <StatCard
-          icon="bed"
-          label="Occupancy Rate"
-          value={`${(stats.occupancyRate || 0).toFixed(1)}%`}
-          sub={`${stats.occupiedRooms ?? 0} of ${stats.totalRooms ?? 0} rooms`}
-        />
-        <StatCard
-          icon="payments"
-          label="Revenue Today"
-          value={`RWF ${(revenueToday).toLocaleString()}`}
-          sub="Room + F&B combined"
-        />
-        <StatCard
-          icon="restaurant"
-          label="F&B Revenue"
-          value={`RWF ${estimatedServices.toLocaleString()}`}
-          sub="Estimated services"
-        />
-        <StatCard
-          icon="pending_actions"
-          label="Active Bookings"
-          value={String(stats.pendingReservations || 0)}
-          sub="Confirmed reservations"
-        />
-      </div>
-
-      {/* Revenue split */}
-      <div className="bg-card border border-border rounded-xl p-6 animate-element animate-delay-100">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h3 className="text-sm font-semibold text-foreground">Revenue Breakdown</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">Room vs F&B split for today</p>
-          </div>
-          <button
-            onClick={() => router.push('/reports')}
-            className="text-xs font-medium text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
-          >
-            Full report
-            <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
-          </button>
-        </div>
-        <div className="flex gap-6 mb-3">
-          <div>
-            <p className="text-xs text-muted-foreground mb-0.5">Room Revenue</p>
-            <p className="text-lg font-bold text-foreground">RWF {roomRevenue.toLocaleString()}</p>
-          </div>
-          <div className="w-px bg-border" />
-          <div>
-            <p className="text-xs text-muted-foreground mb-0.5">F&B / Services</p>
-            <p className="text-lg font-bold text-foreground">RWF {estimatedServices.toLocaleString()}</p>
-          </div>
-        </div>
-        {/* Progress bar */}
-        <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-primary rounded-full transition-all duration-700"
-            style={{ width: revenueToday > 0 ? `${(roomRevenue / revenueToday) * 100}%` : '0%' }}
+        {isReception && (
+          <StatCard
+            icon="bed"
+            label="Occupancy Rate"
+            value={`${(stats.occupancyRate || 0).toFixed(1)}%`}
+            sub={`${rooms.filter((r: any) => r.displayStatus === 'OCCUPIED').length} of ${rooms.length} rooms`}
           />
-        </div>
-        <div className="flex justify-between mt-1.5 text-[10px] text-muted-foreground">
-          <span>Room {revenueToday > 0 ? Math.round((roomRevenue / revenueToday) * 100) : 0}%</span>
-          <span>F&B {revenueToday > 0 ? Math.round((estimatedServices / revenueToday) * 100) : 0}%</span>
-        </div>
+        )}
+        {isReception && (
+          <StatCard
+            icon="login"
+            label="Check-ins Today"
+            value={String(checkinsToday)}
+            sub="Expected arrivals"
+          />
+        )}
+        {isReception && (
+          <StatCard
+            icon="logout"
+            label="Check-outs Today"
+            value={String(checkoutsToday)}
+            sub="Due departures"
+          />
+        )}
+        {isReception && (
+          <StatCard
+            icon="event"
+            label="Events Today"
+            value={String(eventsToday)}
+            sub="Confirmed & active"
+          />
+        )}
+        {isFinance && (
+          <StatCard
+            icon="payments"
+            label="Revenue Today"
+            value={`RWF ${revenueToday.toLocaleString()}`}
+            sub="Paid invoices"
+          />
+        )}
+        {isFinance && (
+          <StatCard
+            icon="restaurant"
+            label="Restaurant Today"
+            value={`RWF ${restaurantRevenueToday.toLocaleString()}`}
+            sub="F&B invoices"
+          />
+        )}
+        {isRestaurant && !isFinance && !isReception && (
+          <StatCard
+            icon="restaurant"
+            label="Restaurant Revenue"
+            value={`RWF ${restaurantRevenueToday.toLocaleString()}`}
+            sub="Today's F&B"
+          />
+        )}
+        {isRestaurant && !isFinance && !isReception && (
+          <StatCard
+            icon="receipt_long"
+            label="POS Activity"
+            value="Active"
+            sub="Restaurant & Bar open"
+          />
+        )}
+        {!isReception && !isFinance && !isRestaurant && (
+          <StatCard
+            icon="hotel"
+            label={HOTEL_INFO.name}
+            value="Online"
+            sub="System operational"
+          />
+        )}
       </div>
 
-      {/* Room Status Grid */}
-      <section className="bg-card border border-border rounded-xl p-6 animate-element animate-delay-200">
+      {/* Finance revenue split — only finance/admin */}
+      {isFinance && revenueToday > 0 && (
+        <div className="bg-card border border-border rounded-xl p-6 animate-element animate-delay-100">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-sm font-semibold text-foreground">Revenue Today</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">Paid invoices breakdown</p>
+            </div>
+            <button
+              onClick={() => router.push('/reports')}
+              className="text-xs font-medium text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+            >
+              Full report
+              <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+            </button>
+          </div>
+          <div className="flex gap-6 mb-3">
+            <div>
+              <p className="text-xs text-muted-foreground mb-0.5">Room Revenue</p>
+              <p className="text-lg font-bold text-foreground">RWF {(revenueToday - restaurantRevenueToday).toLocaleString()}</p>
+            </div>
+            <div className="w-px bg-border" />
+            <div>
+              <p className="text-xs text-muted-foreground mb-0.5">Restaurant & Bar</p>
+              <p className="text-lg font-bold text-foreground">RWF {restaurantRevenueToday.toLocaleString()}</p>
+            </div>
+          </div>
+          <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-primary rounded-full transition-all duration-700"
+              style={{ width: revenueToday > 0 ? `${((revenueToday - restaurantRevenueToday) / revenueToday) * 100}%` : '0%' }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Room Status Grid — reception / admin only */}
+      {(isReception || isAdmin) && <section className="bg-card border border-border rounded-xl p-6 animate-element animate-delay-200">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
             <h3 className="text-base font-semibold text-foreground">Room Status Grid</h3>
@@ -254,7 +306,30 @@ export default function Dashboard() {
             ))
           )}
         </div>
-      </section>
+      </section>}
+
+      {/* Restaurant shortcut for barman/waiter */}
+      {isRestaurant && !isReception && !isAdmin && (
+        <div className="bg-card border border-border rounded-xl p-6 animate-element animate-delay-100">
+          <h3 className="text-sm font-semibold text-foreground mb-4">Quick Actions</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <button
+              onClick={() => router.push('/pos/restaurant')}
+              className="flex flex-col items-center gap-3 p-6 bg-primary/5 border border-primary/20 rounded-xl hover:bg-primary/10 transition-colors"
+            >
+              <span className="material-symbols-outlined text-primary text-4xl">restaurant</span>
+              <span className="text-sm font-medium text-foreground">Open POS</span>
+            </button>
+            <button
+              onClick={() => router.push('/inventory')}
+              className="flex flex-col items-center gap-3 p-6 bg-muted border border-border rounded-xl hover:bg-accent transition-colors"
+            >
+              <span className="material-symbols-outlined text-muted-foreground text-4xl">inventory_2</span>
+              <span className="text-sm font-medium text-foreground">Stock</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <div className="flex justify-between items-center text-[11px] text-muted-foreground pt-2 border-t border-border">

@@ -27,5 +27,9 @@ export function hotelFullLocation() {
 
 /** Routes that render without sidebar or mobile tab bar (print-focused views) */
 export function isChromelessRoute(pathname: string) {
-  return pathname.startsWith('/invoice/restaurant') || pathname.startsWith('/invoice/preview');
+  return (
+    pathname.startsWith('/invoice/restaurant') ||
+    pathname.startsWith('/invoice/preview') ||
+    /^\/invoice\/[^/]+/.test(pathname)
+  );
 }

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { getSession } from '@/lib/auth';
 import { calculateDailyTotal, dailyRangeToTimes } from '@/lib/conference-booking';
 
 export async function GET() {
@@ -16,6 +17,9 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const session = await getSession();
+    const createdByName = session?.user?.name ?? null;
+
     const body = await request.json();
     const {
       conferenceRoomId,
@@ -107,6 +111,7 @@ export async function POST(request: Request) {
         totalAmount: resolvedTotal,
         linkedBookingIds: Array.isArray(linkedBookingIds) ? linkedBookingIds : [],
         notes: notes ?? null,
+        createdByName,
       },
       include: { conferenceRoom: true, items: true },
     });

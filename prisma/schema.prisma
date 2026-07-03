@@ -60,6 +60,9 @@ model Booking {
   updatedAt          DateTime        @updatedAt
   cancellationReason String?
   source             String          @default("DIRECT")
+  checkedInAt        DateTime?
+  checkedOutAt       DateTime?
+  createdByName      String?
   guest              Guest           @relation(fields: [guestId], references: [id])
   room               Room            @relation(fields: [roomId], references: [id])
   serviceCharges     ServiceCharge[]
@@ -99,6 +102,9 @@ model ConferenceBooking {
   invoiceId        String?
   linkedBookingIds String[]
   notes            String?
+  checkedInAt      DateTime?
+  checkedOutAt     DateTime?
+  createdByName    String?
   conferenceRoom   ConferenceRoom          @relation(fields: [conferenceRoomId], references: [id])
   items            ConferenceBookingItem[]
 
@@ -154,11 +160,12 @@ model WebInquiry {
 
 
 model Notification {
-  id        String   @id @default(cuid())
-  message   String
-  type      String   @default("INFO")
-  isRead    Boolean  @default(false)
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  message     String
+  type        String   @default("INFO")
+  isRead      Boolean  @default(false)
+  targetRoles String[] @default([])
+  createdAt   DateTime @default(now())
 
   @@index([isRead])
   @@index([createdAt])
@@ -203,6 +210,8 @@ model Invoice {
   guestSignature  String?
   masterInvoiceId String?
   type            String        @default("ROOM")
+  createdByName   String?
+  createdById     String?
   masterInvoice   Invoice?      @relation("MasterToSub", fields: [masterInvoiceId], references: [id])
   subInvoices     Invoice[]     @relation("MasterToSub")
   items           InvoiceItem[]
@@ -210,6 +219,7 @@ model Invoice {
   @@index([masterInvoiceId])
   @@index([status])
   @@index([date])
+  @@index([createdById])
 }
 
 model InvoiceItem {
@@ -262,4 +272,19 @@ model ConferenceBookingItem {
   conferenceBooking   ConferenceBooking @relation(fields: [conferenceBookingId], references: [id], onDelete: Cascade)
 
   @@index([conferenceBookingId])
+}
+
+model OtherIncome {
+  id            String   @id @default(cuid())
+  description   String
+  amount        Float
+  category      String   @default("OTHER")
+  date          DateTime @default(now())
+  paymentMethod String?
+  source        String?
+  createdAt     DateTime @default(now())
+  createdByName String?
+
+  @@index([date])
+  @@index([category])
 }

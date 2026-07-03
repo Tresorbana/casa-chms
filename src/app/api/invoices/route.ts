@@ -1,5 +1,25 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { getSession } from '@/lib/auth';
+
+function startOfToday() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function isCheckoutEligible(
+  booking: { checkOut: Date; status: string },
+  roomStatus: string,
+  now = new Date()
+) {
+  if (!['CONFIRMED', 'CHECKED_IN'].includes(booking.status)) return false;
+  const endOfStay = new Date(booking.checkOut);
+  endOfStay.setHours(23, 59, 59, 999);
+  if (endOfStay >= startOfToday()) return true;
+  if (roomStatus === 'OCCUPIED') return true;
+  return endOfStay >= now;
+}
 
 async function findOccupiedRoom(roomId: string) {
   const now = new Date();
@@ -19,12 +39,16 @@ async function findOccupiedRoom(roomId: string) {
   });
 
   const booking = room?.bookings[0] ?? null;
-  if (!room || !booking || room.status !== 'OCCUPIED') return null;
+  if (!room || !booking || room.status === 'MAINTENANCE' || !isCheckoutEligible(booking, room.status, now)) return null;
   return { room, booking };
 }
 
 export async function POST(request: Request) {
   try {
+    const session = await getSession();
+    const createdByName = session?.user?.name ?? null;
+    const createdById = session?.user?.id ?? null;
+
     const body = await request.json();
     const { guestName, amount, type, items, masterInvoiceId, customerType, roomId } = body;
 
@@ -50,6 +74,8 @@ export async function POST(request: Request) {
         amount,
         type: type || 'ROOM',
         masterInvoiceId,
+        createdByName,
+        createdById,
         items: {
           create: items.map((item: any) => ({
             description: item.description,

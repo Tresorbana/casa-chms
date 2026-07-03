@@ -14,7 +14,9 @@ const inputClass = "w-full bg-background border border-border rounded-lg px-4 py
 function statusBadge(status: string) {
   const map: Record<string, string> = {
     CONFIRMED: 'bg-blue-50 text-blue-700 border-blue-200',
-    INVOICED: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    CHECKED_IN: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    CHECKED_OUT: 'bg-purple-50 text-purple-700 border-purple-200',
+    INVOICED: 'bg-amber-50 text-amber-700 border-amber-200',
     CANCELLED: 'bg-red-50 text-red-700 border-red-200',
   };
   return map[status] || 'bg-muted text-muted-foreground border-border';
@@ -33,6 +35,11 @@ export default function Events() {
   const [addItemForm, setAddItemForm] = useState({ description: '', quantity: '1', unitPrice: '' });
   const [isAddingItem, setIsAddingItem] = useState(false);
   const [isGeneratingInvoice, setIsGeneratingInvoice] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editForm, setEditForm] = useState({ guestName: '', guestContact: '', guestEmail: '', notes: '' });
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
+  const [isActioning, setIsActioning] = useState(false);
 
   const venues = Array.isArray(venuesData) ? venuesData : [];
   const schedule = Array.isArray(bookingsData) ? bookingsData : [];
@@ -46,6 +53,65 @@ export default function Events() {
   const openBookingDetail = (booking: any) => {
     setSelectedBooking(booking);
     setAddItemForm({ description: '', quantity: '1', unitPrice: '' });
+  };
+
+  const openEditModal = () => {
+    if (!selectedBooking) return;
+    setEditForm({
+      guestName: selectedBooking.guestName ?? '',
+      guestContact: selectedBooking.guestContact ?? '',
+      guestEmail: selectedBooking.guestEmail ?? '',
+      notes: selectedBooking.notes ?? '',
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditBooking = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedBooking) return;
+    try {
+      const res = await fetch(`/api/conference/bookings/${selectedBooking.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editForm),
+      });
+      if (!res.ok) { toast.error('Failed to update booking'); return; }
+      const updated = await res.json();
+      mutateBookings();
+      setSelectedBooking(updated);
+      setIsEditModalOpen(false);
+      toast.success('Booking updated');
+    } catch { toast.error('Error updating booking'); }
+  };
+
+  const handleBookingAction = async (action: string, reason?: string) => {
+    if (!selectedBooking) return;
+    setIsActioning(true);
+    try {
+      const res = await fetch(`/api/conference/bookings/${selectedBooking.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, cancellationReason: reason }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        toast.error(err.error || 'Failed to update status');
+        return;
+      }
+      const updated = await res.json();
+      mutateBookings();
+      setSelectedBooking(updated);
+      setIsCancelModalOpen(false);
+      setCancelReason('');
+      const messages: Record<string, string> = {
+        CHECK_IN: 'Guest checked in',
+        CHECK_OUT: 'Guest checked out',
+        CANCEL: 'Booking cancelled',
+        RESTORE: 'Booking restored',
+      };
+      toast.success(messages[action] || 'Updated');
+    } catch { toast.error('Error updating booking'); }
+    finally { setIsActioning(false); }
   };
 
   const handleAddItem = async (e: React.FormEvent) => {
@@ -112,6 +178,13 @@ export default function Events() {
         actions={
           <div className="flex flex-wrap gap-2">
             <ExportButton onClick={handleExport} disabled={!schedule.length} />
+            <button
+              onClick={() => router.push('/events/report')}
+              className="inline-flex items-center gap-2 border border-border text-foreground text-sm font-medium px-4 py-2 rounded-lg hover:bg-accent transition-colors"
+            >
+              <span className="material-symbols-outlined text-[18px]">assessment</span>
+              Reports
+            </button>
             <button
               onClick={() => setIsModalOpen(true)}
               className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
@@ -229,6 +302,9 @@ export default function Events() {
                   <div>
                     <h3 className="text-sm font-semibold text-foreground">{selectedBooking.guestName}</h3>
                     <p className="text-xs text-muted-foreground">{selectedBooking.conferenceRoom?.name}</p>
+                    {selectedBooking.createdByName && (
+                      <p className="text-[10px] text-muted-foreground mt-0.5">Booked by {selectedBooking.createdByName}</p>
+                    )}
                   </div>
                   <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${statusBadge(selectedBooking.status)}`}>
                     {selectedBooking.status}
@@ -362,6 +438,61 @@ export default function Events() {
                   </div>
                 </div>
 
+                {/* Booking Action Buttons */}
+                {!['CANCELLED', 'CHECKED_OUT'].includes(selectedBooking.status) && (
+                  <div className="space-y-2 pt-2 border-t border-border">
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Manage Booking</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={openEditModal}
+                        className="py-2 border border-border rounded-lg text-xs font-medium text-foreground hover:bg-accent transition-colors flex items-center justify-center gap-1.5"
+                      >
+                        <span className="material-symbols-outlined text-[14px]">edit</span>
+                        Edit
+                      </button>
+                      {selectedBooking.status === 'CONFIRMED' && (
+                        <button
+                          onClick={() => handleBookingAction('CHECK_IN')}
+                          disabled={isActioning}
+                          className="py-2 bg-emerald-600 text-white rounded-lg text-xs font-medium hover:bg-emerald-700 transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
+                        >
+                          <span className="material-symbols-outlined text-[14px]">login</span>
+                          Check In
+                        </button>
+                      )}
+                      {selectedBooking.status === 'CHECKED_IN' && (
+                        <button
+                          onClick={() => handleBookingAction('CHECK_OUT')}
+                          disabled={isActioning}
+                          className="py-2 bg-purple-600 text-white rounded-lg text-xs font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
+                        >
+                          <span className="material-symbols-outlined text-[14px]">logout</span>
+                          Check Out
+                        </button>
+                      )}
+                      {!['INVOICED'].includes(selectedBooking.status) && (
+                        <button
+                          onClick={() => setIsCancelModalOpen(true)}
+                          className="py-2 border border-red-200 text-red-600 rounded-lg text-xs font-medium hover:bg-red-50 transition-colors flex items-center justify-center gap-1.5 col-span-full"
+                        >
+                          <span className="material-symbols-outlined text-[14px]">cancel</span>
+                          Cancel Booking
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+                {selectedBooking.status === 'CANCELLED' && (
+                  <button
+                    onClick={() => handleBookingAction('RESTORE')}
+                    disabled={isActioning}
+                    className="w-full py-2 border border-border rounded-lg text-xs font-medium text-foreground hover:bg-accent transition-colors flex items-center justify-center gap-1.5"
+                  >
+                    <span className="material-symbols-outlined text-[14px]">restore</span>
+                    Restore Booking
+                  </button>
+                )}
+
                 {/* Invoice Actions */}
                 <div className="space-y-2">
                   {selectedBooking.invoiceId ? (
@@ -372,7 +503,7 @@ export default function Events() {
                       <span className="material-symbols-outlined text-[16px]">receipt_long</span>
                       View Invoice
                     </button>
-                  ) : (
+                  ) : !['CANCELLED'].includes(selectedBooking.status) ? (
                     <button
                       onClick={handleGenerateInvoice}
                       disabled={isGeneratingInvoice || selectedBooking.status === 'INVOICED'}
@@ -381,7 +512,7 @@ export default function Events() {
                       <span className="material-symbols-outlined text-[16px]">receipt</span>
                       {isGeneratingInvoice ? 'Generating...' : 'Generate Invoice'}
                     </button>
-                  )}
+                  ) : null}
                 </div>
               </div>
             </>
@@ -394,6 +525,75 @@ export default function Events() {
           onClose={() => setIsModalOpen(false)}
           onSuccess={() => { setIsModalOpen(false); mutateBookings(); }}
         />
+      )}
+
+      {/* Edit Booking Modal */}
+      {isEditModalOpen && selectedBooking && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/20 backdrop-blur-sm">
+          <div className="w-full max-w-md bg-card border border-border rounded-xl shadow-xl overflow-hidden">
+            <div className="p-5 border-b border-border flex justify-between items-center">
+              <h3 className="text-sm font-semibold text-foreground">Edit Booking</h3>
+              <button onClick={() => setIsEditModalOpen(false)} className="text-muted-foreground hover:text-foreground">
+                <span className="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            </div>
+            <form onSubmit={handleEditBooking} className="p-5 space-y-4">
+              <div>
+                <label className="text-xs font-medium text-muted-foreground block mb-1.5">Guest / Organization Name</label>
+                <input required type="text" className={inputClass} value={editForm.guestName} onChange={e => setEditForm({ ...editForm, guestName: e.target.value })} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground block mb-1.5">Contact</label>
+                  <input type="text" className={inputClass} value={editForm.guestContact} onChange={e => setEditForm({ ...editForm, guestContact: e.target.value })} />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground block mb-1.5">Email</label>
+                  <input type="email" className={inputClass} value={editForm.guestEmail} onChange={e => setEditForm({ ...editForm, guestEmail: e.target.value })} />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground block mb-1.5">Notes</label>
+                <textarea rows={3} className={inputClass} value={editForm.notes} onChange={e => setEditForm({ ...editForm, notes: e.target.value })} />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => setIsEditModalOpen(false)} className="flex-1 px-4 py-2.5 rounded-lg text-sm text-muted-foreground border border-border hover:bg-accent transition-colors">Cancel</button>
+                <button type="submit" className="flex-1 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors">Save Changes</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel Confirmation Modal */}
+      {isCancelModalOpen && selectedBooking && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/20 backdrop-blur-sm">
+          <div className="w-full max-w-sm bg-card border border-border rounded-xl shadow-xl overflow-hidden">
+            <div className="p-5 border-b border-border flex justify-between items-center">
+              <h3 className="text-sm font-semibold text-foreground">Cancel Booking</h3>
+              <button onClick={() => setIsCancelModalOpen(false)} className="text-muted-foreground hover:text-foreground">
+                <span className="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <p className="text-sm text-muted-foreground">Cancel the booking for <span className="font-medium text-foreground">{selectedBooking.guestName}</span>?</p>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground block mb-1.5">Reason (optional)</label>
+                <input type="text" className={inputClass} placeholder="Reason for cancellation" value={cancelReason} onChange={e => setCancelReason(e.target.value)} />
+              </div>
+              <div className="flex gap-3">
+                <button onClick={() => setIsCancelModalOpen(false)} className="flex-1 px-4 py-2.5 rounded-lg text-sm text-muted-foreground border border-border hover:bg-accent transition-colors">Back</button>
+                <button
+                  onClick={() => handleBookingAction('CANCEL', cancelReason)}
+                  disabled={isActioning}
+                  className="flex-1 bg-destructive text-destructive-foreground px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-destructive/90 transition-colors disabled:opacity-50"
+                >
+                  {isActioning ? 'Cancelling...' : 'Confirm Cancel'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

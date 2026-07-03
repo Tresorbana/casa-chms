@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
+import { getSession } from '@/lib/auth'
 
 export async function GET(request: Request) {
   try {
@@ -25,6 +26,9 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const session = await getSession();
+    const createdByName = session?.user?.name ?? null;
+
     const body = await request.json()
     const { guestName, guestEmail, guestPhone, roomNumber, checkIn, checkOut, totalAmount, nationality } = body
 
@@ -98,7 +102,8 @@ export async function POST(request: Request) {
         checkIn: new Date(checkIn),
         checkOut: new Date(checkOut),
         totalAmount: parseFloat(totalAmount),
-        status: 'CONFIRMED'
+        status: 'CONFIRMED',
+        createdByName,
       }
     })
 

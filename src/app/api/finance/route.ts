@@ -12,7 +12,7 @@ export async function GET(request: Request) {
       ...(to && { lte: new Date(to + 'T23:59:59.999Z') }),
     };
 
-    const [expenses, paidInvoices] = await Promise.all([
+    const [expenses, paidInvoices, otherIncomeItems] = await Promise.all([
       prisma.expense.findMany({
         where: Object.keys(dateFilter).length ? { date: dateFilter } : undefined,
         orderBy: { date: 'desc' },
@@ -24,30 +24,43 @@ export async function GET(request: Request) {
         },
         include: { items: true },
       }),
+      prisma.otherIncome.findMany({
+        where: Object.keys(dateFilter).length ? { date: dateFilter } : undefined,
+        orderBy: { date: 'desc' },
+      }),
     ]);
 
-    const totalIncome = paidInvoices.reduce((sum, inv) => sum + inv.amount, 0);
+    const invoiceIncome = paidInvoices.reduce((sum, inv) => sum + inv.amount, 0);
+    const otherIncomeTotal = otherIncomeItems.reduce((sum, i) => sum + i.amount, 0);
+    const totalIncome = invoiceIncome + otherIncomeTotal;
     const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
     const profit = totalIncome - totalExpenses;
 
     const incomeByType = paidInvoices.reduce((acc: Record<string, number>, inv) => {
       acc[inv.type] = (acc[inv.type] || 0) + inv.amount;
       return acc;
-    }, {});
+    }, {} as Record<string, number>);
+
+    if (otherIncomeTotal > 0) {
+      incomeByType['OTHER_INCOME'] = otherIncomeTotal;
+    }
 
     const expensesByCategory = expenses.reduce((acc: Record<string, number>, exp) => {
       acc[exp.category] = (acc[exp.category] || 0) + exp.amount;
       return acc;
-    }, {});
+    }, {} as Record<string, number>);
 
     return NextResponse.json({
       totalIncome,
+      invoiceIncome,
+      otherIncomeTotal,
       totalExpenses,
       profit,
       incomeByType,
       expensesByCategory,
       expenses,
       invoices: paidInvoices,
+      otherIncome: otherIncomeItems,
     });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch finance data' }, { status: 500 });

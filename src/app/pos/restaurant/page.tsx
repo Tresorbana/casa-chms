@@ -45,6 +45,28 @@ export default function PosRestaurant() {
     });
     toast.success(`${item.name} added`, { duration: 1500 });
   };
+
+  const increaseQty = (item: any) => {
+    setCart(prev => {
+      return prev.map(entry => getCartItemKey(entry) === getCartItemKey(item)
+        ? { ...entry, quantity: (entry.quantity || 1) + 1 }
+        : entry);
+    });
+  };
+
+  const decreaseQty = (item: any) => {
+    setCart(prev => {
+      const existingItem = prev.find(entry => getCartItemKey(entry) === getCartItemKey(item));
+      if (!existingItem) return prev;
+      if (existingItem.quantity <= 1) {
+        return prev.filter(entry => getCartItemKey(entry) !== getCartItemKey(item));
+      }
+      return prev.map(entry => getCartItemKey(entry) === getCartItemKey(item)
+        ? { ...entry, quantity: entry.quantity - 1 }
+        : entry);
+    });
+  };
+
   const cartTotal = cart.reduce((sum, item) => sum + item.price * (item.quantity || 1), 0);
   const cartCount = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
 
@@ -167,7 +189,7 @@ export default function PosRestaurant() {
               </div>
               <div className="p-3">
                 <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">{item.category}</p>
-                <h3 className="text-sm font-medium text-foreground line-clamp-1 mb-2">{item.name}</h3>
+                <h3 className="text-sm font-medium text-foreground line-clamp-2 min-h-[40px] mb-2">{item.name}</h3>
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-foreground">RWF {item.price.toLocaleString()}</span>
                   <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center group-hover:bg-primary transition-all">
@@ -244,22 +266,52 @@ export default function PosRestaurant() {
               <p className="text-sm">Cart is empty</p>
             </div>
           ) : cart.map((item) => (
-            <div key={getCartItemKey(item)} className="flex gap-3 items-center">
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 bg-muted">
-                <span className="material-symbols-outlined text-muted-foreground text-[16px]">restaurant</span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-medium text-foreground truncate">{item.name}</p>
-                  {item.quantity > 1 && (
-                    <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">×{item.quantity}</span>
-                  )}
+            <div key={getCartItemKey(item)} className="flex gap-3 items-center justify-between bg-card border border-border/60 p-3 rounded-xl hover:shadow-sm transition-all">
+              <div className="flex gap-3 items-center flex-1 min-w-0">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-primary/5 text-primary">
+                  <span className="material-symbols-outlined text-[16px]">restaurant</span>
                 </div>
-                <p className="text-xs text-muted-foreground">RWF {(item.price * (item.quantity || 1)).toLocaleString()}</p>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-foreground break-words whitespace-normal leading-tight">{item.name}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">
+                    RWF {item.price.toLocaleString()} × {item.quantity}
+                  </p>
+                  <p className="text-xs font-bold text-primary mt-0.5">
+                    RWF {(item.price * (item.quantity || 1)).toLocaleString()}
+                  </p>
+                </div>
               </div>
-              <button className="text-muted-foreground hover:text-destructive transition-colors" onClick={() => setCart(prev => prev.filter(entry => getCartItemKey(entry) !== getCartItemKey(item)))}>
-                <span className="material-symbols-outlined text-[16px]">close</span>
-              </button>
+              <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                <div className="flex items-center border border-border rounded bg-muted/20">
+                  <button
+                    type="button"
+                    onClick={() => decreaseQty(item)}
+                    className="w-5.5 h-5.5 flex items-center justify-center hover:bg-muted text-muted-foreground transition-colors border-r border-border text-[10px] font-bold px-1.5"
+                    title="Decrease quantity"
+                  >
+                    -
+                  </button>
+                  <span className="text-[10px] font-semibold px-1.5 min-w-[12px] text-center text-foreground">
+                    {item.quantity}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => increaseQty(item)}
+                    className="w-5.5 h-5.5 flex items-center justify-center hover:bg-muted text-muted-foreground transition-colors border-l border-border text-[10px] font-bold px-1.5"
+                    title="Increase quantity"
+                  >
+                    +
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  className="text-muted-foreground hover:text-destructive p-0.5 transition-colors"
+                  onClick={() => setCart(prev => prev.filter(entry => getCartItemKey(entry) !== getCartItemKey(item)))}
+                  title="Remove item"
+                >
+                  <span className="material-symbols-outlined text-[16px]">delete</span>
+                </button>
+              </div>
             </div>
           ))}
         </div>

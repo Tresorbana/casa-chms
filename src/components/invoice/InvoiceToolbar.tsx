@@ -34,14 +34,6 @@ export function InvoiceToolbar({
   const [showPayDialog, setShowPayDialog] = useState(false);
 
   const isPaid = currentStatus === 'PAID';
-  const isRestaurant = invoiceType === 'RESTAURANT';
-  const view = searchParams.get('view') || (isPaid ? 'final' : 'client');
-
-  const setView = (next: 'client' | 'final') => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('view', next);
-    router.replace(`?${params.toString()}`);
-  };
 
   const handleMarkPaid = async (method: PaymentMethodId) => {
     const res = await fetch(`/api/invoices/${invoiceId}`, {
@@ -57,9 +49,6 @@ export function InvoiceToolbar({
     setCurrentMethod(method);
     onStatusChange?.('PAID', method);
     toast.success(`Paid via ${formatPaymentMethod(method)}`);
-    if (isRestaurant) {
-      setView('final');
-    }
   };
 
   return (
@@ -75,30 +64,6 @@ export function InvoiceToolbar({
         </button>
 
         <div className="flex flex-wrap items-center gap-2">
-          {isRestaurant && (
-            <div className="flex rounded-lg border border-border overflow-hidden text-xs font-medium">
-              <button
-                type="button"
-                onClick={() => setView('client')}
-                className={`px-3 py-1.5 transition-colors ${
-                  view === 'client' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'
-                }`}
-              >
-                Guest copy
-              </button>
-              <button
-                type="button"
-                onClick={() => isPaid && setView('final')}
-                disabled={!isPaid}
-                className={`px-3 py-1.5 transition-colors disabled:opacity-40 ${
-                  view === 'final' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'
-                }`}
-              >
-                Final receipt
-              </button>
-            </div>
-          )}
-
           <span
             className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-medium uppercase ${
               isPaid
@@ -136,7 +101,7 @@ export function InvoiceToolbar({
         open={showPayDialog}
         onClose={() => setShowPayDialog(false)}
         onConfirm={handleMarkPaid}
-        requireSignature={isRestaurant}
+        requireSignature={invoiceType === 'RESTAURANT'}
         hasSignature={Boolean(guestSignature)}
       />
     </>

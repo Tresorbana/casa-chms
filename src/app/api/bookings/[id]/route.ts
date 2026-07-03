@@ -1,0 +1,135 @@
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/db';
+
+type Params = { params: Promise<{ id: string }> };
+
+export async function GET(_req: Request, { params }: Params) {
+  const { id } = await params;
+  try {
+    const booking = await prisma.booking.findUnique({
+      where: { id },
+      include: {
+        guest: true,
+        room: true,
+        serviceCharges: { include: { service: true } },
+      },
+    });
+    if (!booking) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    return NextResponse.json(booking);
+  } catch {
+    return NextResponse.json({ error: 'Failed to fetch booking' }, { status: 500 });
+  }
+}
+
+export async function PUT(request: Request, { params }: Params) {
+  const { id } = await params;
+  try {
+    const body = await request.json();
+    const { checkIn, checkOut, totalAmount, source } = body;
+
+    const booking = await prisma.booking.update({
+      where: { id },
+      data: {
+        ...(checkIn && { checkIn: new Date(checkIn) }),
+        ...(checkOut && { checkOut: new Date(checkOut) }),
+        ...(totalAmount !== undefined && { totalAmount: parseFloat(totalAmount) }),
+        ...(source && { source }),
+      },
+      include: { guest: true, room: true },
+    });
+
+    return NextResponse.json(booking);
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: 'Failed to update booking' }, { status: 500 });
+  }
+}
+
+export async function PATCH(request: Request, { params }: Params) {
+  const { id } = await params;
+  try {
+    const body = await request.json();
+    const { action, cancellationReason } = body;
+
+    const existing = await prisma.booking.findUnique({
+      where: { id },
+      include: { room: true },
+    });
+    if (!existing) return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
+
+    let bookingData: Record<string, any> = {};
+    let roomData: Record<string, any> | null = null;
+
+    switch (action) {
+      case 'CHECK_IN':
+        if (existing.status !== 'CONFIRMED') {
+          return NextResponse.json({ error: 'Only confirmed bookings can be checked in' }, { status: 400 });
+        }
+        bookingData = { status: 'CHECKED_IN', checkedInAt: new Date() };
+        roomData = { status: 'OCCUPIED' };
+        break;
+      case 'CHECK_OUT':
+        if (existing.status !== 'CHECKED_IN') {
+          return NextResponse.json({ error: 'Guest must be checked in first' }, { status: 400 });
+        }
+        bookingData = { status: 'CHECKED_OUT', checkedOutAt: new Date() };
+        roomData = { status: 'AVAILABLE' };
+        break;
+      case 'CANCEL':
+        if (['CANCELLED', 'CHECKED_OUT'].includes(existing.status)) {
+          return NextResponse.json({ error: 'Cannot cancel this booking' }, { status: 400 });
+        }
+        bookingData = {
+          status: 'CANCELLED',
+          cancellationReason: cancellationReason ?? null,
+        };
+        if (existing.room.status === 'OCCUPIED') {
+          roomData = { status: 'AVAILABLE' };
+        }
+        break;
+      case 'RESTORE':
+        if (existing.status !== 'CANCELLED') {
+          return NextResponse.json({ error: 'Only cancelled bookings can be restored' }, { status: 400 });
+        }
+        bookingData = { status: 'CONFIRMED', cancellationReason: null };
+        break;
+      default:
+        return NextResponse.json({ error: 'Unknown action' }, { status: 400 });
+    }
+
+    const [booking] = await prisma.$transaction([
+      prisma.booking.update({
+        where: { id },
+        data: bookingData,
+        include: { guest: true, room: true },
+      }),
+      ...(roomData
+        ? [prisma.room.update({ where: { id: existing.roomId }, data: roomData })]
+        : []),
+    ]);
+
+    return NextResponse.json(booking);
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: 'Failed to update booking status' }, { status: 500 });
+  }
+}
+
+export async function DELETE(_req: Request, { params }: Params) {
+  const { id } = await params;
+  try {
+    const booking = await prisma.booking.findUnique({ where: { id }, include: { room: true } });
+    if (!booking) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
+    await prisma.$transaction([
+      prisma.booking.delete({ where: { id } }),
+      ...(booking.room.status === 'OCCUPIED'
+        ? [prisma.room.update({ where: { id: booking.roomId }, data: { status: 'AVAILABLE' } })]
+        : []),
+    ]);
+
+    return NextResponse.json({ success: true });
+  } catch {
+    return NextResponse.json({ error: 'Failed to delete booking' }, { status: 500 });
+  }
+}

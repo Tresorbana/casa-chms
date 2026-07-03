@@ -113,6 +113,12 @@ function InvoicePageContent() {
                         : ''}
                     </span>
                   </p>
+                  {invoice.createdByName && (
+                    <p>
+                      <span className="font-medium text-foreground">Issued by:</span>{' '}
+                      {invoice.createdByName}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -217,7 +223,9 @@ function InvoicePageContent() {
                   Authorized by
                 </p>
                 <div className="h-px bg-border w-full mb-2" />
-                <p className="text-xs text-muted-foreground">{HOTEL_INFO.name} · Front desk</p>
+                <p className="text-xs text-muted-foreground">
+                  {invoice.createdByName ? invoice.createdByName : `${HOTEL_INFO.name} · Front desk`}
+                </p>
               </div>
             </div>
           </div>

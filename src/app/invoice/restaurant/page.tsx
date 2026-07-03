@@ -12,7 +12,6 @@ function RestaurantInvoiceContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const invoiceId = searchParams.get('id');
-  const viewParam = searchParams.get('view');
 
   const [status, setStatus] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
@@ -27,8 +26,7 @@ function RestaurantInvoiceContent() {
   const displayStatus = status ?? apiInvoice?.status ?? 'UNPAID';
   const displayMethod = paymentMethod ?? apiInvoice?.paymentMethod ?? null;
   const isPaid = displayStatus === 'PAID';
-  const view = viewParam === 'final' && isPaid ? 'final' : 'client';
-  const isClientCopy = view === 'client';
+  const isClientCopy = !isPaid;
   const hasSignature = Boolean(apiInvoice?.guestSignature);
 
   const saveSignature = async () => {
@@ -143,7 +141,7 @@ function RestaurantInvoiceContent() {
               <span className="material-symbols-outlined text-primary-foreground text-[30px]">restaurant</span>
             </div>
             <h1 className="text-xl font-semibold text-slate-900 tracking-tight">{HOTEL_INFO.name}</h1>
-            <p className="text-sm font-medium text-primary">Restaurant & Bar</p>
+            <p className="text-sm font-medium text-primary">Restaurant &amp; Bar</p>
             <p className="text-xs text-muted-foreground mt-1 text-center">{hotelFullLocation()}</p>
             <p className="text-xs text-muted-foreground">{HOTEL_INFO.phone}</p>
           </div>
@@ -156,7 +154,7 @@ function RestaurantInvoiceContent() {
               <p className="font-semibold text-primary text-sm">{invoiceRef}</p>
             </div>
             <div className="text-right">
-              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Date & time</p>
+              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Date &amp; time</p>
               <p className="text-sm font-medium text-foreground">
                 {invoiceDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
               </p>
@@ -227,7 +225,11 @@ function RestaurantInvoiceContent() {
                             </div>
                           </div>
                         </td>
-                        <td className="px-4 py-4 text-center text-muted-foreground font-medium">{item.quantity}</td>
+                        <td className="px-4 py-4 text-center">
+                          <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-md bg-primary/5 text-primary border border-primary/10 font-bold text-xs">
+                            {item.quantity}
+                          </span>
+                        </td>
                         <td className="px-4 py-4 text-right text-muted-foreground">RWF {item.price.toLocaleString()}</td>
                         <td className="px-4 py-4 text-right font-semibold text-foreground">
                           RWF {(item.quantity * item.price).toLocaleString()}
@@ -339,7 +341,7 @@ function RestaurantInvoiceContent() {
           )}
 
           <div className="bg-muted/30 border-t border-border px-8 py-4 text-center text-xs text-muted-foreground">
-            {HOTEL_INFO.name} — Restaurant & Bar · {HOTEL_INFO.phone}
+            {HOTEL_INFO.name} — Restaurant &amp; Bar · {HOTEL_INFO.phone}
           </div>
         </div>
       </div>

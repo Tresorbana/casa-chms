@@ -44,9 +44,10 @@ function buildFolio(
       totalPrice: number;
       service: { name: string };
     }>;
-  }
+  },
+  now = new Date()
 ) {
-  const nights = nightsBetween(booking.checkIn, booking.checkOut);
+  const nights = nightsBetween(booking.checkIn, now);
   const roomLineTotal = room.price * nights;
 
   const lineItems: Array<{ description: string; quantity: number; price: number }> = [
@@ -153,7 +154,7 @@ async function listOccupiedRooms() {
     if (!isCheckoutEligible(booking, room.status, now)) continue;
 
     seenRoomIds.add(room.id);
-    const nights = nightsBetween(booking.checkIn, booking.checkOut);
+    const nights = nightsBetween(booking.checkIn, now);
     const roomLineTotal = room.price * nights;
     const servicesTotal = booking.serviceCharges.reduce((s, c) => s + c.totalPrice, 0);
 
