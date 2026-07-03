@@ -3,6 +3,22 @@ import { prisma } from '@/lib/db';
 
 type Params = { params: Promise<{ id: string }> };
 
+async function enrichLinkedBookings(linkedBookingIds: string[]) {
+  if (!linkedBookingIds.length) return [];
+  return prisma.booking.findMany({
+    where: { id: { in: linkedBookingIds } },
+    select: {
+      id: true,
+      status: true,
+      checkIn: true,
+      checkOut: true,
+      totalAmount: true,
+      guest: { select: { name: true, phone: true } },
+      room: { select: { id: true, number: true, type: true } },
+    },
+  });
+}
+
 export async function GET(_req: Request, { params }: Params) {
   const { id } = await params;
   try {
@@ -11,7 +27,8 @@ export async function GET(_req: Request, { params }: Params) {
       include: { conferenceRoom: true, items: true },
     });
     if (!booking) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-    return NextResponse.json(booking);
+    const linkedBookings = await enrichLinkedBookings(booking.linkedBookingIds);
+    return NextResponse.json({ ...booking, linkedBookings });
   } catch {
     return NextResponse.json({ error: 'Failed to fetch booking' }, { status: 500 });
   }
@@ -41,7 +58,8 @@ export async function PUT(request: Request, { params }: Params) {
       include: { conferenceRoom: true, items: true },
     });
 
-    return NextResponse.json(booking);
+    const linkedBookings = await enrichLinkedBookings(booking.linkedBookingIds);
+    return NextResponse.json({ ...booking, linkedBookings });
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: 'Failed to update booking' }, { status: 500 });
@@ -107,7 +125,8 @@ export async function PATCH(request: Request, { params }: Params) {
       include: { conferenceRoom: true, items: true },
     });
 
-    return NextResponse.json(booking);
+    const linkedBookings = await enrichLinkedBookings(booking.linkedBookingIds);
+    return NextResponse.json({ ...booking, linkedBookings });
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: 'Failed to update booking status' }, { status: 500 });

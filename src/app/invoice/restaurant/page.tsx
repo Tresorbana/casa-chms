@@ -12,6 +12,8 @@ function RestaurantInvoiceContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const invoiceId = searchParams.get('id');
+  const isRoomCharge = searchParams.get('mode') === 'room-charge';
+  const roomNumber = searchParams.get('room');
 
   const [status, setStatus] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
@@ -26,6 +28,7 @@ function RestaurantInvoiceContent() {
   const displayStatus = status ?? apiInvoice?.status ?? 'UNPAID';
   const displayMethod = paymentMethod ?? apiInvoice?.paymentMethod ?? null;
   const isPaid = displayStatus === 'PAID';
+  // Room-charge mode: unpaid by design, guest signs but payment is at hotel checkout
   const isClientCopy = !isPaid;
   const hasSignature = Boolean(apiInvoice?.guestSignature);
 
@@ -113,6 +116,7 @@ function RestaurantInvoiceContent() {
         invoiceType="RESTAURANT"
         backLabel="Back to Restaurant"
         backHref="/pos/restaurant"
+        roomCharge={isRoomCharge ? (roomNumber ?? 'Room') : null}
         onStatusChange={(s, m) => {
           setStatus(s);
           setPaymentMethod(m ?? null);
@@ -124,7 +128,7 @@ function RestaurantInvoiceContent() {
         <div className="inv-card bg-card w-full max-w-[720px] shadow-sm rounded-xl overflow-hidden border border-border print:border-0">
           <div className="h-1 bg-primary" />
 
-          <div className="px-8 pt-6 pb-2 no-print">
+          <div className="px-8 pt-6 pb-2 no-print flex flex-wrap items-center gap-2">
             <span
               className={`inline-flex text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full ${
                 isClientCopy
@@ -134,6 +138,12 @@ function RestaurantInvoiceContent() {
             >
               {isClientCopy ? 'Guest copy — signature required' : 'Final receipt — paid'}
             </span>
+            {isRoomCharge && roomNumber && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
+                <span className="material-symbols-outlined text-[12px]">hotel</span>
+                Charged to Room {roomNumber} — Settle at checkout
+              </span>
+            )}
           </div>
 
           <div className="flex flex-col items-center pt-4 pb-6 px-8 border-b border-border">

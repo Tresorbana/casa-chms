@@ -373,9 +373,12 @@ export default function Events() {
                 {/* Linked Hotel Rooms */}
                 {(() => {
                   const linkedIds: string[] = selectedBooking.linkedBookingIds ?? [];
+                  // Use server-enriched linkedBookings array (always up to date)
+                  const linkedBookings: any[] = selectedBooking.linkedBookings ?? [];
                   const canEdit = !['CANCELLED', 'INVOICED', 'CHECKED_OUT'].includes(selectedBooking.status);
+                  const linkedIdSet = new Set(linkedIds);
                   const availableToLink = allHotelBookings.filter((b: any) =>
-                    ['CONFIRMED', 'CHECKED_IN'].includes(b.status) && !linkedIds.includes(b.id)
+                    ['CONFIRMED', 'CHECKED_IN'].includes(b.status) && !linkedIdSet.has(b.id)
                   );
                   return (
                     <div>
@@ -396,13 +399,18 @@ export default function Events() {
                       ) : (
                         <div className="space-y-1">
                           {linkedIds.map((bid: string) => {
-                            const b = allHotelBookings.find((ab: any) => ab.id === bid);
+                            const b = linkedBookings.find((lb: any) => lb.id === bid);
                             return (
                               <div key={bid} className="flex items-center gap-2 p-2 bg-muted/40 rounded-lg border border-border text-xs">
                                 <span className="material-symbols-outlined text-[14px] text-muted-foreground">hotel</span>
                                 <span className="flex-1">
-                                  {b ? `Room ${b.room?.number} — ${b.guest?.name}` : `Stay ${bid.slice(-6)}`}
+                                  {b ? `Room ${b.room?.number} — ${b.guest?.name}` : `Room (loading…)`}
                                 </span>
+                                {b?.status && (
+                                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full border ${b.status === 'CHECKED_IN' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-blue-50 text-blue-700 border-blue-200'}`}>
+                                    {b.status === 'CHECKED_IN' ? 'In' : b.status === 'CHECKED_OUT' ? 'Out' : 'Conf'}
+                                  </span>
+                                )}
                                 {canEdit && (
                                   <button
                                     onClick={() => handleUnlinkRoom(bid)}

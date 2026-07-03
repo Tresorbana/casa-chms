@@ -3,13 +3,41 @@ import { prisma } from '@/lib/db';
 import { getSession } from '@/lib/auth';
 import { calculateDailyTotal, dailyRangeToTimes } from '@/lib/conference-booking';
 
+async function enrichLinkedBookings(linkedBookingIds: string[]) {
+  if (!linkedBookingIds.length) return [];
+  return prisma.booking.findMany({
+    where: { id: { in: linkedBookingIds } },
+    select: {
+      id: true,
+      status: true,
+      checkIn: true,
+      checkOut: true,
+      totalAmount: true,
+      guest: { select: { name: true, phone: true } },
+      room: { select: { id: true, number: true, type: true } },
+    },
+  });
+}
+
 export async function GET() {
   try {
     const bookings = await prisma.conferenceBooking.findMany({
       orderBy: { startTime: 'desc' },
       include: { conferenceRoom: true, items: true },
     });
-    return NextResponse.json(bookings);
+
+    // Collect all unique linked IDs across all bookings
+    const rawIds = bookings.flatMap((b) => b.linkedBookingIds);
+    const allIds = rawIds.filter((id, i) => rawIds.indexOf(id) === i);
+    const hotelBookings = await enrichLinkedBookings(allIds);
+    const byId = Object.fromEntries(hotelBookings.map((b) => [b.id, b]));
+
+    const enriched = bookings.map((b) => ({
+      ...b,
+      linkedBookings: b.linkedBookingIds.map((id) => byId[id]).filter(Boolean),
+    }));
+
+    return NextResponse.json(enriched);
   } catch {
     return NextResponse.json({ error: 'Failed to fetch conference bookings' }, { status: 500 });
   }
@@ -152,7 +180,8 @@ export async function POST(request: Request) {
       include: { conferenceRoom: true, items: true },
     });
 
-    return NextResponse.json(booking);
+    const linkedBookings = await enrichLinkedBookings(booking.linkedBookingIds);
+    return NextResponse.json({ ...booking, linkedBookings });
   } catch {
     return NextResponse.json({ error: 'Failed to create conference booking' }, { status: 500 });
   }

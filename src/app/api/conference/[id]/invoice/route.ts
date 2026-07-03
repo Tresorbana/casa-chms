@@ -16,9 +16,38 @@ export async function POST(
       return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
     }
 
-    const itemsTotal = booking.items.reduce((sum, i) => sum + i.totalPrice, 0);
+    // Fetch linked hotel room bookings so we can include their costs
+    const linkedHotelBookings = booking.linkedBookingIds.length > 0
+      ? await prisma.booking.findMany({
+          where: { id: { in: booking.linkedBookingIds } },
+          include: { room: true },
+        })
+      : [];
+
     const venueTotal = booking.totalAmount;
-    const grandTotal = venueTotal + itemsTotal;
+    const itemsTotal = booking.items.reduce((sum, i) => sum + i.totalPrice, 0);
+
+    // Calculate room cost: room.price × nights for each linked hotel booking
+    const roomLineItems: { description: string; quantity: number; price: number }[] = [];
+    let roomsTotal = 0;
+    const roomAmountUpdates: Array<{ id: string; totalAmount: number }> = [];
+
+    for (const lb of linkedHotelBookings) {
+      const nights = Math.max(
+        1,
+        Math.ceil((new Date(lb.checkOut).getTime() - new Date(lb.checkIn).getTime()) / 86400000)
+      );
+      const roomTotal = lb.room.price * nights;
+      roomsTotal += roomTotal;
+      roomAmountUpdates.push({ id: lb.id, totalAmount: roomTotal });
+      roomLineItems.push({
+        description: `Room ${lb.room.number} (${lb.room.type}) — ${nights} night${nights !== 1 ? 's' : ''}`,
+        quantity: nights,
+        price: lb.room.price,
+      });
+    }
+
+    const grandTotal = venueTotal + roomsTotal + itemsTotal;
 
     const invoiceItems = [
       {
@@ -28,6 +57,7 @@ export async function POST(
         quantity: 1,
         price: venueTotal,
       },
+      ...roomLineItems,
       ...booking.items.map((item) => ({
         description: item.description,
         quantity: item.quantity,
@@ -44,6 +74,13 @@ export async function POST(
       },
       include: { items: true },
     });
+
+    // Update linked hotel bookings' totalAmount now that we've computed it
+    await Promise.all(
+      roomAmountUpdates.map(({ id, totalAmount }) =>
+        prisma.booking.update({ where: { id }, data: { totalAmount } })
+      )
+    );
 
     // Link the invoice back to the conference booking
     await prisma.conferenceBooking.update({

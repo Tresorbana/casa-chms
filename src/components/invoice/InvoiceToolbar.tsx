@@ -14,6 +14,7 @@ type InvoiceToolbarProps = {
   invoiceType?: string;
   backLabel?: string;
   backHref?: string;
+  roomCharge?: string | null;
   onStatusChange?: (status: string, paymentMethod?: string | null) => void;
 };
 
@@ -25,6 +26,7 @@ export function InvoiceToolbar({
   invoiceType,
   backLabel = 'Back to Invoices',
   backHref = '/invoices',
+  roomCharge,
   onStatusChange,
 }: InvoiceToolbarProps) {
   const router = useRouter();
@@ -75,7 +77,12 @@ export function InvoiceToolbar({
             {isPaid ? `Paid · ${formatPaymentMethod(currentMethod)}` : currentStatus}
           </span>
 
-          {!isPaid && (
+          {roomCharge ? (
+            <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span className="material-symbols-outlined text-[18px]">hotel</span>
+              Charged to Room {roomCharge}
+            </span>
+          ) : !isPaid && (
             <button
               type="button"
               onClick={() => setShowPayDialog(true)}

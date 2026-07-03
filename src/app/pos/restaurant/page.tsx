@@ -17,7 +17,6 @@ export default function PosRestaurant() {
   const [walkInName, setWalkInName] = useState('');
   const [walkInContact, setWalkInContact] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [chargedRoom, setChargedRoom] = useState<{ number: string; guestName: string } | null>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('All Items');
   const [searchTerm, setSearchTerm] = useState('');
@@ -108,12 +107,9 @@ export default function PosRestaurant() {
       if (res.ok) {
         const invoice = await res.json();
         if (orderType === 'resident' && residentRoom) {
-          // Resident: charge to room — no payment needed here, will settle at checkout
-          setChargedRoom({ number: residentRoom.roomNumber, guestName: residentRoom.guestName });
-          setCart([]);
-          setResidentRoomId('');
+          // Resident: go to invoice page in room-charge mode — guest signs, no payment collected now
+          router.push(`/invoice/restaurant?id=${invoice.id}&mode=room-charge&room=${residentRoom.roomNumber}`);
         } else {
-          // Walk-in: go to invoice page to collect payment
           router.push(`/invoice/restaurant?id=${invoice.id}`);
         }
       } else {
@@ -279,30 +275,13 @@ export default function PosRestaurant() {
           )}
         </div>
 
-        {chargedRoom && (
-          <div className="m-4 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-center space-y-3">
-            <span className="material-symbols-outlined text-4xl text-emerald-600 block">check_circle</span>
-            <div>
-              <p className="text-sm font-semibold text-emerald-800">Charged to Room {chargedRoom.number}</p>
-              <p className="text-xs text-emerald-700 mt-0.5">{chargedRoom.guestName}</p>
-              <p className="text-[10px] text-emerald-600 mt-1">Will be settled at hotel checkout</p>
-            </div>
-            <button
-              onClick={() => setChargedRoom(null)}
-              className="w-full py-2 rounded-lg bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700 transition-colors"
-            >
-              New Order
-            </button>
-          </div>
-        )}
-
         <div className="flex-1 overflow-y-auto p-5 space-y-3">
-          {cart.length === 0 && !chargedRoom ? (
+          {cart.length === 0 ? (
             <div className="text-center text-muted-foreground py-12 flex flex-col items-center gap-2">
               <span className="material-symbols-outlined text-3xl opacity-30">shopping_cart</span>
               <p className="text-sm">Cart is empty</p>
             </div>
-          ) : !chargedRoom && cart.map((item) => (
+          ) : cart.map((item) => (
             <div key={getCartItemKey(item)} className="flex gap-3 items-center justify-between bg-card border border-border/60 p-3 rounded-xl hover:shadow-sm transition-all">
               <div className="flex gap-3 items-center flex-1 min-w-0">
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-primary/5 text-primary">
@@ -353,22 +332,20 @@ export default function PosRestaurant() {
           ))}
         </div>
 
-        {!chargedRoom && (
-          <div className="p-5 border-t border-border">
-            <div className="flex justify-between items-center mb-4">
-              <span className="text-xs text-muted-foreground">Total</span>
-              <span className="text-xl font-semibold text-foreground">RWF {cartTotal.toLocaleString()}</span>
-            </div>
-            <button
-              onClick={handleFinalize}
-              disabled={isSubmitting || cart.length === 0}
-              className="w-full bg-primary text-primary-foreground text-sm font-medium py-3 rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              <span className="material-symbols-outlined text-[18px]">{isSubmitting ? 'sync' : 'receipt_long'}</span>
-              {isSubmitting ? 'Processing...' : 'Finalize Order'}
-            </button>
+        <div className="p-5 border-t border-border">
+          <div className="flex justify-between items-center mb-4">
+            <span className="text-xs text-muted-foreground">Total</span>
+            <span className="text-xl font-semibold text-foreground">RWF {cartTotal.toLocaleString()}</span>
           </div>
-        )}
+          <button
+            onClick={handleFinalize}
+            disabled={isSubmitting || cart.length === 0}
+            className="w-full bg-primary text-primary-foreground text-sm font-medium py-3 rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+          >
+            <span className="material-symbols-outlined text-[18px]">{isSubmitting ? 'sync' : 'receipt_long'}</span>
+            {isSubmitting ? 'Processing...' : orderType === 'resident' ? 'Charge to Room' : 'Finalize Order'}
+          </button>
+        </div>
       </div>
     </div>
   );
