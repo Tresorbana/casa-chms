@@ -278,6 +278,43 @@ model ConferenceBookingItem {
   @@index([conferenceBookingId])
 }
 
+model RestaurantEvent {
+  id              String                @id @default(cuid())
+  name            String
+  guestName       String
+  guestContact    String?
+  guestEmail      String?
+  eventType       String                @default("GROUP_BOOKING")
+  eventDate       DateTime
+  startTime       DateTime
+  endTime         DateTime?
+  partySize       Int
+  status          String                @default("CONFIRMED")
+  specialRequests String?
+  notes           String?
+  invoiceId       String?
+  totalAmount     Float?
+  createdByName   String?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  items           RestaurantEventItem[]
+
+  @@index([status])
+  @@index([eventDate])
+}
+
+model RestaurantEventItem {
+  id          String          @id @default(cuid())
+  eventId     String
+  description String
+  quantity    Int             @default(1)
+  unitPrice   Float
+  totalPrice  Float
+  event       RestaurantEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+}
+
 model OtherIncome {
   id            String   @id @default(cuid())
   description   String

@@ -16,6 +16,7 @@ const NAV_ITEMS = [
 
 const OPS_ITEMS = [
   { href: '/pos/restaurant', icon: 'restaurant',    label: 'Restaurant & Bar' },
+  { href: '/pos/events',     icon: 'celebration',   label: 'Restaurant Events' },
   { href: '/checkout',       icon: 'receipt_long',  label: 'Checkout' },
   { href: '/invoices',       icon: 'folder_shared', label: 'Invoices' },
   { href: '/inventory',      icon: 'inventory_2',   label: 'Stock' },

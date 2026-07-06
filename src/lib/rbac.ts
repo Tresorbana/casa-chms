@@ -39,6 +39,8 @@ const ROUTE_RULES: RouteRule[] = [
   { pattern: /^\/reports(?:\/.*)?$/, roles: AUTHENTICATED_ROLES },
   { pattern: /^\/inventory(?:\/.*)?$/, roles: ['BARMAN', 'STORE_KEEPER', 'FINANCE', 'ADMIN', 'SUPER_ADMIN'] },
   { pattern: /^\/pos\/restaurant(?:\/.*)?$/, roles: MENU_ROLES },
+  { pattern: /^\/pos\/events(?:\/.*)?$/, roles: MENU_ROLES },
+  { pattern: /^\/api\/restaurant-events(?:\/.*)?$/, roles: MENU_ROLES },
   { pattern: /^\/cms\/requests(?:\/.*)?$/, roles: RECEPTION_ROLES },
   { pattern: /^\/inquiries(?:\/.*)?$/, roles: RECEPTION_ROLES },
   { pattern: /^\/bookings(?:\/.*)?$/, roles: RECEPTION_ROLES },

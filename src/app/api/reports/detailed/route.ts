@@ -220,6 +220,40 @@ export async function GET(request: Request) {
                 break;
             }
 
+            case 'RESTAURANT_EVENTS': {
+                const eventsWhere = start && end
+                    ? { eventDate: { gte: new Date(start), lte: new Date(end) } }
+                    : {};
+                const restaurantEvents = await prisma.restaurantEvent.findMany({
+                    where: eventsWhere,
+                    orderBy: { eventDate: 'desc' },
+                    include: { items: true },
+                });
+                const completedEvents = restaurantEvents.filter((e) => e.status === 'COMPLETED');
+                const totalRevenue = completedEvents.reduce((s, e) => s + (e.totalAmount ?? 0), 0);
+                const byType = restaurantEvents.reduce((acc: Record<string, number>, e) => {
+                    acc[e.eventType] = (acc[e.eventType] || 0) + 1;
+                    return acc;
+                }, {});
+                data = {
+                    totalEvents: restaurantEvents.length,
+                    completedEvents: completedEvents.length,
+                    totalRevenue,
+                    breakdown: Object.entries(byType).map(([type, count]) => ({
+                        type,
+                        _count: { id: count },
+                    })),
+                    records: restaurantEvents.map((e) => ({
+                        id: e.id,
+                        details: `${e.name} — ${e.guestName} (${e.partySize} guests)`,
+                        totalAmount: e.totalAmount ?? 0,
+                        status: e.status,
+                        createdAt: e.eventDate,
+                    })),
+                };
+                break;
+            }
+
             case 'CONFERENCE': {
                 const confWhere =
                     start && end

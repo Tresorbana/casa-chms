@@ -21,6 +21,7 @@ const REPORT_TYPES = [
   { id: 'RESTAURANT_ORDERS', label: 'Order Report',                  category: 'DINING' },
   { id: 'INVENTORY',         label: 'Inventory & Stock',             category: 'INVENTORY' },
   { id: 'CONFERENCE',        label: 'Conference & Events',           category: 'EVENTS' },
+  { id: 'RESTAURANT_EVENTS', label: 'Restaurant Events',             category: 'EVENTS' },
   { id: 'INVOICES',          label: 'All Invoices',                  category: 'FINANCE' },
   { id: 'EXTRA_SERVICES',    label: 'Extra Services Usage',          category: 'SERVICES' },
 ];
@@ -290,6 +291,11 @@ export default function Reports() {
                   </>)}
                   {selectedReport.id === 'CONFERENCE' && (<>
                     <StatCard label="Bookings" value={data?.totalBookings || 0} icon="event" />
+                    <StatCard label="Revenue" value={`RWF ${(data?.totalRevenue || 0).toLocaleString()}`} icon="payments" />
+                  </>)}
+                  {selectedReport.id === 'RESTAURANT_EVENTS' && (<>
+                    <StatCard label="Total Events" value={data?.totalEvents || 0} icon="celebration" />
+                    <StatCard label="Completed" value={data?.completedEvents || 0} icon="check_circle" />
                     <StatCard label="Revenue" value={`RWF ${(data?.totalRevenue || 0).toLocaleString()}`} icon="payments" />
                   </>)}
                   {selectedReport.id === 'INVOICES' && (<>
