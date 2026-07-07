@@ -19,7 +19,11 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   try {
     const { id } = await params;
     const body = await request.json();
-    const { status, notes, specialRequests, addItem, removeItemId } = body;
+    const {
+      status, notes, specialRequests, addItem, removeItemId,
+      name, guestName, guestContact, guestEmail, eventType,
+      eventDate, startTime, endTime, partySize,
+    } = body;
 
     if (removeItemId) {
       await prisma.restaurantEventItem.delete({ where: { id: removeItemId } });
@@ -48,6 +52,15 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     if (status) data.status = status;
     if (notes !== undefined) data.notes = notes;
     if (specialRequests !== undefined) data.specialRequests = specialRequests;
+    if (name !== undefined) data.name = name;
+    if (guestName !== undefined) data.guestName = guestName;
+    if (guestContact !== undefined) data.guestContact = guestContact;
+    if (guestEmail !== undefined) data.guestEmail = guestEmail;
+    if (eventType !== undefined) data.eventType = eventType;
+    if (eventDate !== undefined) data.eventDate = new Date(eventDate);
+    if (startTime !== undefined) data.startTime = new Date(startTime);
+    if (endTime !== undefined) data.endTime = endTime ? new Date(endTime) : null;
+    if (partySize !== undefined) data.partySize = parseInt(partySize);
 
     const updated = await prisma.restaurantEvent.update({
       where: { id },

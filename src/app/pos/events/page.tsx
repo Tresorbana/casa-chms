@@ -59,10 +59,24 @@ export default function RestaurantEventsPage() {
   const [tab, setTab] = useState<'upcoming' | 'past'>('upcoming');
   const [selected, setSelected] = useState<any>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isAddingItem, setIsAddingItem] = useState(false);
   const [isFinalizing, setIsFinalizing] = useState(false);
   const [cancelConfirm, setCancelConfirm] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: '',
+    guestName: '',
+    guestContact: '',
+    guestEmail: '',
+    eventType: 'GROUP_BOOKING',
+    eventDate: '',
+    startTime: '',
+    endTime: '',
+    partySize: '',
+    specialRequests: '',
+    notes: '',
+  });
   const [createForm, setCreateForm] = useState({
     name: '',
     guestName: '',
@@ -128,6 +142,63 @@ export default function RestaurantEventsPage() {
       setCreateForm({ name: '', guestName: '', guestContact: '', guestEmail: '', eventType: 'GROUP_BOOKING', eventDate: '', startTime: '', endTime: '', partySize: '', specialRequests: '', notes: '' });
       await mutate();
       setSelected(created);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const openEdit = (event: any) => {
+    const toDateInput = (iso: string) => new Date(iso).toISOString().slice(0, 10);
+    const toTimeInput = (iso: string) => new Date(iso).toTimeString().slice(0, 5);
+    setEditForm({
+      name: event.name,
+      guestName: event.guestName,
+      guestContact: event.guestContact ?? '',
+      guestEmail: event.guestEmail ?? '',
+      eventType: event.eventType,
+      eventDate: toDateInput(event.eventDate),
+      startTime: toTimeInput(event.startTime),
+      endTime: event.endTime ? toTimeInput(event.endTime) : '',
+      partySize: String(event.partySize),
+      specialRequests: event.specialRequests ?? '',
+      notes: event.notes ?? '',
+    });
+    setIsEditing(true);
+  };
+
+  const handleEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selected) return;
+    if (!editForm.name || !editForm.guestName || !editForm.eventDate || !editForm.startTime || !editForm.partySize) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+    if (editForm.endTime && editForm.endTime <= editForm.startTime) {
+      toast.error('End time must be after start time');
+      return;
+    }
+    setIsSaving(true);
+    try {
+      const startISO = new Date(`${editForm.eventDate}T${editForm.startTime}`).toISOString();
+      const endISO = editForm.endTime
+        ? new Date(`${editForm.eventDate}T${editForm.endTime}`).toISOString()
+        : null;
+      const res = await fetch(`/api/restaurant-events/${selected.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...editForm,
+          eventDate: new Date(editForm.eventDate).toISOString(),
+          startTime: startISO,
+          endTime: endISO,
+        }),
+      });
+      if (!res.ok) { toast.error('Failed to update event'); return; }
+      const updated = await res.json();
+      toast.success('Event updated');
+      setIsEditing(false);
+      setSelected(updated);
+      await mutate();
     } finally {
       setIsSaving(false);
     }
@@ -294,6 +365,15 @@ export default function RestaurantEventsPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <StatusBadge status={selected.status} />
+                  {selected.status !== 'COMPLETED' && selected.status !== 'CANCELLED' && (
+                    <button
+                      onClick={() => openEdit(selected)}
+                      className="text-muted-foreground hover:text-foreground transition-colors"
+                      title="Edit event"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">edit</span>
+                    </button>
+                  )}
                   <button onClick={() => setSelected(null)} className="text-muted-foreground hover:text-foreground transition-colors">
                     <span className="material-symbols-outlined text-[18px]">close</span>
                   </button>
@@ -479,6 +559,90 @@ export default function RestaurantEventsPage() {
           )}
         </div>
       </div>
+
+      {/* Edit modal */}
+      {isEditing && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/20 backdrop-blur-sm">
+          <div className="bg-background border border-border rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-border flex items-center justify-between">
+              <h2 className="text-base font-semibold text-foreground">Edit Event</h2>
+              <button onClick={() => setIsEditing(false)} className="text-muted-foreground hover:text-foreground transition-colors">
+                <span className="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            </div>
+            <form onSubmit={handleEdit} className="p-6 space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-foreground mb-1.5">Event Name *</label>
+                <input className={inputClass} placeholder="e.g. Smith Birthday Dinner" required value={editForm.name} onChange={(e) => setEditForm((f) => ({ ...f, name: e.target.value }))} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-foreground mb-1.5">Organizer Name *</label>
+                  <input className={inputClass} placeholder="Guest name" required value={editForm.guestName} onChange={(e) => setEditForm((f) => ({ ...f, guestName: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-foreground mb-1.5">Contact</label>
+                  <input className={inputClass} placeholder="Phone / WhatsApp" value={editForm.guestContact} onChange={(e) => setEditForm((f) => ({ ...f, guestContact: e.target.value }))} />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-foreground mb-1.5">Email</label>
+                <input className={inputClass} type="email" placeholder="guest@email.com" value={editForm.guestEmail} onChange={(e) => setEditForm((f) => ({ ...f, guestEmail: e.target.value }))} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-foreground mb-1.5">Event Type</label>
+                  <select className={inputClass} value={editForm.eventType} onChange={(e) => setEditForm((f) => ({ ...f, eventType: e.target.value }))}>
+                    {EVENT_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-foreground mb-1.5">Party Size *</label>
+                  <input className={inputClass} type="number" min="1" placeholder="No. of guests" required value={editForm.partySize} onChange={(e) => setEditForm((f) => ({ ...f, partySize: e.target.value }))} />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-foreground mb-1.5">Event Date *</label>
+                <input className={inputClass} type="date" required value={editForm.eventDate} onChange={(e) => setEditForm((f) => ({ ...f, eventDate: e.target.value }))} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-foreground mb-1.5">Start Time *</label>
+                  <input className={inputClass} type="time" required value={editForm.startTime} onChange={(e) => setEditForm((f) => ({ ...f, startTime: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-foreground mb-1.5">End Time</label>
+                  <input className={inputClass} type="time" value={editForm.endTime} onChange={(e) => setEditForm((f) => ({ ...f, endTime: e.target.value }))} />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-foreground mb-1.5">Special Requests</label>
+                <textarea className={inputClass} rows={2} placeholder="Dietary requirements, decorations, seating preferences..." value={editForm.specialRequests} onChange={(e) => setEditForm((f) => ({ ...f, specialRequests: e.target.value }))} />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-foreground mb-1.5">Internal Notes</label>
+                <textarea className={inputClass} rows={2} placeholder="Notes for staff..." value={editForm.notes} onChange={(e) => setEditForm((f) => ({ ...f, notes: e.target.value }))} />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsEditing(false)}
+                  className="flex-1 border border-border text-foreground text-sm font-medium py-2.5 rounded-lg hover:bg-muted transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="flex-1 bg-primary text-primary-foreground text-sm font-medium py-2.5 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+                >
+                  {isSaving ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Create modal */}
       {isCreating && (
