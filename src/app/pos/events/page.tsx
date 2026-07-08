@@ -64,6 +64,9 @@ export default function RestaurantEventsPage() {
   const [isAddingItem, setIsAddingItem] = useState(false);
   const [isFinalizing, setIsFinalizing] = useState(false);
   const [cancelConfirm, setCancelConfirm] = useState(false);
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [editingItemForm, setEditingItemForm] = useState({ description: '', quantity: '1', unitPrice: '' });
+  const [isSavingItem, setIsSavingItem] = useState(false);
   const [editForm, setEditForm] = useState({
     name: '',
     guestName: '',
@@ -254,6 +257,29 @@ export default function RestaurantEventsPage() {
     await mutate();
   };
 
+  const startEditItem = (item: any) => {
+    setEditingItemId(item.id);
+    setEditingItemForm({ description: item.description, quantity: String(item.quantity), unitPrice: String(item.unitPrice) });
+  };
+
+  const handleSaveItem = async () => {
+    if (!selected || !editingItemId) return;
+    setIsSavingItem(true);
+    try {
+      const res = await fetch(`/api/restaurant-events/${selected.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ editItem: { itemId: editingItemId, ...editingItemForm } }),
+      });
+      if (!res.ok) { toast.error('Failed to update item'); return; }
+      const updated = await res.json();
+      setSelected(updated);
+      setEditingItemId(null);
+      await mutate();
+    } catch { toast.error('Error updating item'); }
+    finally { setIsSavingItem(false); }
+  };
+
   const handleFinalize = async () => {
     if (!selected) return;
     setIsFinalizing(true);
@@ -400,26 +426,81 @@ export default function RestaurantEventsPage() {
                 ) : (
                   <div className="space-y-2">
                     {selected.items.map((item: any) => (
-                      <div key={item.id} className="flex items-center justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-medium text-foreground truncate">{item.description}</p>
-                          <p className="text-[10px] text-muted-foreground">
-                            {item.quantity} × RWF {item.unitPrice.toLocaleString()}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-semibold text-foreground">
-                            RWF {item.totalPrice.toLocaleString()}
-                          </span>
-                          {selected.status !== 'COMPLETED' && selected.status !== 'CANCELLED' && (
-                            <button
-                              onClick={() => handleRemoveItem(item.id)}
-                              className="text-muted-foreground hover:text-destructive transition-colors"
-                            >
-                              <span className="material-symbols-outlined text-[14px]">delete</span>
-                            </button>
-                          )}
-                        </div>
+                      <div key={item.id} className="rounded-lg border border-border overflow-hidden">
+                        {editingItemId === item.id ? (
+                          <div className="p-2 space-y-2 bg-muted/30">
+                            <input
+                              className={inputClass}
+                              value={editingItemForm.description}
+                              onChange={e => setEditingItemForm(f => ({ ...f, description: e.target.value }))}
+                              placeholder="Description"
+                            />
+                            <div className="grid grid-cols-2 gap-2">
+                              <input
+                                className={inputClass}
+                                type="number"
+                                min="1"
+                                value={editingItemForm.quantity}
+                                onChange={e => setEditingItemForm(f => ({ ...f, quantity: e.target.value }))}
+                                placeholder="Qty"
+                              />
+                              <input
+                                className={inputClass}
+                                type="number"
+                                min="0"
+                                value={editingItemForm.unitPrice}
+                                onChange={e => setEditingItemForm(f => ({ ...f, unitPrice: e.target.value }))}
+                                placeholder="Price (RWF)"
+                              />
+                            </div>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => setEditingItemId(null)}
+                                className="flex-1 py-1.5 border border-border rounded-lg text-xs text-muted-foreground hover:bg-accent transition-colors"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                onClick={handleSaveItem}
+                                disabled={isSavingItem}
+                                className="flex-1 py-1.5 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
+                              >
+                                {isSavingItem ? 'Saving...' : 'Save'}
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-between gap-2 px-3 py-2">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-medium text-foreground truncate">{item.description}</p>
+                              <p className="text-[10px] text-muted-foreground">
+                                {item.quantity} × RWF {item.unitPrice.toLocaleString()}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-xs font-semibold text-foreground">
+                                RWF {item.totalPrice.toLocaleString()}
+                              </span>
+                              {selected.status !== 'CANCELLED' && (
+                                <>
+                                  <button
+                                    onClick={() => startEditItem(item)}
+                                    className="text-muted-foreground hover:text-primary transition-colors"
+                                    title="Edit item"
+                                  >
+                                    <span className="material-symbols-outlined text-[14px]">edit</span>
+                                  </button>
+                                  <button
+                                    onClick={() => handleRemoveItem(item.id)}
+                                    className="text-muted-foreground hover:text-destructive transition-colors"
+                                  >
+                                    <span className="material-symbols-outlined text-[14px]">delete</span>
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                     <div className="pt-2 border-t border-border flex justify-between">
@@ -429,8 +510,8 @@ export default function RestaurantEventsPage() {
                   </div>
                 )}
 
-                {/* Add item — only for non-terminal statuses */}
-                {selected.status !== 'COMPLETED' && selected.status !== 'CANCELLED' && (
+                {/* Add item — available for all except CANCELLED */}
+                {selected.status !== 'CANCELLED' && (
                   <div className="mt-4 space-y-2">
                     <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Add from menu</p>
                     <input

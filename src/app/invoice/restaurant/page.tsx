@@ -121,7 +121,7 @@ function RestaurantInvoiceContent() {
               <p className="text-sm">{HOTEL_INFO.address}, {HOTEL_INFO.region}</p>
               <p className="text-sm">Tel: {HOTEL_INFO.phone}</p>
               <h2 className="text-base font-bold uppercase underline mt-3 tracking-widest">
-                {isPaid ? 'INVOICE' : 'PROFORMA INVOICE'}
+              {isPaid ? 'INVOICE' : 'DELIVERY NOTE'}
               </h2>
             </div>
 
@@ -133,7 +133,7 @@ function RestaurantInvoiceContent() {
 
             {/* Client */}
             <div className="text-sm mb-5">
-              <span className="font-bold">CLIENT: </span>
+              <span className="font-bold">RECEIVED BY: </span>
               <span className="font-bold uppercase">{apiInvoice.guestName}</span>
             </div>
 
@@ -186,7 +186,7 @@ function RestaurantInvoiceContent() {
             <div className="grid grid-cols-2 gap-8 text-sm">
               {/* Left — hotel rep */}
               <div>
-                <p className="font-medium">For KAMDINE COMPANY LTD</p>
+                <p className="font-medium">DELIVERED BY KAMDINE COMPANY LTD</p>
                 <div className="mt-8 border-b border-black w-48 print:mt-16" />
                 <p className="mt-1">{apiInvoice.createdByName ?? ''}</p>
               </div>

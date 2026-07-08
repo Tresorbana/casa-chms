@@ -43,6 +43,11 @@ export async function PUT(request: Request, { params }: Params) {
       startTime, endTime, totalAmount, linkedBookingIds,
     } = body;
 
+    const existing = await prisma.conferenceBooking.findUnique({ where: { id } });
+    if (!existing) return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
+
+    const newVenueTotal = totalAmount !== undefined ? parseFloat(totalAmount) : undefined;
+
     const booking = await prisma.conferenceBooking.update({
       where: { id },
       data: {
@@ -52,11 +57,35 @@ export async function PUT(request: Request, { params }: Params) {
         ...(notes !== undefined && { notes }),
         ...(startTime !== undefined && { startTime: new Date(startTime) }),
         ...(endTime !== undefined && { endTime: new Date(endTime) }),
-        ...(totalAmount !== undefined && { totalAmount: parseFloat(totalAmount) }),
+        ...(newVenueTotal !== undefined && { totalAmount: newVenueTotal }),
         ...(linkedBookingIds !== undefined && { linkedBookingIds }),
       },
       include: { conferenceRoom: true, items: true },
     });
+
+    // If venue fee changed and an invoice exists, update the invoice accordingly
+    if (newVenueTotal !== undefined && newVenueTotal !== existing.totalAmount && existing.invoiceId) {
+      const invoice = await prisma.invoice.findUnique({
+        where: { id: existing.invoiceId },
+        include: { items: true },
+      });
+      if (invoice) {
+        const venueItem = invoice.items.find(
+          (item) => item.description.includes(' — Daily rate') || item.description.includes(' — Hourly rate')
+        );
+        if (venueItem) {
+          await prisma.invoiceItem.update({
+            where: { id: venueItem.id },
+            data: { price: newVenueTotal },
+          });
+          const newInvoiceTotal = invoice.amount - existing.totalAmount + newVenueTotal;
+          await prisma.invoice.update({
+            where: { id: existing.invoiceId },
+            data: { amount: newInvoiceTotal },
+          });
+        }
+      }
+    }
 
     const linkedBookings = await enrichLinkedBookings(booking.linkedBookingIds);
     return NextResponse.json({ ...booking, linkedBookings });

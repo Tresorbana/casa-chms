@@ -70,6 +70,7 @@ export async function POST(
         guestName: booking.guestName,
         amount: grandTotal,
         type: 'CONFERENCE',
+        date: new Date(booking.startTime),
         items: { create: invoiceItems },
       },
       include: { items: true },

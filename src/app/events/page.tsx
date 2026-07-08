@@ -36,11 +36,14 @@ export default function Events() {
   const [isAddingItem, setIsAddingItem] = useState(false);
   const [isGeneratingInvoice, setIsGeneratingInvoice] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editForm, setEditForm] = useState({ guestName: '', guestContact: '', guestEmail: '', notes: '' });
+  const [editForm, setEditForm] = useState({ guestName: '', guestContact: '', guestEmail: '', notes: '', totalAmount: '' });
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
   const [isActioning, setIsActioning] = useState(false);
   const [isLinkingRoom, setIsLinkingRoom] = useState(false);
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [editingItemForm, setEditingItemForm] = useState({ description: '', quantity: '1', unitPrice: '' });
+  const [isSavingItem, setIsSavingItem] = useState(false);
 
   const venues = Array.isArray(venuesData) ? venuesData : [];
   const schedule = Array.isArray(bookingsData) ? bookingsData : [];
@@ -64,6 +67,7 @@ export default function Events() {
       guestContact: selectedBooking.guestContact ?? '',
       guestEmail: selectedBooking.guestEmail ?? '',
       notes: selectedBooking.notes ?? '',
+      totalAmount: selectedBooking.totalAmount?.toString() ?? '',
     });
     setIsEditModalOpen(true);
   };
@@ -75,7 +79,10 @@ export default function Events() {
       const res = await fetch(`/api/conference/bookings/${selectedBooking.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editForm),
+        body: JSON.stringify({
+        ...editForm,
+        totalAmount: editForm.totalAmount !== '' ? parseFloat(editForm.totalAmount) : undefined,
+      }),
       });
       if (!res.ok) { toast.error('Failed to update booking'); return; }
       const updated = await res.json();
@@ -183,6 +190,35 @@ export default function Events() {
       if (refreshed) setSelectedBooking(refreshed);
       toast.success('Item removed');
     } catch { toast.error('Failed to remove item'); }
+  };
+
+  const startEditItem = (item: any) => {
+    setEditingItemId(item.id);
+    setEditingItemForm({
+      description: item.description,
+      quantity: item.quantity.toString(),
+      unitPrice: item.unitPrice.toString(),
+    });
+  };
+
+  const handleSaveItem = async (itemId: string) => {
+    if (!selectedBooking) return;
+    setIsSavingItem(true);
+    try {
+      const res = await fetch(`/api/conference/${selectedBooking.id}/items?itemId=${itemId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editingItemForm),
+      });
+      if (!res.ok) { toast.error('Failed to update item'); return; }
+      const updated = await fetch(`/api/conference/bookings`).then(r => r.json());
+      mutateBookings(updated, false);
+      const refreshed = updated.find((b: any) => b.id === selectedBooking.id);
+      if (refreshed) setSelectedBooking(refreshed);
+      setEditingItemId(null);
+      toast.success('Item updated');
+    } catch { toast.error('Error updating item'); }
+    finally { setIsSavingItem(false); }
   };
 
   const handleGenerateInvoice = async () => {
@@ -461,24 +497,78 @@ export default function Events() {
                   ) : (
                     <div className="space-y-1 mb-3">
                       {selectedBooking.items.map((item: any) => (
-                        <div key={item.id} className="flex items-center justify-between p-2 bg-muted/40 rounded-lg border border-border">
-                          <div className="text-xs">
-                            <span className="font-medium text-foreground">{item.description}</span>
-                            <span className="text-muted-foreground ml-1">×{item.quantity}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-medium text-foreground">RWF {item.totalPrice.toLocaleString()}</span>
-                            <button onClick={() => handleRemoveItem(item.id)} className="text-muted-foreground hover:text-destructive transition-colors">
-                              <span className="material-symbols-outlined text-[14px]">close</span>
-                            </button>
-                          </div>
+                        <div key={item.id} className="rounded-lg border border-border bg-muted/40 overflow-hidden">
+                          {editingItemId === item.id ? (
+                            <div className="p-2 space-y-2">
+                              <input
+                                type="text"
+                                className={inputClass}
+                                value={editingItemForm.description}
+                                onChange={e => setEditingItemForm({ ...editingItemForm, description: e.target.value })}
+                                placeholder="Description"
+                              />
+                              <div className="grid grid-cols-2 gap-2">
+                                <input
+                                  type="number"
+                                  min="1"
+                                  className={inputClass}
+                                  value={editingItemForm.quantity}
+                                  onChange={e => setEditingItemForm({ ...editingItemForm, quantity: e.target.value })}
+                                  placeholder="Qty"
+                                />
+                                <input
+                                  type="number"
+                                  min="0"
+                                  className={inputClass}
+                                  value={editingItemForm.unitPrice}
+                                  onChange={e => setEditingItemForm({ ...editingItemForm, unitPrice: e.target.value })}
+                                  placeholder="Unit price (RWF)"
+                                />
+                              </div>
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => setEditingItemId(null)}
+                                  className="flex-1 py-1.5 border border-border rounded-lg text-xs text-muted-foreground hover:bg-accent transition-colors"
+                                >
+                                  Cancel
+                                </button>
+                                <button
+                                  onClick={() => handleSaveItem(item.id)}
+                                  disabled={isSavingItem}
+                                  className="flex-1 py-1.5 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
+                                >
+                                  {isSavingItem ? 'Saving...' : 'Save'}
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-between p-2">
+                              <div className="text-xs">
+                                <span className="font-medium text-foreground">{item.description}</span>
+                                <span className="text-muted-foreground ml-1">×{item.quantity}</span>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-xs font-medium text-foreground">RWF {item.totalPrice.toLocaleString()}</span>
+                                <button
+                                  onClick={() => startEditItem(item)}
+                                  className="text-muted-foreground hover:text-primary transition-colors"
+                                  title="Edit item"
+                                >
+                                  <span className="material-symbols-outlined text-[14px]">edit</span>
+                                </button>
+                                <button onClick={() => handleRemoveItem(item.id)} className="text-muted-foreground hover:text-destructive transition-colors">
+                                  <span className="material-symbols-outlined text-[14px]">close</span>
+                                </button>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
                   )}
 
                   {/* Add Item Form */}
-                  {selectedBooking.status !== 'INVOICED' && (
+                  {selectedBooking.status !== 'CANCELLED' && (
                     <form onSubmit={handleAddItem} className="space-y-2 pt-2 border-t border-border">
                       <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Add Item</p>
                       <input
@@ -649,6 +739,20 @@ export default function Events() {
                   <label className="text-xs font-medium text-muted-foreground block mb-1.5">Email</label>
                   <input type="email" className={inputClass} value={editForm.guestEmail} onChange={e => setEditForm({ ...editForm, guestEmail: e.target.value })} />
                 </div>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground block mb-1.5">Venue Fee (RWF)</label>
+                <input
+                  type="number"
+                  min="0"
+                  className={inputClass}
+                  value={editForm.totalAmount}
+                  onChange={e => setEditForm({ ...editForm, totalAmount: e.target.value })}
+                  placeholder="Agreed venue fee"
+                />
+                {selectedBooking?.invoiceId && (
+                  <p className="text-[10px] text-amber-600 mt-1">Invoice already generated — changing this will update the invoice amount.</p>
+                )}
               </div>
               <div>
                 <label className="text-xs font-medium text-muted-foreground block mb-1.5">Notes</label>
