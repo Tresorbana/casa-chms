@@ -29,6 +29,7 @@ export async function POST(_: Request, { params }: { params: Promise<{ id: strin
         guestName: event.guestName,
         amount: total,
         type: 'RESTAURANT',
+        date: new Date(event.startTime),
         createdByName,
         createdById,
         items: {

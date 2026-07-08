@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import TopBar from '@/components/TopBar';
 import { ExportButton } from '@/components/ExportButton';
 import { exportToExcel, inventoryExportRows } from '@/lib/export-excel';
+import { useRouter } from 'next/navigation';
 
 type Tab = 'stock' | 'movements';
 
@@ -18,6 +19,7 @@ const REASONS: Record<string, string> = {
 };
 
 export default function Inventory() {
+  const router = useRouter();
   const { data: items, isLoading, mutate } = useSWR('/api/inventory', fetcher, {
     onError: () => toast.error('Failed to load inventory'),
   });
@@ -172,6 +174,13 @@ export default function Inventory() {
         actions={
           <div className="flex flex-wrap gap-2">
             <ExportButton onClick={handleExport} disabled={!items?.length} />
+            <button
+              onClick={() => router.push('/reports')}
+              className="inline-flex items-center gap-2 border border-border text-foreground text-sm font-medium px-4 py-2 rounded-lg hover:bg-accent transition-colors"
+            >
+              <span className="material-symbols-outlined text-[18px]">assessment</span>
+              Reports
+            </button>
             <button
               onClick={() => setIsModalOpen(true)}
               className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"

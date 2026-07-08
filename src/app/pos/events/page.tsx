@@ -64,6 +64,8 @@ export default function RestaurantEventsPage() {
   const [isAddingItem, setIsAddingItem] = useState(false);
   const [isFinalizing, setIsFinalizing] = useState(false);
   const [cancelConfirm, setCancelConfirm] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [editingItemForm, setEditingItemForm] = useState({ description: '', quantity: '1', unitPrice: '' });
   const [isSavingItem, setIsSavingItem] = useState(false);
@@ -292,6 +294,21 @@ export default function RestaurantEventsPage() {
       router.push(`/invoice/restaurant?id=${data.invoiceId}`);
     } finally {
       setIsFinalizing(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!selected) return;
+    setIsDeleting(true);
+    try {
+      const res = await fetch(`/api/restaurant-events/${selected.id}`, { method: 'DELETE' });
+      if (!res.ok) { toast.error('Failed to delete event'); return; }
+      toast.success('Event deleted');
+      setSelected(null);
+      setDeleteConfirm(false);
+      await mutate();
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -619,7 +636,7 @@ export default function RestaurantEventsPage() {
               )}
 
               {selected.status === 'COMPLETED' && selected.invoiceId && (
-                <div className="p-4">
+                <div className="px-4 pt-0 pb-2">
                   <button
                     onClick={() => router.push(`/invoice/restaurant?id=${selected.invoiceId}`)}
                     className="w-full bg-primary text-primary-foreground text-sm font-medium py-2.5 rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
@@ -629,6 +646,37 @@ export default function RestaurantEventsPage() {
                   </button>
                 </div>
               )}
+
+              <div className="p-4 border-t border-border">
+                {!deleteConfirm ? (
+                  <button
+                    onClick={() => setDeleteConfirm(true)}
+                    className="w-full border border-destructive/40 text-destructive text-xs font-medium py-2 rounded-lg hover:bg-destructive/5 transition-colors flex items-center justify-center gap-1.5"
+                  >
+                    <span className="material-symbols-outlined text-[14px]">delete</span>
+                    Delete Event
+                  </button>
+                ) : (
+                  <div className="space-y-2">
+                    <p className="text-xs text-center text-muted-foreground">This cannot be undone. Delete this event?</p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setDeleteConfirm(false)}
+                        className="flex-1 border border-border text-foreground text-xs font-medium py-2 rounded-lg hover:bg-muted transition-colors"
+                      >
+                        Keep
+                      </button>
+                      <button
+                        onClick={handleDelete}
+                        disabled={isDeleting}
+                        className="flex-1 bg-destructive text-destructive-foreground text-xs font-medium py-2 rounded-lg hover:bg-destructive/90 transition-colors disabled:opacity-50"
+                      >
+                        {isDeleting ? 'Deleting...' : 'Delete'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           ) : (
             <div className="hidden lg:flex items-center justify-center text-muted-foreground rounded-xl border border-dashed border-border h-64">

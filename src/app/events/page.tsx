@@ -38,8 +38,10 @@ export default function Events() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editForm, setEditForm] = useState({ guestName: '', guestContact: '', guestEmail: '', notes: '', totalAmount: '' });
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
   const [isActioning, setIsActioning] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [isLinkingRoom, setIsLinkingRoom] = useState(false);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [editingItemForm, setEditingItemForm] = useState({ description: '', quantity: '1', unitPrice: '' });
@@ -238,6 +240,20 @@ export default function Events() {
   const handleViewInvoice = async () => {
     if (!selectedBooking?.invoiceId) return;
     router.push(`/invoice/${selectedBooking.invoiceId}`);
+  };
+
+  const handleDeleteBooking = async () => {
+    if (!selectedBooking) return;
+    setIsDeleting(true);
+    try {
+      const res = await fetch(`/api/conference/bookings/${selectedBooking.id}`, { method: 'DELETE' });
+      if (!res.ok) { toast.error('Failed to delete booking'); return; }
+      toast.success('Booking deleted');
+      setSelectedBooking(null);
+      setIsDeleteModalOpen(false);
+      mutateBookings();
+    } catch { toast.error('Error deleting booking'); }
+    finally { setIsDeleting(false); }
   };
 
   const itemsTotal = (selectedBooking?.items ?? []).reduce((sum: number, i: any) => sum + i.totalPrice, 0);
@@ -681,6 +697,14 @@ export default function Events() {
                   </button>
                 )}
 
+                <button
+                  onClick={() => setIsDeleteModalOpen(true)}
+                  className="w-full py-2 border border-destructive/40 text-destructive rounded-lg text-xs font-medium hover:bg-destructive/5 transition-colors flex items-center justify-center gap-1.5"
+                >
+                  <span className="material-symbols-outlined text-[14px]">delete</span>
+                  Delete Booking
+                </button>
+
                 {/* Invoice Actions */}
                 <div className="space-y-2">
                   {selectedBooking.invoiceId ? (
@@ -763,6 +787,33 @@ export default function Events() {
                 <button type="submit" className="flex-1 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors">Save Changes</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {isDeleteModalOpen && selectedBooking && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/20 backdrop-blur-sm">
+          <div className="w-full max-w-sm bg-card border border-border rounded-xl shadow-xl overflow-hidden">
+            <div className="p-5 border-b border-border flex justify-between items-center">
+              <h3 className="text-sm font-semibold text-foreground">Delete Booking</h3>
+              <button onClick={() => setIsDeleteModalOpen(false)} className="text-muted-foreground hover:text-foreground">
+                <span className="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <p className="text-sm text-muted-foreground">Permanently delete the booking for <span className="font-medium text-foreground">{selectedBooking.guestName}</span>? This cannot be undone.</p>
+              <div className="flex gap-3">
+                <button onClick={() => setIsDeleteModalOpen(false)} className="flex-1 px-4 py-2.5 rounded-lg text-sm text-muted-foreground border border-border hover:bg-accent transition-colors">Back</button>
+                <button
+                  onClick={handleDeleteBooking}
+                  disabled={isDeleting}
+                  className="flex-1 bg-destructive text-destructive-foreground px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-destructive/90 transition-colors disabled:opacity-50"
+                >
+                  {isDeleting ? 'Deleting...' : 'Delete'}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

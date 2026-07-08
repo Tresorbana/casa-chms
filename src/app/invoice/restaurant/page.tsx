@@ -183,23 +183,22 @@ function RestaurantInvoiceContent() {
             </div>
 
             {/* Signature section */}
-            <div className="grid grid-cols-2 gap-8 text-sm">
+            <div className="grid grid-cols-2 gap-12 text-sm">
               {/* Left — hotel rep */}
               <div>
-                <p className="font-medium">DELIVERED BY KAMDINE COMPANY LTD</p>
-                <div className="mt-8 border-b border-black w-48 print:mt-16" />
-                <p className="mt-1">{apiInvoice.createdByName ?? ''}</p>
+                <p className="font-medium uppercase">Delivered by KAMDINE COMPANY LTD</p>
+                <div className="mt-10 border-b border-black print:mt-16" />
+                <p className="mt-1 text-xs">{apiInvoice.createdByName ?? ''}</p>
+                <p className="mt-3 text-xs">Date: ........../........../............</p>
               </div>
 
               {/* Right — client rep */}
               <div>
-                <p className="font-medium">Names &amp; signature</p>
-                <div className="mt-4">
-                  <p>Participant Representative:.................................</p>
-                </div>
-                <div className="mt-6">
-                  <p>Telephone Number:.................................</p>
-                </div>
+                <p className="font-medium uppercase">Received by</p>
+                <div className="mt-10 border-b border-black print:mt-16" />
+                <p className="mt-1 text-xs">Name: .............................................</p>
+                <p className="mt-3 text-xs">Tel: .............................................</p>
+                <p className="mt-3 text-xs">Date: ........../........../............</p>
               </div>
             </div>
           </div>
