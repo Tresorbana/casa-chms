@@ -391,7 +391,7 @@ export default function RestaurantEventsPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <StatusBadge status={selected.status} />
-                  {selected.status !== 'COMPLETED' && selected.status !== 'CANCELLED' && (
+                  {selected.status !== 'CANCELLED' && (
                     <button
                       onClick={() => openEdit(selected)}
                       className="text-muted-foreground hover:text-foreground transition-colors"
