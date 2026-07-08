@@ -35,6 +35,7 @@ export default function Events() {
   const [addItemForm, setAddItemForm] = useState({ description: '', quantity: '1', unitPrice: '' });
   const [isAddingItem, setIsAddingItem] = useState(false);
   const [isGeneratingInvoice, setIsGeneratingInvoice] = useState(false);
+  const [isRegeneratingInvoice, setIsRegeneratingInvoice] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editForm, setEditForm] = useState({ guestName: '', guestContact: '', guestEmail: '', notes: '', totalAmount: '' });
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
@@ -240,6 +241,20 @@ export default function Events() {
   const handleViewInvoice = async () => {
     if (!selectedBooking?.invoiceId) return;
     router.push(`/invoice/${selectedBooking.invoiceId}`);
+  };
+
+  const handleRegenerateInvoice = async () => {
+    if (!selectedBooking) return;
+    setIsRegeneratingInvoice(true);
+    try {
+      const res = await fetch(`/api/conference/${selectedBooking.id}/regenerate-invoice`, { method: 'POST' });
+      if (!res.ok) { toast.error('Failed to regenerate invoice'); return; }
+      const invoice = await res.json();
+      mutateBookings();
+      toast.success('Invoice regenerated');
+      router.push(`/invoice/${invoice.invoiceId}`);
+    } catch { toast.error('Error regenerating invoice'); }
+    finally { setIsRegeneratingInvoice(false); }
   };
 
   const handleDeleteBooking = async () => {
@@ -708,13 +723,23 @@ export default function Events() {
                 {/* Invoice Actions */}
                 <div className="space-y-2">
                   {selectedBooking.invoiceId ? (
-                    <button
-                      onClick={handleViewInvoice}
-                      className="w-full py-2.5 bg-emerald-600 text-white rounded-lg text-xs font-medium hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2"
-                    >
-                      <span className="material-symbols-outlined text-[16px]">receipt_long</span>
-                      View Invoice
-                    </button>
+                    <>
+                      <button
+                        onClick={handleViewInvoice}
+                        className="w-full py-2.5 bg-emerald-600 text-white rounded-lg text-xs font-medium hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">receipt_long</span>
+                        View Invoice
+                      </button>
+                      <button
+                        onClick={handleRegenerateInvoice}
+                        disabled={isRegeneratingInvoice}
+                        className="w-full py-2 border border-border text-foreground rounded-lg text-xs font-medium hover:bg-accent transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
+                      >
+                        <span className="material-symbols-outlined text-[14px]">refresh</span>
+                        {isRegeneratingInvoice ? 'Regenerating...' : 'Regenerate Invoice'}
+                      </button>
+                    </>
                   ) : !['CANCELLED'].includes(selectedBooking.status) ? (
                     <button
                       onClick={handleGenerateInvoice}

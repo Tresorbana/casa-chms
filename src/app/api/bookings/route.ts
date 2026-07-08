@@ -70,16 +70,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid dates provided' }, { status: 400 })
     }
 
-    const todayStart = new Date()
-    todayStart.setHours(0, 0, 0, 0)
-
-    if (newCheckIn < todayStart) {
-      return NextResponse.json({
-        error: 'Invalid check-in date',
-        message: 'Check-in date cannot be in the past.'
-      }, { status: 400 })
-    }
-
     if (newCheckOut <= newCheckIn) {
       return NextResponse.json({
         error: 'Invalid dates',
@@ -118,22 +108,37 @@ export async function POST(request: Request) {
       }, { status: 409 })
     }
 
+    const now = new Date()
+    const start = new Date(checkIn)
+    const end = new Date(checkOut)
+
+    let status: string
+    let checkedInAt: Date | null = null
+    let checkedOutAt: Date | null = null
+    if (end <= now) {
+      status = 'CHECKED_OUT'
+      checkedInAt = start
+      checkedOutAt = end
+    } else if (start <= now) {
+      status = 'CHECKED_IN'
+      checkedInAt = start
+    } else {
+      status = 'CONFIRMED'
+    }
+
     const booking = await prisma.booking.create({
       data: {
         guestId: guest.id,
         roomId: room.id,
-        checkIn: new Date(checkIn),
-        checkOut: new Date(checkOut),
+        checkIn: start,
+        checkOut: end,
         totalAmount: parseFloat(totalAmount),
-        status: 'CONFIRMED',
+        status,
         createdByName,
+        ...(checkedInAt && { checkedInAt }),
+        ...(checkedOutAt && { checkedOutAt }),
       }
     })
-
-    // Update room status to OCCUPIED if the booking is for now/today
-    const now = new Date()
-    const start = new Date(checkIn)
-    const end = new Date(checkOut)
 
     if (start <= now && end >= now) {
       await prisma.room.update({

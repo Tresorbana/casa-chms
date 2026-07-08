@@ -41,6 +41,10 @@ function BookingsContent() {
   const [isActioning, setIsActioning] = useState<string | null>(null);
   const [cancelTarget, setCancelTarget] = useState<any>(null);
   const [cancelReason, setCancelReason] = useState('');
+  const [editPriceTarget, setEditPriceTarget] = useState<any>(null);
+  const [editPriceValue, setEditPriceValue] = useState('');
+  const [isSavingPrice, setIsSavingPrice] = useState(false);
+  const [customTotal, setCustomTotal] = useState<string>('');
 
   const rooms = Array.isArray(roomsData) ? roomsData : [];
   const bookings: any[] = Array.isArray(bookingsData) ? bookingsData : [];
@@ -73,13 +77,15 @@ function BookingsContent() {
           guestName: formData.name, guestEmail: formData.email,
           guestPhone: formData.phone, roomNumber: formData.roomNumber,
           checkIn: formData.checkIn, checkOut: formData.checkOut,
-          nationality: formData.nationality, totalAmount: estimatedTotal,
+          nationality: formData.nationality,
+          totalAmount: customTotal !== '' ? parseFloat(customTotal) : estimatedTotal,
         }),
       });
       if (res.ok) {
         toast.success('Booking created successfully');
         mutateBookings();
         setFormData({ name: '', phone: '', email: '', nationality: '', checkIn: '', checkOut: '', roomType: '', roomNumber: '', adults: 1, children: 0 });
+        setCustomTotal('');
         setActiveView('manage');
       } else {
         const error = await res.json();
@@ -90,6 +96,23 @@ function BookingsContent() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleSavePrice = async () => {
+    if (!editPriceTarget || !editPriceValue) return;
+    setIsSavingPrice(true);
+    try {
+      const res = await fetch(`/api/bookings/${editPriceTarget.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ totalAmount: parseFloat(editPriceValue) }),
+      });
+      if (!res.ok) { toast.error('Failed to update price'); return; }
+      toast.success('Price updated');
+      mutateBookings();
+      setEditPriceTarget(null);
+    } catch { toast.error('Error updating price'); }
+    finally { setIsSavingPrice(false); }
   };
 
   const handleBookingAction = async (bookingId: string, action: string, reason?: string) => {
@@ -252,9 +275,25 @@ function BookingsContent() {
                   )}
 
                   <div className="pt-4 border-t border-border">
-                    <div className="flex justify-between items-center mb-4">
+                    <div className="flex justify-between items-center mb-2">
                       <span className="text-xs text-muted-foreground">Estimated Total</span>
-                      <span className="text-xl font-semibold text-foreground">RWF {estimatedTotal.toLocaleString()}</span>
+                      <span className="text-sm font-medium text-muted-foreground">RWF {estimatedTotal.toLocaleString()}</span>
+                    </div>
+                    <div className="space-y-1.5 mb-4">
+                      <label className={labelClass}>Agreed Price (RWF) — override if negotiated</label>
+                      <input
+                        className={inputClass}
+                        type="number"
+                        min="0"
+                        placeholder={`e.g. ${estimatedTotal || '50000'}`}
+                        value={customTotal}
+                        onChange={e => setCustomTotal(e.target.value)}
+                      />
+                      {customTotal !== '' && (
+                        <p className="text-xs text-primary font-medium">
+                          Will charge: RWF {parseFloat(customTotal || '0').toLocaleString()}
+                        </p>
+                      )}
                     </div>
                     <button
                       className="w-full bg-primary text-primary-foreground text-sm font-medium py-2.5 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
@@ -396,6 +435,13 @@ function BookingsContent() {
                                 <span className="material-symbols-outlined text-[16px]">restore</span>
                               </button>
                             )}
+                            <button
+                              onClick={() => { setEditPriceTarget(b); setEditPriceValue(b.totalAmount?.toString() ?? ''); }}
+                              title="Adjust Price"
+                              className="p-1.5 rounded-lg bg-muted text-muted-foreground hover:bg-accent transition-colors"
+                            >
+                              <span className="material-symbols-outlined text-[16px]">edit</span>
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -404,6 +450,46 @@ function BookingsContent() {
                 </table>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Edit Price Modal */}
+      {editPriceTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/20 backdrop-blur-sm">
+          <div className="w-full max-w-sm bg-card border border-border rounded-xl shadow-xl overflow-hidden">
+            <div className="p-5 border-b border-border flex justify-between items-center">
+              <h3 className="text-sm font-semibold text-foreground">Adjust Price</h3>
+              <button onClick={() => setEditPriceTarget(null)} className="text-muted-foreground hover:text-foreground">
+                <span className="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Booking for <span className="font-medium text-foreground">{editPriceTarget.guest?.name}</span> — Room <span className="font-medium text-foreground">{editPriceTarget.room?.number}</span>
+              </p>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground block mb-1.5">Agreed Amount (RWF)</label>
+                <input
+                  type="number"
+                  min="0"
+                  className={inputClass}
+                  value={editPriceValue}
+                  onChange={e => setEditPriceValue(e.target.value)}
+                  autoFocus
+                />
+              </div>
+              <div className="flex gap-3">
+                <button onClick={() => setEditPriceTarget(null)} className="flex-1 px-4 py-2.5 rounded-lg text-sm text-muted-foreground border border-border hover:bg-accent transition-colors">Cancel</button>
+                <button
+                  onClick={handleSavePrice}
+                  disabled={isSavingPrice || !editPriceValue}
+                  className="flex-1 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
+                >
+                  {isSavingPrice ? 'Saving...' : 'Save Price'}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

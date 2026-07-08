@@ -63,6 +63,7 @@ export default function RestaurantEventsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isAddingItem, setIsAddingItem] = useState(false);
   const [isFinalizing, setIsFinalizing] = useState(false);
+  const [isRegenerating, setIsRegenerating] = useState(false);
   const [cancelConfirm, setCancelConfirm] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -280,6 +281,21 @@ export default function RestaurantEventsPage() {
       await mutate();
     } catch { toast.error('Error updating item'); }
     finally { setIsSavingItem(false); }
+  };
+
+  const handleRegenerate = async () => {
+    if (!selected) return;
+    setIsRegenerating(true);
+    try {
+      const res = await fetch(`/api/restaurant-events/${selected.id}/regenerate-invoice`, { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) { toast.error(data.error || 'Failed to regenerate invoice'); return; }
+      toast.success('Invoice regenerated');
+      await mutate();
+      router.push(`/invoice/restaurant?id=${data.invoiceId}`);
+    } finally {
+      setIsRegenerating(false);
+    }
   };
 
   const handleFinalize = async () => {
@@ -635,14 +651,24 @@ export default function RestaurantEventsPage() {
                 </div>
               )}
 
-              {selected.status === 'COMPLETED' && selected.invoiceId && (
-                <div className="px-4 pt-0 pb-2">
+              {selected.status === 'COMPLETED' && (
+                <div className="px-4 pt-0 pb-2 space-y-2">
+                  {selected.invoiceId && (
+                    <button
+                      onClick={() => router.push(`/invoice/restaurant?id=${selected.invoiceId}`)}
+                      className="w-full bg-primary text-primary-foreground text-sm font-medium py-2.5 rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">receipt_long</span>
+                      View Invoice
+                    </button>
+                  )}
                   <button
-                    onClick={() => router.push(`/invoice/restaurant?id=${selected.invoiceId}`)}
-                    className="w-full bg-primary text-primary-foreground text-sm font-medium py-2.5 rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+                    onClick={handleRegenerate}
+                    disabled={isRegenerating}
+                    className="w-full border border-border text-foreground text-xs font-medium py-2 rounded-lg hover:bg-accent transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
                   >
-                    <span className="material-symbols-outlined text-[18px]">receipt_long</span>
-                    View Invoice
+                    <span className="material-symbols-outlined text-[14px]">refresh</span>
+                    {isRegenerating ? 'Regenerating...' : 'Regenerate Invoice'}
                   </button>
                 </div>
               )}
