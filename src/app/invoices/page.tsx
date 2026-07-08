@@ -122,7 +122,7 @@ export default function InvoicesList() {
                     <td className="px-5 py-4 text-sm font-medium text-foreground">{inv.guestName}</td>
                     <td className="px-5 py-4">
                       <span className="px-2 py-1 bg-muted rounded text-[10px] font-medium uppercase text-muted-foreground">
-                        {inv.type === 'RESTAURANT' ? 'Restaurant' : inv.type}
+                        {inv.type === 'RESTAURANT' ? 'Restaurant' : inv.type === 'ROOM' ? 'Accommodation' : inv.type}
                       </span>
                     </td>
                     <td className="px-5 py-4 text-sm text-foreground">RWF {inv.amount.toLocaleString()}</td>

@@ -46,6 +46,7 @@ model Guest {
   email       String?   @unique
   phone       String?
   nationality String?
+  idNumber    String?
   bookings    Booking[]
 }
 
@@ -67,6 +68,7 @@ model Booking {
   guest              Guest           @relation(fields: [guestId], references: [id])
   room               Room            @relation(fields: [roomId], references: [id])
   serviceCharges     ServiceCharge[]
+  invoice            Invoice?        @relation("BookingInvoice")
 
   @@index([status])
   @@index([roomId])
@@ -218,12 +220,15 @@ model Invoice {
   subInvoices     Invoice[]     @relation("MasterToSub")
   items           InvoiceItem[]
   room            Room?         @relation(fields: [roomId], references: [id])
+  bookingId       String?       @unique
+  booking         Booking?      @relation("BookingInvoice", fields: [bookingId], references: [id], onDelete: SetNull)
 
   @@index([masterInvoiceId])
   @@index([status])
   @@index([date])
   @@index([createdById])
   @@index([roomId])
+  @@index([bookingId])
 }
 
 model InvoiceItem {

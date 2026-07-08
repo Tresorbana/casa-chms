@@ -9,15 +9,26 @@ export async function GET(
   const params = await props.params;
   try {
     const id = params.id;
-    const invoice = await prisma.invoice.findUnique({
-      where: { id },
-      include: {
-        items: true,
-        subInvoices: {
-          include: { items: true },
+    let invoice: any;
+    try {
+      invoice = await prisma.invoice.findUnique({
+        where: { id },
+        include: {
+          items: true,
+          subInvoices: { include: { items: true } },
+          booking: { include: { room: true } },
         },
-      },
-    });
+      });
+    } catch {
+      // Fallback if Prisma client hasn't regenerated yet after schema change
+      invoice = await prisma.invoice.findUnique({
+        where: { id },
+        include: {
+          items: true,
+          subInvoices: { include: { items: true } },
+        },
+      });
+    }
 
     if (!invoice) return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
 

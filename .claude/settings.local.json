@@ -20,7 +20,8 @@
       "Bash(git mv *)",
       "WebSearch",
       "Bash(xxd public/sign-in.jpeg)",
-      "Bash(xargs grep *)"
+      "Bash(xargs grep *)",
+      "Bash(git -C .claude/worktrees/agent-aa6c2a12125d44f8a log --oneline -3)"
     ]
   }
 }

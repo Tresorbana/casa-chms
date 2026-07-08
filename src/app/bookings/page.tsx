@@ -45,10 +45,17 @@ function BookingsContent() {
   const [editPriceValue, setEditPriceValue] = useState('');
   const [isSavingPrice, setIsSavingPrice] = useState(false);
   const [customTotal, setCustomTotal] = useState<string>('');
+  const [showWalkIn, setShowWalkIn] = useState(false);
+  const [walkInData, setWalkInData] = useState({ name: '', phone: '', email: '', idNumber: '', nationality: '', roomNumber: '', checkOut: '', total: '' });
+  const [isSubmittingWalkIn, setIsSubmittingWalkIn] = useState(false);
 
   const rooms = Array.isArray(roomsData) ? roomsData : [];
   const bookings: any[] = Array.isArray(bookingsData) ? bookingsData : [];
   const selectedRoom = rooms.find((room: any) => room.number === formData.roomNumber);
+  const walkInRoom = rooms.find((r: any) => r.number === walkInData.roomNumber) ?? null;
+  const walkInNights = walkInData.checkOut
+    ? Math.max(1, Math.ceil((new Date(walkInData.checkOut).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+    : 0;
 
   useEffect(() => {
     if (formData.checkIn && formData.checkOut && selectedRoom) {
@@ -60,6 +67,11 @@ function BookingsContent() {
     }
     setEstimatedTotal(0);
   }, [formData.checkIn, formData.checkOut, selectedRoom]);
+
+  useEffect(() => {
+    if (!showWalkIn || !walkInRoom || !walkInData.checkOut) return;
+    setWalkInData(p => ({ ...p, total: (walkInRoom.price * walkInNights).toString() }));
+  }, [walkInData.roomNumber, walkInData.checkOut, showWalkIn]);
 
   const handleChange = (e: any) => {
     const { name, value } = e.target;
@@ -95,6 +107,44 @@ function BookingsContent() {
       toast.error('Failed to submit booking');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleWalkIn = async (e: any) => {
+    e.preventDefault();
+    setIsSubmittingWalkIn(true);
+    try {
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          guestName: walkInData.name,
+          guestPhone: walkInData.phone,
+          ...(walkInData.email.trim() && { guestEmail: walkInData.email }),
+          ...(walkInData.idNumber.trim() && { guestIdNumber: walkInData.idNumber }),
+          ...(walkInData.nationality && { nationality: walkInData.nationality }),
+          roomNumber: walkInData.roomNumber,
+          checkIn: new Date().toISOString(),
+          checkOut: walkInData.checkOut,
+          totalAmount: walkInData.total,
+          source: 'WALK_IN',
+        }),
+      });
+      if (res.ok) {
+        toast.success(`Walk-in registered: ${walkInData.name}`);
+        mutateBookings();
+        globalMutate('/api/dashboard');
+        setShowWalkIn(false);
+        setWalkInData({ name: '', phone: '', email: '', idNumber: '', nationality: '', roomNumber: '', checkOut: '', total: '' });
+        setActiveView('manage');
+      } else {
+        const err = await res.json();
+        toast.error(err.message || err.error || 'Failed to register walk-in');
+      }
+    } catch {
+      toast.error('Failed to register walk-in');
+    } finally {
+      setIsSubmittingWalkIn(false);
     }
   };
 
@@ -158,26 +208,35 @@ function BookingsContent() {
         title="Guest Registration"
         description="Create bookings and manage check-in / check-out."
         actions={
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             <button
-              onClick={() => setActiveView('new')}
-              className={`inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg transition-colors ${activeView === 'new' ? 'bg-primary text-primary-foreground' : 'border border-border text-foreground hover:bg-accent'}`}
+              onClick={() => setShowWalkIn(true)}
+              className="inline-flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 transition-colors"
             >
-              <span className="material-symbols-outlined text-[18px]">add</span>
-              New Booking
+              <span className="material-symbols-outlined text-[16px]">directions_walk</span>
+              Walk-in
             </button>
-            <button
-              onClick={() => setActiveView('manage')}
-              className={`inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg transition-colors ${activeView === 'manage' ? 'bg-primary text-primary-foreground' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
-            >
-              <span className="material-symbols-outlined text-[18px]">table_rows</span>
-              Manage Bookings
-              {bookings.length > 0 && (
-                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${activeView === 'manage' ? 'bg-white/20' : 'bg-white/25'}`}>
-                  {bookings.length}
-                </span>
-              )}
-            </button>
+            <div className="inline-flex rounded-lg border border-border bg-muted/50 p-0.5">
+              <button
+                onClick={() => setActiveView('new')}
+                className={`inline-flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-md transition-colors ${activeView === 'new' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+              >
+                <span className="material-symbols-outlined text-[16px]">add</span>
+                New Booking
+              </button>
+              <button
+                onClick={() => setActiveView('manage')}
+                className={`inline-flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-md transition-colors ${activeView === 'manage' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+              >
+                <span className="material-symbols-outlined text-[16px]">table_rows</span>
+                Manage
+                {bookings.length > 0 && (
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground">
+                    {bookings.length}
+                  </span>
+                )}
+              </button>
+            </div>
           </div>
         }
       />
@@ -198,15 +257,15 @@ function BookingsContent() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
                       <label className={labelClass}>Full Name</label>
-                      <input className={inputClass} placeholder="John Doe" type="text" name="name" value={formData.name} onChange={handleChange} required />
+                      <input className={inputClass} placeholder="John Doe" type="text" name="name" autoComplete="off" value={formData.name} onChange={handleChange} required />
                     </div>
                     <div className="space-y-1.5">
                       <label className={labelClass}>Phone Number</label>
-                      <input className={inputClass} placeholder="+250 788 000 000" type="tel" name="phone" value={formData.phone} onChange={handleChange} required />
+                      <input className={inputClass} placeholder="+250 788 000 000" type="tel" name="phone" autoComplete="off" value={formData.phone} onChange={handleChange} required />
                     </div>
                     <div className="space-y-1.5">
                       <label className={labelClass}>Email Address</label>
-                      <input className={inputClass} placeholder="guest@example.com" type="email" name="email" value={formData.email} onChange={handleChange} required />
+                      <input className={inputClass} placeholder="guest@example.com" type="email" name="email" autoComplete="off" value={formData.email} onChange={handleChange} required />
                     </div>
                     <div className="space-y-1.5">
                       <label className={labelClass}>Nationality</label>
@@ -367,7 +426,12 @@ function BookingsContent() {
                     {filteredBookings.map((b: any) => (
                       <tr key={b.id} className="hover:bg-muted/30 transition-colors">
                         <td className="px-4 py-3">
-                          <p className="text-sm font-medium text-foreground">{b.guest?.name}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-medium text-foreground">{b.guest?.name}</p>
+                            {b.source === 'WALK_IN' && (
+                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 uppercase tracking-wide">Walk-in</span>
+                            )}
+                          </div>
                           <p className="text-xs text-muted-foreground">{b.guest?.phone || b.guest?.email || '—'}</p>
                         </td>
                         <td className="px-4 py-3 text-sm text-foreground">
@@ -442,6 +506,15 @@ function BookingsContent() {
                             >
                               <span className="material-symbols-outlined text-[16px]">edit</span>
                             </button>
+                            {b.invoice?.id && (
+                              <button
+                                onClick={() => router.push(`/invoice/${b.invoice.id}`)}
+                                title="View Invoice"
+                                className="p-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
+                              >
+                                <span className="material-symbols-outlined text-[16px]">receipt_long</span>
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -490,6 +563,112 @@ function BookingsContent() {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Walk-in Registration Modal */}
+      {showWalkIn && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/20 backdrop-blur-sm">
+          <div className="w-full max-w-lg bg-card border border-border rounded-xl shadow-xl overflow-hidden">
+            <div className="p-5 border-b border-border flex justify-between items-center">
+              <div>
+                <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <span className="material-symbols-outlined text-[18px] text-purple-600">directions_walk</span>
+                  Walk-in Guest
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">Guest arriving now — no advance booking</p>
+              </div>
+              <button onClick={() => setShowWalkIn(false)} className="text-muted-foreground hover:text-foreground">
+                <span className="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            </div>
+            <form onSubmit={handleWalkIn} className="p-5 space-y-4 max-h-[72vh] overflow-y-auto">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="col-span-2 space-y-1.5">
+                  <label className={labelClass}>Full Name <span className="text-destructive">*</span></label>
+                  <input className={inputClass} type="text" autoComplete="off" placeholder="Guest full name"
+                    value={walkInData.name} onChange={e => setWalkInData(p => ({ ...p, name: e.target.value }))} required />
+                </div>
+                <div className="space-y-1.5">
+                  <label className={labelClass}>Phone <span className="text-destructive">*</span></label>
+                  <input className={inputClass} type="tel" autoComplete="off" placeholder="+250 788 000 000"
+                    value={walkInData.phone} onChange={e => setWalkInData(p => ({ ...p, phone: e.target.value }))} required />
+                </div>
+                <div className="space-y-1.5">
+                  <label className={labelClass}>ID / Passport No. <span className="text-destructive">*</span></label>
+                  <input className={inputClass} type="text" autoComplete="off" placeholder="National ID or passport"
+                    value={walkInData.idNumber} onChange={e => setWalkInData(p => ({ ...p, idNumber: e.target.value }))} required />
+                </div>
+                <div className="space-y-1.5">
+                  <label className={labelClass}>Email <span className="text-xs font-normal text-muted-foreground">(optional)</span></label>
+                  <input className={inputClass} type="email" autoComplete="off" placeholder="guest@example.com"
+                    value={walkInData.email} onChange={e => setWalkInData(p => ({ ...p, email: e.target.value }))} />
+                </div>
+                <div className="space-y-1.5">
+                  <label className={labelClass}>Nationality</label>
+                  <select className={inputClass} value={walkInData.nationality} onChange={e => setWalkInData(p => ({ ...p, nationality: e.target.value }))}>
+                    <option value="">Select country...</option>
+                    {countries.map((c) => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div className="space-y-1.5">
+                  <label className={labelClass}>Room Number <span className="text-destructive">*</span></label>
+                  <input className={inputClass} type="text" autoComplete="off" placeholder="e.g. 101"
+                    value={walkInData.roomNumber} onChange={e => setWalkInData(p => ({ ...p, roomNumber: e.target.value }))} required />
+                </div>
+                <div className="space-y-1.5">
+                  <label className={labelClass}>Check-out Date <span className="text-destructive">*</span></label>
+                  <input className={inputClass} type="date" min={new Date().toISOString().split('T')[0]}
+                    value={walkInData.checkOut} onChange={e => setWalkInData(p => ({ ...p, checkOut: e.target.value }))} required />
+                </div>
+                {walkInRoom ? (
+                  <div className="col-span-2 rounded-lg bg-muted/40 border border-border px-4 py-3 flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-medium text-foreground">Room {walkInRoom.number} · {walkInRoom.type}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">RWF {Number(walkInRoom.price).toLocaleString()}/night</p>
+                    </div>
+                    {walkInNights > 0 && (
+                      <p className="text-sm font-semibold text-primary">
+                        {walkInNights} night{walkInNights !== 1 ? 's' : ''} = RWF {(walkInRoom.price * walkInNights).toLocaleString()}
+                      </p>
+                    )}
+                  </div>
+                ) : walkInData.roomNumber ? (
+                  <div className="col-span-2 rounded-lg bg-amber-50 border border-amber-200 px-4 py-2.5 text-xs text-amber-700">
+                    Room &quot;{walkInData.roomNumber}&quot; not found — check the room number.
+                  </div>
+                ) : null}
+                <div className="col-span-2 space-y-1.5">
+                  <label className={labelClass}>Agreed Amount (RWF) <span className="text-destructive">*</span></label>
+                  <input className={inputClass} type="number" min="0" autoComplete="off" placeholder="e.g. 50000"
+                    value={walkInData.total} onChange={e => setWalkInData(p => ({ ...p, total: e.target.value }))} required />
+                  {walkInRoom && walkInNights > 0 && walkInData.total && Number(walkInData.total) !== walkInRoom.price * walkInNights && (
+                    <p className="text-xs text-amber-600">Differs from room rate estimate — confirm this is correct.</p>
+                  )}
+                </div>
+              </div>
+              <div className="rounded-lg bg-purple-50 border border-purple-200 px-4 py-2.5 text-xs text-purple-700 flex items-center gap-2">
+                <span className="material-symbols-outlined text-[16px]">info</span>
+                Room will be marked <strong>Occupied</strong> immediately and an invoice will be generated.
+              </div>
+              <div className="flex gap-3 pt-1">
+                <button type="button" onClick={() => setShowWalkIn(false)} className="flex-1 px-4 py-2.5 rounded-lg text-sm text-muted-foreground border border-border hover:bg-accent transition-colors">
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingWalkIn}
+                  className="flex-1 bg-purple-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isSubmittingWalkIn ? (
+                    <><span className="material-symbols-outlined text-[16px] animate-spin">refresh</span>Registering...</>
+                  ) : (
+                    <><span className="material-symbols-outlined text-[16px]">how_to_reg</span>Register Walk-in</>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
