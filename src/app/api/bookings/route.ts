@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { getSession } from '@/lib/auth'
+import { recordActivity } from '@/lib/activity-log'
 
 export async function GET(request: Request) {
   try {
@@ -166,6 +167,25 @@ export async function POST(request: Request) {
     if (bookingStatus === 'CHECKED_IN') {
       await prisma.room.update({ where: { id: room.id }, data: { status: 'OCCUPIED' } })
     }
+
+    await recordActivity({
+      user: session?.user,
+      action: isWalkIn ? 'BOOKING_WALK_IN' : 'BOOKING_CREATED',
+      category: 'BOOKINGS',
+      entity: 'Booking',
+      entityId: booking.id,
+      method: 'POST',
+      path: '/api/bookings',
+      metadata: {
+        guestName,
+        roomNumber,
+        nights,
+        totalAmount: amount,
+        source: source || 'DIRECT',
+        status: bookingStatus,
+      },
+      request,
+    })
 
     return NextResponse.json(booking)
   } catch (error) {

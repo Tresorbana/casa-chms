@@ -30,6 +30,7 @@ export function isChromelessRoute(pathname: string) {
   return (
     pathname.startsWith('/invoice/restaurant') ||
     pathname.startsWith('/invoice/preview') ||
+    pathname.startsWith('/supervisor') ||
     /^\/invoice\/[^/]+/.test(pathname)
   );
 }

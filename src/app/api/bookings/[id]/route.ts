@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { getSession } from '@/lib/auth';
+import { recordActivity } from '@/lib/activity-log';
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -24,6 +26,7 @@ export async function GET(_req: Request, { params }: Params) {
 export async function PUT(request: Request, { params }: Params) {
   const { id } = await params;
   try {
+    const session = await getSession();
     const body = await request.json();
     const { checkIn, checkOut, totalAmount, source } = body;
 
@@ -36,6 +39,23 @@ export async function PUT(request: Request, { params }: Params) {
         ...(source && { source }),
       },
       include: { guest: true, room: true },
+    });
+
+    await recordActivity({
+      user: session?.user,
+      action: 'BOOKING_UPDATED',
+      category: 'BOOKINGS',
+      entity: 'Booking',
+      entityId: booking.id,
+      method: 'PUT',
+      path: `/api/bookings/${id}`,
+      metadata: {
+        guestName: booking.guest?.name,
+        roomNumber: booking.room?.number,
+        totalAmount: booking.totalAmount,
+        changed: { checkIn, checkOut, totalAmount, source },
+      },
+      request,
     });
 
     return NextResponse.json(booking);
@@ -120,6 +140,24 @@ export async function PATCH(request: Request, { params }: Params) {
         ? [prisma.room.update({ where: { id: existing.roomId }, data: roomData })]
         : []),
     ]);
+
+    const session = await getSession();
+    await recordActivity({
+      user: session?.user,
+      action: `BOOKING_${action}`,
+      category: 'BOOKINGS',
+      entity: 'Booking',
+      entityId: booking.id,
+      method: 'PATCH',
+      path: `/api/bookings/${id}`,
+      metadata: {
+        guestName: booking.guest?.name,
+        roomNumber: booking.room?.number,
+        newStatus: booking.status,
+        cancellationReason: cancellationReason ?? undefined,
+      },
+      request,
+    });
 
     return NextResponse.json(booking);
   } catch (err) {

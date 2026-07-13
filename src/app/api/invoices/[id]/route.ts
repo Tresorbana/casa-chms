@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { isValidPaymentMethod } from '@/lib/payment-methods';
+import { getSession } from '@/lib/auth';
+import { recordActivity } from '@/lib/activity-log';
 
 export async function GET(
   request: Request,
@@ -97,6 +99,25 @@ export async function PATCH(
       where: { id },
       data,
       include: { items: true, subInvoices: { include: { items: true } } },
+    });
+
+    const session = await getSession();
+    await recordActivity({
+      user: session?.user,
+      action: data.status === 'PAID' ? 'INVOICE_PAID' : data.status === 'UNPAID' ? 'INVOICE_UNPAID' : 'INVOICE_UPDATED',
+      category: 'INVOICES',
+      entity: 'Invoice',
+      entityId: invoice.id,
+      method: 'PATCH',
+      path: `/api/invoices/${id}`,
+      metadata: {
+        guestName: invoice.guestName,
+        amount: invoice.amount,
+        type: invoice.type,
+        status: invoice.status,
+        paymentMethod: invoice.paymentMethod,
+      },
+      request,
     });
 
     return NextResponse.json(invoice);

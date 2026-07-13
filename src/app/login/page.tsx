@@ -25,6 +25,15 @@ export default function Login() {
 
       if (res.ok) {
         toast.success('Signed in successfully');
+        // Route supervisor straight to their console
+        try {
+          const meRes = await fetch('/api/auth/me');
+          const me = await meRes.json();
+          if (me?.user?.role === 'SUPERVISOR') {
+            window.location.href = '/supervisor';
+            return;
+          }
+        } catch { /* fall through */ }
         window.location.href = '/';
       } else {
         const responseData = await res.json();

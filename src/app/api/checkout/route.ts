@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { isValidPaymentMethod } from '@/lib/payment-methods';
+import { getSession } from '@/lib/auth';
+import { recordActivity } from '@/lib/activity-log';
 
 function startOfToday() {
   const d = new Date();
@@ -388,6 +390,26 @@ export async function POST(request: Request) {
         data: { status: 'CLEANING' },
       });
     }
+
+    const session = await getSession();
+    await recordActivity({
+      user: session?.user,
+      action: markPaid ? 'CHECKOUT_PAID' : 'CHECKOUT_INVOICE_ONLY',
+      category: 'CHECKOUT',
+      entity: 'Invoice',
+      entityId: masterInvoice.id,
+      method: 'POST',
+      path: '/api/checkout',
+      metadata: {
+        roomNumber: room.number,
+        guestName: folio.guestName,
+        nights: folio.nights,
+        total: consolidatedTotal,
+        paymentMethod: markPaid ? paymentMethod : null,
+        finalized: finalize,
+      },
+      request,
+    });
 
     return NextResponse.json({
       success: true,

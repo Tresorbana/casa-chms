@@ -26,7 +26,11 @@
       "PowerShell(npx tsc --noEmit 2>&1 | Select-Object -First 100)",
       "PowerShell(npx eslint src/app/bookings/page.tsx src/app/api/bookings/route.ts src/app/api/checkout/route.ts src/components/invoice/MarkPaidDialog.tsx src/components/invoice/InvoiceToolbar.tsx src/app/invoice/[id]/page.tsx src/app/invoices/page.tsx src/app/invoice/restaurant/page.tsx src/app/invoice/preview/page.tsx src/app/api/invoices/[id]/route.ts 2>&1 | Select-Object -First 60)",
       "PowerShell(npx next lint --file src/app/bookings/page.tsx --file src/app/api/bookings/route.ts --file src/app/api/checkout/route.ts --file src/components/invoice/MarkPaidDialog.tsx 2>&1 | Select-Object -First 40)",
-      "PowerShell(npx tsc --noEmit 2>&1 | Select-Object -Last 20)"
+      "PowerShell(npx tsc --noEmit 2>&1 | Select-Object -Last 20)",
+      "PowerShell(npx prisma generate 2>&1 | Select-Object -Last 10)",
+      "PowerShell(npx tsc --noEmit 2>&1 | Select-Object -First 60)",
+      "PowerShell(npx tsc --noEmit 2>&1)",
+      "PowerShell(npx prisma db push --skip-generate 2>&1 | Select-Object -Last 20)"
     ]
   }
 }

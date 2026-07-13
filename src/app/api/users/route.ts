@@ -2,10 +2,15 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { getSession } from '@/lib/auth'
 import bcrypt from 'bcryptjs'
-import { canAssignRole, normalizeRole } from '@/lib/rbac'
+import { canAssignRole, normalizeRole, HIDDEN_ROLES } from '@/lib/rbac'
+import { recordActivity } from '@/lib/activity-log'
 
 function canManageUsers(role: string | null | undefined) {
-    return ['ADMIN', 'SUPER_ADMIN'].includes(normalizeRole(role) ?? '');
+    return ['ADMIN', 'SUPER_ADMIN', 'SUPERVISOR'].includes(normalizeRole(role) ?? '');
+}
+
+function isSupervisor(role: string | null | undefined) {
+    return normalizeRole(role) === 'SUPERVISOR';
 }
 
 export async function GET() {
@@ -15,7 +20,9 @@ export async function GET() {
     }
 
     try {
+        const viewerIsSupervisor = isSupervisor(session.user.role)
         const users = await prisma.user.findMany({
+            where: viewerIsSupervisor ? undefined : { role: { notIn: HIDDEN_ROLES as unknown as string[] } },
             select: {
                 id: true,
                 email: true,
@@ -61,6 +68,18 @@ export async function POST(request: Request) {
             },
         })
 
+        await recordActivity({
+            user: session.user,
+            action: 'USER_CREATED',
+            category: 'USERS',
+            entity: 'User',
+            entityId: user.id,
+            method: 'POST',
+            path: '/api/users',
+            metadata: { email, name, role: normalizedRole },
+            request,
+        })
+
         return NextResponse.json(user)
     } catch (error) {
         return NextResponse.json({ error: 'Failed to create user' }, { status: 500 })
@@ -79,6 +98,14 @@ export async function PATCH(request: Request) {
 
         if (!id) {
             return NextResponse.json({ error: 'User id is required' }, { status: 400 })
+        }
+
+        // Non-supervisors cannot touch supervisor accounts at all
+        if (!isSupervisor(session.user.role)) {
+            const target = await prisma.user.findUnique({ where: { id }, select: { role: true } })
+            if (target && (HIDDEN_ROLES as unknown as string[]).includes(target.role)) {
+                return NextResponse.json({ error: 'User not found' }, { status: 404 })
+            }
         }
 
         const normalizedRole = role !== undefined ? normalizeRole(role) : undefined
@@ -106,6 +133,18 @@ export async function PATCH(request: Request) {
                 role: true,
                 createdAt: true,
             },
+        })
+
+        await recordActivity({
+            user: session.user,
+            action: 'USER_UPDATED',
+            category: 'USERS',
+            entity: 'User',
+            entityId: user.id,
+            method: 'PATCH',
+            path: '/api/users',
+            metadata: { updates: Object.keys(updates) },
+            request,
         })
 
         return NextResponse.json(user)

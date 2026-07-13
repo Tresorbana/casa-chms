@@ -7,6 +7,7 @@ export const ROLES = [
   'FINANCE',
   'ADMIN',
   'SUPER_ADMIN',
+  'SUPERVISOR',
 ] as const;
 
 export type Role = (typeof ROLES)[number];
@@ -20,17 +21,22 @@ type RouteRule = {
 
 const AUTHENTICATED_ROLES: Role[] = [...ROLES];
 
-const ADMIN_ROLES: Role[] = ['ADMIN', 'SUPER_ADMIN'];
-const FINANCE_ROLES: Role[] = ['FINANCE', 'ADMIN', 'SUPER_ADMIN'];
-const RECEPTION_ROLES: Role[] = ['RECEPTIONIST', 'ADMIN', 'SUPER_ADMIN'];
-const OPS_ROLES: Role[] = ['RECEPTIONIST', 'WAITER', 'BARMAN', 'STORE_KEEPER', 'FINANCE', 'ADMIN', 'SUPER_ADMIN'];
-const SERVICE_ROLES: Role[] = ['BARMAN', 'ADMIN', 'SUPER_ADMIN'];
-const MENU_ROLES: Role[] = ['WAITER', 'BARMAN', 'ADMIN', 'SUPER_ADMIN'];
+const ADMIN_ROLES: Role[] = ['ADMIN', 'SUPER_ADMIN', 'SUPERVISOR'];
+const FINANCE_ROLES: Role[] = ['FINANCE', 'ADMIN', 'SUPER_ADMIN', 'SUPERVISOR'];
+const RECEPTION_ROLES: Role[] = ['RECEPTIONIST', 'ADMIN', 'SUPER_ADMIN', 'SUPERVISOR'];
+const OPS_ROLES: Role[] = ['RECEPTIONIST', 'WAITER', 'BARMAN', 'STORE_KEEPER', 'FINANCE', 'ADMIN', 'SUPER_ADMIN', 'SUPERVISOR'];
+const SERVICE_ROLES: Role[] = ['BARMAN', 'ADMIN', 'SUPER_ADMIN', 'SUPERVISOR'];
+const MENU_ROLES: Role[] = ['WAITER', 'BARMAN', 'ADMIN', 'SUPER_ADMIN', 'SUPERVISOR'];
+const SUPERVISOR_ROLES: Role[] = ['SUPERVISOR'];
 
 const ROUTE_RULES: RouteRule[] = [
   { pattern: /^\/login$/, public: true },
   { pattern: /^\/api\/auth\/(login|logout)$/, public: true, methods: ['POST'] },
   { pattern: /^\/api\/inquiries$/, public: true, methods: ['POST', 'OPTIONS'] },
+  { pattern: /^\/api\/supervisor\/bootstrap$/, public: true },
+
+  { pattern: /^\/supervisor(?:\/.*)?$/, roles: SUPERVISOR_ROLES },
+  { pattern: /^\/api\/supervisor(?:\/.*)?$/, roles: SUPERVISOR_ROLES },
 
   { pattern: /^\/api\/users(?:\/.*)?$/, roles: ADMIN_ROLES },
 
@@ -86,7 +92,15 @@ const ROLE_ORDER: Record<Role, number> = {
   FINANCE: 2,
   ADMIN: 3,
   SUPER_ADMIN: 4,
+  SUPERVISOR: 99,
 };
+
+export const HIDDEN_ROLES: Role[] = ['SUPERVISOR'];
+
+export function isHiddenRole(role: string | null | undefined) {
+  const normalized = normalizeRole(role);
+  return normalized ? HIDDEN_ROLES.includes(normalized) : false;
+}
 
 export function normalizeRole(role: string | null | undefined): Role | null {
   const normalized = role?.trim().toUpperCase();
@@ -99,6 +113,8 @@ export function canAssignRole(actorRole: string | null | undefined, targetRole: 
 
   if (!actor) return false;
   if (!target) return false;
+  if (target === 'SUPERVISOR') return actor === 'SUPERVISOR';
+  if (actor === 'SUPERVISOR') return true;
   if (actor === 'SUPER_ADMIN') return true;
   if (actor === 'ADMIN') return true;
   return false;

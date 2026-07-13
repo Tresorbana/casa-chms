@@ -9,13 +9,41 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  name      String?
-  role      String   @default("STAFF")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String        @id @default(cuid())
+  email        String        @unique
+  password     String
+  name         String?
+  role         String        @default("STAFF")
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  activityLogs ActivityLog[]
+
+  @@index([role])
+}
+
+model ActivityLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  userName   String?
+  userRole   String?
+  action     String
+  category   String   @default("GENERAL")
+  entity     String?
+  entityId   String?
+  method     String?
+  path       String?
+  metadata   Json?
+  ipAddress  String?
+  userAgent  String?
+  status     String   @default("OK")
+  createdAt  DateTime @default(now())
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([category])
+  @@index([action])
+  @@index([entity])
+  @@index([createdAt])
 }
 
 model Floor {
