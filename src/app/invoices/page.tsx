@@ -183,8 +183,6 @@ export default function InvoicesList() {
         open={Boolean(payDialogInvoice)}
         onClose={() => setPayDialogInvoice(null)}
         onConfirm={handleMarkPaid}
-        requireSignature={payDialogInvoice?.type === 'RESTAURANT'}
-        hasSignature={Boolean(payDialogInvoice?.guestSignature)}
       />
     </div>
   );

@@ -64,8 +64,6 @@ function PreviewContent() {
         invoiceId={invoice.id}
         status={displayStatus}
         paymentMethod={invoice.paymentMethod}
-        guestSignature={invoice.guestSignature}
-        invoiceType={invoice.type}
         onStatusChange={() => mutate()}
       />
 

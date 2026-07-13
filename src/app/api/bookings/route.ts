@@ -151,11 +151,12 @@ export async function POST(request: Request) {
         bookingId: booking.id,
         roomId: room.id,
         createdByName,
+        guestSignature: guestName,
         items: {
           create: [{
             description: `Room ${room.number} (${room.type}) — ${nights} night${nights !== 1 ? 's' : ''}`,
-            quantity: 1,
-            price: amount,
+            quantity: nights,
+            price: amount / nights,
           }],
         },
       },

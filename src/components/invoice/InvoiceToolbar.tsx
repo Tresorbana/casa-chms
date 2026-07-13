@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { formatPaymentMethod, type PaymentMethodId } from '@/lib/payment-methods';
@@ -10,8 +10,6 @@ type InvoiceToolbarProps = {
   invoiceId: string;
   status: string;
   paymentMethod?: string | null;
-  guestSignature?: string | null;
-  invoiceType?: string;
   backLabel?: string;
   backHref?: string;
   roomCharge?: string | null;
@@ -22,15 +20,12 @@ export function InvoiceToolbar({
   invoiceId,
   status,
   paymentMethod,
-  guestSignature,
-  invoiceType,
   backLabel = 'Back to Invoices',
   backHref = '/invoices',
   roomCharge,
   onStatusChange,
 }: InvoiceToolbarProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [currentStatus, setCurrentStatus] = useState(status);
   const [currentMethod, setCurrentMethod] = useState(paymentMethod);
   const [showPayDialog, setShowPayDialog] = useState(false);
@@ -108,8 +103,6 @@ export function InvoiceToolbar({
         open={showPayDialog}
         onClose={() => setShowPayDialog(false)}
         onConfirm={handleMarkPaid}
-        requireSignature={invoiceType === 'RESTAURANT'}
-        hasSignature={Boolean(guestSignature)}
       />
     </>
   );

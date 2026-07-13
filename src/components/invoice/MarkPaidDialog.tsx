@@ -7,26 +7,19 @@ type MarkPaidDialogProps = {
   open: boolean;
   onClose: () => void;
   onConfirm: (paymentMethod: PaymentMethodId) => Promise<void>;
-  requireSignature?: boolean;
-  hasSignature?: boolean;
 };
 
 export function MarkPaidDialog({
   open,
   onClose,
   onConfirm,
-  requireSignature = false,
-  hasSignature = false,
 }: MarkPaidDialogProps) {
   const [method, setMethod] = useState<PaymentMethodId>('CASH');
   const [submitting, setSubmitting] = useState(false);
 
   if (!open) return null;
 
-  const canSubmit = !requireSignature || hasSignature;
-
   const handleConfirm = async () => {
-    if (!canSubmit) return;
     setSubmitting(true);
     try {
       await onConfirm(method);
@@ -44,11 +37,6 @@ export function MarkPaidDialog({
           <p className="text-xs text-muted-foreground mt-0.5">Select how the guest paid to generate the final invoice.</p>
         </div>
         <div className="p-5 space-y-2">
-          {requireSignature && !hasSignature && (
-            <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-2">
-              Client signature is required on the guest copy before marking as paid.
-            </p>
-          )}
           {PAYMENT_METHODS.map((pm) => (
             <label
               key={pm.id}
@@ -81,7 +69,7 @@ export function MarkPaidDialog({
           <button
             type="button"
             onClick={handleConfirm}
-            disabled={!canSubmit || submitting}
+            disabled={submitting}
             className="flex-1 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
           >
             {submitting ? 'Saving...' : 'Confirm & finalize'}

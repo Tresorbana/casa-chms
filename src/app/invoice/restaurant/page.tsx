@@ -80,8 +80,6 @@ function RestaurantInvoiceContent() {
         invoiceId={apiInvoice.id}
         status={displayStatus}
         paymentMethod={displayMethod}
-        guestSignature={apiInvoice.guestSignature}
-        invoiceType="RESTAURANT"
         backLabel="Back to Events"
         backHref="/pos/events"
         roomCharge={isRoomCharge ? (roomNumber ?? 'Room') : null}

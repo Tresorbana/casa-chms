@@ -37,6 +37,7 @@ function buildFolio(
     id: string;
     checkIn: Date;
     checkOut: Date;
+    totalAmount: number;
     guest: { name: string; email: string | null; phone: string | null };
     serviceCharges: Array<{
       id: string;
@@ -48,13 +49,15 @@ function buildFolio(
   now = new Date()
 ) {
   const nights = nightsBetween(booking.checkIn, now);
-  const roomLineTotal = room.price * nights;
+  const plannedNights = nightsBetween(booking.checkIn, booking.checkOut);
+  const nightlyRate = booking.totalAmount / plannedNights;
+  const roomLineTotal = nightlyRate * nights;
 
   const lineItems: Array<{ description: string; quantity: number; price: number }> = [
     {
       description: `Room ${room.number} (${room.type}) — ${nights} night${nights !== 1 ? 's' : ''}`,
       quantity: nights,
-      price: room.price,
+      price: nightlyRate,
     },
   ];
 
@@ -155,7 +158,9 @@ async function listOccupiedRooms() {
 
     seenRoomIds.add(room.id);
     const nights = nightsBetween(booking.checkIn, now);
-    const roomLineTotal = room.price * nights;
+    const plannedNights = nightsBetween(booking.checkIn, booking.checkOut);
+    const nightlyRate = booking.totalAmount / plannedNights;
+    const roomLineTotal = nightlyRate * nights;
     const servicesTotal = booking.serviceCharges.reduce((s, c) => s + c.totalPrice, 0);
 
     occupied.push({
@@ -341,6 +346,7 @@ export async function POST(request: Request) {
         status: markPaid ? 'PAID' : 'UNPAID',
         paymentMethod: markPaid ? paymentMethod : null,
         paidAt: markPaid ? now : null,
+        guestSignature: folio.guestName,
         items: {
           create: allLineItems,
         },

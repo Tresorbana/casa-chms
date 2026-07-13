@@ -80,15 +80,12 @@ export async function PATCH(
             { status: 400 }
           );
         }
-        if (existing.type === 'RESTAURANT' && !existing.guestSignature && !data.guestSignature) {
-          return NextResponse.json(
-            { error: 'Client signature is required before marking this invoice as paid' },
-            { status: 400 }
-          );
-        }
         data.status = 'PAID';
         data.paymentMethod = paymentMethod;
         data.paidAt = new Date();
+        if (!existing.guestSignature && !data.guestSignature) {
+          data.guestSignature = existing.guestName;
+        }
       } else {
         data.status = 'UNPAID';
         data.paymentMethod = null;

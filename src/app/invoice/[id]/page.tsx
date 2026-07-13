@@ -13,32 +13,10 @@ function InvoicePageContent() {
   const router = useRouter();
   const [status, setStatus] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
-  const [showSignDialog, setShowSignDialog] = useState(false);
-  const [sigName, setSigName] = useState('');
-  const [isSigning, setIsSigning] = useState(false);
   const { data: invoice, isLoading, mutate } = useSWR(
     params.id ? `/api/invoices/${params.id}` : null,
     fetcher
   );
-
-  const handleRecordSign = async () => {
-    if (!sigName.trim() || !invoice) return;
-    setIsSigning(true);
-    try {
-      const res = await fetch(`/api/invoices/${invoice.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ guestSignature: sigName.trim() }),
-      });
-      if (res.ok) {
-        await mutate();
-        setShowSignDialog(false);
-        setSigName('');
-      }
-    } finally {
-      setIsSigning(false);
-    }
-  };
 
   useEffect(() => {
     if (invoice?.type === 'RESTAURANT') {
@@ -104,8 +82,6 @@ function InvoicePageContent() {
         invoiceId={invoice.id}
         status={displayStatus}
         paymentMethod={displayMethod}
-        guestSignature={invoice.guestSignature}
-        invoiceType={invoice.type}
         backLabel="Back to Invoices"
         backHref="/invoices"
         onStatusChange={(s, m) => {
@@ -239,84 +215,15 @@ function InvoicePageContent() {
               <div>
                 <p className="font-medium uppercase">Received by</p>
                 <div className="mt-10 border-b border-black print:mt-16" />
-                {invoice.guestSignature ? (
-                  <p className="mt-1 text-xs font-semibold text-emerald-700">✓ {invoice.guestSignature}</p>
-                ) : (
-                  <p className="mt-1 text-xs">Name: .............................................</p>
-                )}
+                <p className="mt-1 text-xs font-semibold uppercase">{invoice.guestName}</p>
                 <p className="mt-3 text-xs">Tel: .............................................</p>
                 <p className="mt-3 text-xs">Date: ........../........../............</p>
               </div>
             </div>
 
-            {/* Signature capture button — screen only */}
-            <div className="no-print mt-6 flex justify-end">
-              {invoice.guestSignature ? (
-                <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full">
-                  <span className="material-symbols-outlined text-[14px]">verified</span>
-                  Client signed — {invoice.guestSignature}
-                </span>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => { setSigName(invoice.guestName ?? ''); setShowSignDialog(true); }}
-                  className="inline-flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg border border-border text-foreground hover:bg-accent transition-colors"
-                >
-                  <span className="material-symbols-outlined text-[16px]">draw</span>
-                  Record client signature
-                </button>
-              )}
-            </div>
-
           </div>
         </div>
       </div>
-
-      {/* Signature dialog */}
-      {showSignDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/20 backdrop-blur-sm">
-          <div className="w-full max-w-sm bg-card border border-border rounded-xl shadow-xl overflow-hidden">
-            <div className="p-5 border-b border-border">
-              <h3 className="text-sm font-semibold text-foreground">Record client signature</h3>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Enter the guest&apos;s name to confirm they signed the invoice.
-              </p>
-            </div>
-            <div className="p-5 space-y-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground">Guest name</label>
-                <input
-                  type="text"
-                  autoComplete="off"
-                  className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
-                  placeholder="Full name as signed"
-                  value={sigName}
-                  onChange={e => setSigName(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && handleRecordSign()}
-                  autoFocus
-                />
-              </div>
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => { setShowSignDialog(false); setSigName(''); }}
-                  className="flex-1 px-4 py-2.5 rounded-lg text-sm text-muted-foreground border border-border hover:bg-accent transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleRecordSign}
-                  disabled={isSigning || !sigName.trim()}
-                  className="flex-1 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
-                >
-                  {isSigning ? 'Saving...' : 'Confirm signed'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

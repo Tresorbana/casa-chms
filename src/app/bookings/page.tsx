@@ -57,6 +57,14 @@ function BookingsContent() {
     ? Math.max(1, Math.ceil((new Date(walkInData.checkOut).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
     : 0;
 
+  const bookingNights = formData.checkIn && formData.checkOut
+    ? Math.max(1, Math.ceil((new Date(formData.checkOut).getTime() - new Date(formData.checkIn).getTime()) / (1000 * 60 * 60 * 24)))
+    : 0;
+  const perNightRate = customTotal !== ''
+    ? parseFloat(customTotal || '0')
+    : Number(selectedRoom?.price || 0);
+  const computedTotal = bookingNights > 0 ? perNightRate * bookingNights : 0;
+
   useEffect(() => {
     if (formData.checkIn && formData.checkOut && selectedRoom) {
       const start = new Date(formData.checkIn);
@@ -70,7 +78,7 @@ function BookingsContent() {
 
   useEffect(() => {
     if (!showWalkIn || !walkInRoom || !walkInData.checkOut) return;
-    setWalkInData(p => ({ ...p, total: (walkInRoom.price * walkInNights).toString() }));
+    setWalkInData(p => ({ ...p, total: walkInRoom.price.toString() }));
   }, [walkInData.roomNumber, walkInData.checkOut, showWalkIn]);
 
   const handleChange = (e: any) => {
@@ -90,7 +98,7 @@ function BookingsContent() {
           guestPhone: formData.phone, roomNumber: formData.roomNumber,
           checkIn: formData.checkIn, checkOut: formData.checkOut,
           nationality: formData.nationality,
-          totalAmount: customTotal !== '' ? parseFloat(customTotal) : estimatedTotal,
+          totalAmount: computedTotal,
         }),
       });
       if (res.ok) {
@@ -126,7 +134,7 @@ function BookingsContent() {
           roomNumber: walkInData.roomNumber,
           checkIn: new Date().toISOString(),
           checkOut: walkInData.checkOut,
-          totalAmount: walkInData.total,
+          totalAmount: (parseFloat(walkInData.total || '0') * Math.max(1, walkInNights)).toString(),
           source: 'WALK_IN',
         }),
       });
@@ -148,14 +156,19 @@ function BookingsContent() {
     }
   };
 
+  const editPriceNights = editPriceTarget
+    ? Math.max(1, Math.ceil((new Date(editPriceTarget.checkOut).getTime() - new Date(editPriceTarget.checkIn).getTime()) / (1000 * 60 * 60 * 24)))
+    : 1;
+
   const handleSavePrice = async () => {
     if (!editPriceTarget || !editPriceValue) return;
     setIsSavingPrice(true);
     try {
+      const newTotal = parseFloat(editPriceValue) * editPriceNights;
       const res = await fetch(`/api/bookings/${editPriceTarget.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ totalAmount: parseFloat(editPriceValue) }),
+        body: JSON.stringify({ totalAmount: newTotal }),
       });
       if (!res.ok) { toast.error('Failed to update price'); return; }
       toast.success('Price updated');
@@ -335,22 +348,24 @@ function BookingsContent() {
 
                   <div className="pt-4 border-t border-border">
                     <div className="flex justify-between items-center mb-2">
-                      <span className="text-xs text-muted-foreground">Estimated Total</span>
-                      <span className="text-sm font-medium text-muted-foreground">RWF {estimatedTotal.toLocaleString()}</span>
+                      <span className="text-xs text-muted-foreground">Standard rate / night</span>
+                      <span className="text-sm font-medium text-muted-foreground">
+                        RWF {Number(selectedRoom?.price || 0).toLocaleString()}
+                      </span>
                     </div>
                     <div className="space-y-1.5 mb-4">
-                      <label className={labelClass}>Agreed Price (RWF) — override if negotiated</label>
+                      <label className={labelClass}>Agreed Price per Night (RWF) — override if negotiated</label>
                       <input
                         className={inputClass}
                         type="number"
                         min="0"
-                        placeholder={`e.g. ${estimatedTotal || '50000'}`}
+                        placeholder={`e.g. ${Number(selectedRoom?.price || 50000)}`}
                         value={customTotal}
                         onChange={e => setCustomTotal(e.target.value)}
                       />
-                      {customTotal !== '' && (
+                      {bookingNights > 0 && (
                         <p className="text-xs text-primary font-medium">
-                          Will charge: RWF {parseFloat(customTotal || '0').toLocaleString()}
+                          {bookingNights} night{bookingNights !== 1 ? 's' : ''} × RWF {perNightRate.toLocaleString()} = RWF {computedTotal.toLocaleString()}
                         </p>
                       )}
                     </div>
@@ -447,7 +462,18 @@ function BookingsContent() {
                           {b.checkedOutAt && <p className="text-[10px] text-purple-600">Out: {new Date(b.checkedOutAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>}
                         </td>
                         <td className="px-4 py-3 text-sm font-medium text-foreground whitespace-nowrap">
-                          RWF {b.totalAmount?.toLocaleString()}
+                          {(() => {
+                            const nights = Math.max(1, Math.ceil((new Date(b.checkOut).getTime() - new Date(b.checkIn).getTime()) / (1000 * 60 * 60 * 24)));
+                            const perNight = b.totalAmount ? Math.round(b.totalAmount / nights) : 0;
+                            return (
+                              <>
+                                <p>RWF {b.totalAmount?.toLocaleString()}</p>
+                                <p className="text-[10px] text-muted-foreground font-normal">
+                                  {nights} night{nights !== 1 ? 's' : ''} × RWF {perNight.toLocaleString()}
+                                </p>
+                              </>
+                            );
+                          })()}
                         </td>
                         <td className="px-4 py-3 text-xs text-muted-foreground">
                           {b.createdByName || '—'}
@@ -500,7 +526,12 @@ function BookingsContent() {
                               </button>
                             )}
                             <button
-                              onClick={() => { setEditPriceTarget(b); setEditPriceValue(b.totalAmount?.toString() ?? ''); }}
+                              onClick={() => {
+                                setEditPriceTarget(b);
+                                const nights = Math.max(1, Math.ceil((new Date(b.checkOut).getTime() - new Date(b.checkIn).getTime()) / (1000 * 60 * 60 * 24)));
+                                const perNight = b.totalAmount ? b.totalAmount / nights : 0;
+                                setEditPriceValue(perNight ? Math.round(perNight).toString() : '');
+                              }}
                               title="Adjust Price"
                               className="p-1.5 rounded-lg bg-muted text-muted-foreground hover:bg-accent transition-colors"
                             >
@@ -542,7 +573,7 @@ function BookingsContent() {
                 Booking for <span className="font-medium text-foreground">{editPriceTarget.guest?.name}</span> — Room <span className="font-medium text-foreground">{editPriceTarget.room?.number}</span>
               </p>
               <div>
-                <label className="text-xs font-medium text-muted-foreground block mb-1.5">Agreed Amount (RWF)</label>
+                <label className="text-xs font-medium text-muted-foreground block mb-1.5">Agreed Price per Night (RWF)</label>
                 <input
                   type="number"
                   min="0"
@@ -551,6 +582,11 @@ function BookingsContent() {
                   onChange={e => setEditPriceValue(e.target.value)}
                   autoFocus
                 />
+                {editPriceValue && (
+                  <p className="text-xs text-primary font-medium mt-1.5">
+                    {editPriceNights} night{editPriceNights !== 1 ? 's' : ''} × RWF {parseFloat(editPriceValue || '0').toLocaleString()} = RWF {(parseFloat(editPriceValue || '0') * editPriceNights).toLocaleString()}
+                  </p>
+                )}
               </div>
               <div className="flex gap-3">
                 <button onClick={() => setEditPriceTarget(null)} className="flex-1 px-4 py-2.5 rounded-lg text-sm text-muted-foreground border border-border hover:bg-accent transition-colors">Cancel</button>
@@ -626,11 +662,11 @@ function BookingsContent() {
                   <div className="col-span-2 rounded-lg bg-muted/40 border border-border px-4 py-3 flex items-center justify-between">
                     <div>
                       <p className="text-xs font-medium text-foreground">Room {walkInRoom.number} · {walkInRoom.type}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">RWF {Number(walkInRoom.price).toLocaleString()}/night</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">Standard: RWF {Number(walkInRoom.price).toLocaleString()}/night</p>
                     </div>
-                    {walkInNights > 0 && (
+                    {walkInNights > 0 && walkInData.total && (
                       <p className="text-sm font-semibold text-primary">
-                        {walkInNights} night{walkInNights !== 1 ? 's' : ''} = RWF {(walkInRoom.price * walkInNights).toLocaleString()}
+                        {walkInNights} night{walkInNights !== 1 ? 's' : ''} × RWF {Number(walkInData.total).toLocaleString()} = RWF {(Number(walkInData.total) * walkInNights).toLocaleString()}
                       </p>
                     )}
                   </div>
@@ -640,11 +676,11 @@ function BookingsContent() {
                   </div>
                 ) : null}
                 <div className="col-span-2 space-y-1.5">
-                  <label className={labelClass}>Agreed Amount (RWF) <span className="text-destructive">*</span></label>
+                  <label className={labelClass}>Agreed Price per Night (RWF) <span className="text-destructive">*</span></label>
                   <input className={inputClass} type="number" min="0" autoComplete="off" placeholder="e.g. 50000"
                     value={walkInData.total} onChange={e => setWalkInData(p => ({ ...p, total: e.target.value }))} required />
-                  {walkInRoom && walkInNights > 0 && walkInData.total && Number(walkInData.total) !== walkInRoom.price * walkInNights && (
-                    <p className="text-xs text-amber-600">Differs from room rate estimate — confirm this is correct.</p>
+                  {walkInRoom && walkInData.total && Number(walkInData.total) !== walkInRoom.price && (
+                    <p className="text-xs text-amber-600">Differs from standard rate — confirm this is correct.</p>
                   )}
                 </div>
               </div>
